@@ -23,8 +23,6 @@ Everything.
 # Known limitations
 - Only 1 instance can be run simultaneous! - yet
 
-- Not all controllers (e.g. Data Entry) can be automated - yet
-
 - Aux (dry) outputs not implemented - yet
 
 - No window resizing, only 1600x720 resolution - yet
