@@ -14,8 +14,9 @@ Everything.
 
 # Features:
 - Intel® Windows® / Mac Intel®+ARM® universal binaries
+- 1024 samples internal buffer
 - VST3 state saving, midi input and automation, full gui with VFD display and onboard keyboard
-- Loading all compatible VFX/VFX-SD/SD1-24/SD1-32 disk images and cartridges (.img .bin .crt etc) Attach the disk image with Load Floppy/Cartridge, Press Storage, then select DISK. Press LOAD. The display shows the Disk Load page, with the File Type selected. Move the data entry slider to select file.
+- Can load all compatible VFX/VFX-SD/SD1-24/SD1-32 disk images and cartridges (.img .bin .crt etc) Attach the disk image with Load Floppy/Cartridge button, Press Storage, then select DISK. Press LOAD. The display shows the Disk Load page, with the File Type selected. Move the data entry slider to select file.
 
 # Known limitations
 - Only 1 instance can be run simultaneous! - yet
