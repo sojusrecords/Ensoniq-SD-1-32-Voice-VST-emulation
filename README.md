@@ -1,5 +1,7 @@
 # Ensoniq® SD-1 32 voices VST emulation
-MAME®-based emulation of the Ensoniq® SD-1 32 voices version synthesizer with JUCE® VST3 
+MAME®-based emulation of the Ensoniq® SD-1 32 voices version synthesizer with JUCE® VST3
+
+![Screenshot of Ensoniq SD-1 VST]([https://myoctocat.com/assets/images/base-octocat.svg](https://github.com/kukoricajoe/Ensoniq-SD-1-32-voices-VST-emulation/blob/main/sd1.png))
 
 # Ensoniq® SD-1
 The SD-1 (1990) comes from a long line of Ensoniq®'s evolving Transwave® wavetable digital synthesizers. It began with Ensoniq®'s earliest synthesizer, the ESQ-1. That led to the SQ-80, then the VFX and VFX-SD (the latter featuring an on-board sequencer) and then to the SD-1 (and it eventually led to the Fizmo®). The SD-1 allows for additive synthesis using waveform modulation, a sort of wavetable synthesis. This puts it into a unique class of digital synthesizers along with the PPG Wave® series and Waldorf® Microwave® series.
