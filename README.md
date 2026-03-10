@@ -16,14 +16,11 @@ Everything.
 
 # Features:
 - Intel® Windows® / Mac Intel®+ARM® universal binaries
-- 1024 samples internal buffer
 - VST3 state saving, midi input and automation, full gui with VFD display and onboard keyboard
 - Can load all compatible VFX/VFX-SD/SD1-24/SD1-32 disk images and cartridges (.img .bin .crt etc) Attach the disk image with Load Floppy/Cartridge button, Press Storage, then select DISK. Press LOAD. The display shows the Disk Load page, with the File Type selected. Move the data entry slider to select file.
 
 # Known limitations
-- Only 1 instance can be run simultaneous! - yet
-
-- Aux (dry) outputs not implemented - yet
+- Only 1 instance can be run simultaneous.
 
 - No window resizing, only 1600x720 resolution - yet
 
@@ -36,6 +33,7 @@ Everything.
   - or
   - Removing quarantine (from Terminal): The user must run the following command on the plugin folder:
   sudo xattr -rd com.apple.quarantine /Library/Audio/Plug-Ins/VST3/EnsoniqSD1.vst3
+  - You must codesign the vst3 file: sudo codesign -f -s - /Library/Audio/Plug-Ins/VST3/EnsoniqSD1.vst3
 
 # Requirements
 - Original SD-1 32 rom files at these location (can be zipped into sd1.zip):
