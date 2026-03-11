@@ -1,0 +1,63 @@
+# ==========================================
+# Ensoniq SD-1 MAME VST .gitignore
+# ==========================================
+
+# JUCE specifikus mappák (A Projucer generálja őket)
+Builds/
+JuceLibraryCode/
+*.user
+*.suo
+
+# Lefordított binárisok és VST fájlok
+*.vst3
+*.component
+*.a
+*.o
+*.dylib
+*.dll
+*.exe
+*.lib
+
+# macOS specifikus rejtett rendszerfájlok
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.Spotlight-V100
+.Trashes
+__MACOSX/
+
+# Xcode specifikus
+build/
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata/
+*.xccheckout
+*.moved-aside
+DerivedData/
+*.hmap
+*.xcworkspace/
+!default.xcworkspace/
+
+# Windows / Visual Studio specifikus
+.vs/
+Debug/
+Release/
+x64/
+x86/
+*.ncb
+*.sdf
+*.opensdf
+*.pdb
+
+# ROM fájlok (Szerzői jogok miatt tilos feltölteni!)
+*.zip
+*.rom
+*.bin

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<JUCERPROJECT id="Oippeb" name="Ensoniq SD-1" projectType="audioplug" useAppConfig="0"
+              addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1" bundleIdentifier="com.sojusrecords.EnsoniqSD1"
+              companyWebsite="www.sojusrecords.com" companyCopyright="Open Source"
+              companyName="EnsoniqMAME" pluginCharacteristicsValue="pluginIsSynth,pluginWantsMidiIn"
+              pluginFormats="buildStandalone,buildVST3" version="1.0" pluginName="Ensoniq SD-1"
+              pluginDesc="Ensoniq SD-1 MAME Emu VST" pluginManufacturer="EnsoniqMAME"
+              pluginManufacturerCode="Esma" pluginCode="SD1A" pluginAUExportPrefix="EnsoniqSD1AU"
+              pluginAUMainType="'augn'" companyEmail="sjs@sojusrecords.com">
+  <MAINGROUP id="OpvzjD" name="Ensoniq SD-1">
+    <GROUP id="{3F88782C-AB7D-82EE-F4B6-16FDEB0AE012}" name="Source">
+      <FILE id="QKKuRX" name="legscsi.o" compile="0" resource="1" file="../../Documents/MameVfxDev/mame/build/osx_clang/obj/x64/Release/src/devices/machine/legscsi.o"/>
+      <FILE id="AZ2vWs" name="f16_to_extF80.o" compile="0" resource="1" file="../../Documents/MameVfxDev/mame/build/osx_clang/obj/x64/Release/3rdparty/softfloat3/source/f16_to_extF80.o"/>
+      <FILE id="mBqaAh" name="f16_to_f32.o" compile="0" resource="1" file="../../Documents/MameVfxDev/mame/build/osx_clang/obj/x64/Release/3rdparty/softfloat3/source/f16_to_f32.o"/>
+      <FILE id="LdrVgA" name="f16_to_f64.o" compile="0" resource="1" file="../../Documents/MameVfxDev/mame/build/osx_clang/obj/x64/Release/3rdparty/softfloat3/source/f16_to_f64.o"/>
+      <FILE id="sJRJhP" name="f16_to_f128.o" compile="0" resource="1" file="../../Documents/MameVfxDev/mame/build/osx_clang/obj/x64/Release/3rdparty/softfloat3/source/f16_to_f128.o"/>
+      <FILE id="uQaptq" name="terminal.o" compile="0" resource="1" file="../../Documents/MameVfxDev/mame/build/osx_clang/obj/x64/Release/src/devices/machine/terminal.o"/>
+      <FILE id="sGyNeH" name="mcf5206e.o" compile="0" resource="1" file="../../Documents/MameVfxDev/mame/build/osx_clang/obj/x64/Release/src/devices/cpu/m68000/mcf5206e.o"/>
+      <FILE id="PFsrAc" name="mfmhd.o" compile="0" resource="1" file="../../Documents/MameVfxDev/mame/build/osx_clang/obj/x64/Release/src/devices/imagedev/mfmhd.o"/>
+      <FILE id="IWhokv" name="PluginProcessor.cpp" compile="1" resource="0"
+            file="Source/PluginProcessor.cpp"/>
+      <FILE id="YhSlmb" name="PluginProcessor.h" compile="0" resource="0"
+            file="Source/PluginProcessor.h"/>
+      <FILE id="fNCSn0" name="PluginEditor.cpp" compile="1" resource="0"
+            file="Source/PluginEditor.cpp"/>
+      <FILE id="Z6Wmy3" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
+    </GROUP>
+  </MAINGROUP>
+  <MODULES>
+    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_plugin_client" showAllCode="1" useLocalCopy="0"
+            useGlobalPath="1"/>
+    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_processors_headless" showAllCode="1" useLocalCopy="0"
+            useGlobalPath="1"/>
+    <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_events" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_midi_ci" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+  </MODULES>
+  <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_VST3_CAN_REPLACE_VST2="0"
+               JUCE_USE_FLAC="0"/>
+  <EXPORTFORMATS>
+    <XCODE_MAC targetFolder="Builds/MacOSX" externalLibraries="frontend&#10;emu&#10;mame_mame&#10;optional&#10;formats&#10;dasm&#10;emu&#10;mame_mame&#10;optional&#10;formats&#10;dasm&#10;osd_sdl3&#10;qtdbg_sdl3&#10;ocore_sdl3&#10;utils&#10;lua&#10;lualibs&#10;expat&#10;zlib&#10;flac&#10;portaudio&#10;portmidi&#10;jpeg&#10;7z&#10;zstd&#10;utf8proc&#10;sqlite3&#10;asmjit&#10;bgfx&#10;bimg&#10;bx&#10;softfloat&#10;softfloat3&#10;ymfm&#10;wdlfft&#10;linenoise&#10;utils"
+               extraCustomFrameworks="CoreAudio&#10;CoreVideo&#10;CoreMedia&#10;AudioToolbox&#10;AudioUnit&#10;Carbon&#10;ForceFeedback&#10;IOKit&#10;Cocoa&#10;OpenGL&#10;SDL2&#10;SDL3"
+               frameworkSearchPaths="/Library/Frameworks" buildNumber="2026.03"
+               customXcodeResourceFolders="/Users/csabibab/Documents/MameVfxDev/mame/plugins"
+               xcodeValidArchs="arm64,x86_64" extraLinkerFlags="-Wl,-rpath,/Library/Frameworks -Wl,-rpath,@loader_path/../Frameworks"
+               postbuildCommand="# Csak akkor fut le a m&#225;sol&#225;s, ha t&#233;nylegesen a VST3 vagy az App k&#233;sz&#252;l (nem a Shared Code)&#10;if [[ &quot;$FULL_PRODUCT_NAME&quot; == *.vst3 ]] || [[ &quot;$FULL_PRODUCT_NAME&quot; == *.app ]]; then&#10;&#10;    echo &quot;Csomagoljuk az SDL Framework-&#246;ket ide: $FULL_PRODUCT_NAME&quot;&#10;    FRAMEWORKS_DIR=&quot;$TARGET_BUILD_DIR/$FULL_PRODUCT_NAME/Contents/Frameworks&quot;&#10;    &#10;    # 1. L&#233;trehozzuk a Frameworks mapp&#225;t a VST3 belsej&#233;ben&#10;    mkdir -p &quot;$FRAMEWORKS_DIR&quot;&#10;&#10;    # 2. Bem&#225;soljuk az SDL3-at (&#233;s a biztons&#225;g kedv&#233;&#233;rt az SDL2-t is, ha l&#233;tezik)&#10;    cp -R &quot;/Library/Frameworks/SDL3.framework&quot; &quot;$FRAMEWORKS_DIR/&quot;&#10;    if [ -d &quot;/Library/Frameworks/SDL2.framework&quot; ]; then&#10;        cp -R &quot;/Library/Frameworks/SDL2.framework&quot; &quot;$FRAMEWORKS_DIR/&quot;&#10;    fi&#10;&#10;    # 3. R&#225;s&#252;tj&#252;k az Ad-Hoc al&#225;&#237;r&#225;st a be&#225;gyazott Framework&#246;kre&#10;    codesign -f -s - &quot;$FRAMEWORKS_DIR/SDL3.framework&quot;&#10;    if [ -d &quot;$FRAMEWORKS_DIR/SDL2.framework&quot; ]; then&#10;        codesign -f -s - &quot;$FRAMEWORKS_DIR/SDL2.framework&quot;&#10;    fi&#10;&#10;    # 4. &#218;jra hiteles&#237;tj&#252;k a TELJES VST3 f&#225;jlt/Appot!&#10;    codesign -f -s - &quot;$TARGET_BUILD_DIR/$FULL_PRODUCT_NAME&quot;&#10;&#10;fi">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="0" name="Release" targetName="EnsoniqSD1" headerPath="/Users/csabibab/Documents/MameVfxDev/mame/src&#10;/Users/csabibab/Documents/MameVfxDev/mame/src/emu&#10;/Users/csabibab/Documents/MameVfxDev/mame/src/osd&#10;/Users/csabibab/Documents/MameVfxDev/mame/src/lib&#10;/Users/csabibab/Documents/MameVfxDev/mame/src/lib/util&#10;/Users/csabibab/Documents/MameVfxDev/mame/src/frontend/mame&#10;/Users/csabibab/Documents/MameVfxDev/mame/3rdparty/bx/include"
+                       libraryPath="/Users/csabibab/Documents/MameVfxDev/mame/build/osx_clang/bin/x64/Release/mame_mame&#10;/Users/csabibab/Documents/MameVfxDev/mame/build/osx_clang/bin/x64/Release&#10;/usr/local/lib"
+                       macOSDeploymentTarget="14.0" osxCompatibility="14.0 SDK" linkTimeOptimisation="0"
+                       customXcodeFlags="DEAD_CODE_STRIPPING = NO"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_audio_basics" path="../../Documents/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../Documents/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../Documents/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../../Documents/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../Documents/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors_headless" path="../../Documents/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../Documents/JUCE/modules"/>
+        <MODULEPATH id="juce_core" path="../../Documents/JUCE/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../Documents/JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="../../Documents/JUCE/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../Documents/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../Documents/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../Documents/JUCE/modules"/>
+        <MODULEPATH id="juce_midi_ci" path="../../Documents/JUCE/modules"/>
+      </MODULEPATHS>
+    </XCODE_MAC>
+  </EXPORTFORMATS>
+</JUCERPROJECT>
