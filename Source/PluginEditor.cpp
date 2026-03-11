@@ -129,7 +129,7 @@ void EnsoniqSD1AudioProcessorEditor::paint (juce::Graphics& g)
         g.setColour(juce::Colours::red);
         g.setFont(24.0f);
         
-        juce::String errorMsg = "Ensoniq(R) SD-1 32-Voice MAME(R) Emulation VST - Built with love by sojusrecords.com\n\n";
+        juce::String errorMsg = "Ensoniq(R) SD-1/32 MAME(R) Emulation VST - Built with love by sojusrecords.com\n\n";
         errorMsg += "Instance Limit Reached!\n\n";
         errorMsg += "Due to MAME engine limitations, only ONE instance\n";
         errorMsg += "of this plugin can run at a time in the host.\n\n";
@@ -145,7 +145,7 @@ void EnsoniqSD1AudioProcessorEditor::paint (juce::Graphics& g)
         g.setColour(juce::Colours::orange);
         g.setFont(24.0f);
         
-        juce::String errorMsg = "Ensoniq(R) SD-1 32-Voice MAME(R) Emulation VST - Built with love by sojusrecords.com\n\n";
+        juce::String errorMsg = "Ensoniq(R) SD-1/32 MAME(R) Emulation VST - Built with love by sojusrecords.com\n\n";
         errorMsg += "Sample Rate Changed!\n\n";
         errorMsg += "The host sample rate has changed since the plugin was loaded.\n";
         errorMsg += "To prevent audio glitches, please reload the plugin or restart your DAW.";
@@ -160,7 +160,7 @@ void EnsoniqSD1AudioProcessorEditor::paint (juce::Graphics& g)
         g.setColour(juce::Colours::red);
         g.setFont(24.0f);
         
-        juce::String errorMsg = "Ensoniq(R) SD-1 32-Voice MAME(R) Emulation VST - Built with love by sojusrecords.com\n\n";
+        juce::String errorMsg = "Ensoniq(R) SD-1/32 MAME(R) Emulation VST - Built with love by sojusrecords.com\n\n";
         errorMsg += "Error! Roms not found!\n\n";
         errorMsg += "Please copy the 'sd132.zip' file into the following folder:\n\n";
         errorMsg += juce::File::getSpecialLocation(juce::File::userDocumentsDirectory).getChildFile("EnsoniqSD1").getFullPathName();
@@ -318,7 +318,7 @@ void EnsoniqSD1AudioProcessorEditor::mouseMove(const juce::MouseEvent& e) {
 void EnsoniqSD1AudioProcessorEditor::loadMediaButtonClicked()
 {
     // Launch asynchronous file chooser
-    fileChooser = std::make_unique<juce::FileChooser>("Select Floppy Image",
+    fileChooser = std::make_unique<juce::FileChooser>("Select Floppy Image or cartridge",
                                                       juce::File::getSpecialLocation(juce::File::userHomeDirectory),
                                                       "*.img;*.hfe;*.dsk;*.eda");
     

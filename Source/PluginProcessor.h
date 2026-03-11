@@ -151,12 +151,6 @@ public:
     // Triggered by the DAW when an automation parameter changes
     void parameterChanged (const juce::String& parameterID, float newValue) override;
 
-    // --- THREAD-SAFE CONTAINERS FOR MAME AUTOMATION (0-1023 range) ---
-    std::atomic<int> mameVolume    { 1023 }; // Default to max volume
-    std::atomic<int> mameDataEntry { 0 };
-    std::atomic<int> mamePitchBend { 512 };  // Default to center position
-    std::atomic<int> mameModWheel  { 0 };
-
     // Dynamically adjustable buffer threshold for MAME processing
     std::atomic<int> mameBufferThreshold { 1024 };
 

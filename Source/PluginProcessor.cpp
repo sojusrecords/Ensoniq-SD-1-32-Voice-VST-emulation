@@ -71,6 +71,12 @@ void EnsoniqSD1AudioProcessor::pushAudioFromMame(const int16_t* pcmBuffer, int n
     // We throttle the MAME thread here by putting it to sleep if our ring buffer has 
     // more unread samples than the defined threshold. This prevents buffer overflows.
     while (isMameRunningFlag()) {
+        
+        // --- DEADLOCK BREAKER ---
+                if (requestMameSave.load(std::memory_order_acquire) || requestMameLoad.load(std::memory_order_acquire)) {
+                    break;
+                }
+        
         uint64_t writePos = getTotalWritten();
         uint64_t readPos = getTotalRead();
         int64_t available = writePos - readPos;
@@ -135,14 +141,11 @@ private:
     running_machine* mame_machine = nullptr;
     uint32_t lastMouseButtons = 0;
     
-    ioport_port* portVolume = nullptr;
-    ioport_port* portDataEntry = nullptr;
-    ioport_port* portPitchBend = nullptr;
-    ioport_port* portModWheel = nullptr;
     render_target* main_target = nullptr;
 
     int saveFrameDelay = 0;
     int loadFrameDelay = 0;
+    int frameSkipCounter = 0;
     
 public:
     
@@ -157,12 +160,7 @@ public:
     virtual void init(running_machine &machine) override {
         // REQUIRED: Initializes MAME's core sound, mouse, and keyboard modules
         osd_common_t::init(machine);
-        
-        portVolume = machine.root_device().ioport("analog_volume");
-        portDataEntry = machine.root_device().ioport("analog_data_entry");
-        portPitchBend = machine.root_device().ioport("analog_pitch_bend");
-        portModWheel = machine.root_device().ioport("analog_mod_wheel");
-        
+                
         mame_machine = &machine;
         processor->mameMachine = &machine;
         
@@ -288,14 +286,31 @@ public:
             }
         }
         
-        // Disable on-screen popups (e.g., "State loaded")
-        mame_machine->ui().popup_time(0, " ");
-        
-        render_target *target = mame_machine->render().first_target();
-        if (target == nullptr) return;
-        
-        render_primitive_list &prims = target->get_primitives();
-        prims.acquire_lock();
+                // Disable on-screen popups (e.g., "State loaded")
+                mame_machine->ui().popup_time(0, " ");
+                
+                // ========================================================================
+                // DAW AUTOMATION INJECTION (Ezt felhoztuk ide, hogy 60Hz-en fusson)
+                // ========================================================================
+             /*   auto setPortValue = [](ioport_port* port, int value) {
+                    if (port != nullptr) {
+                        for (ioport_field& field : port->fields()) {
+                            field.set_value(value);
+                        }
+                    }
+                };*/
+
+                // --- RAME SKIPPING
+                frameSkipCounter++;
+                if (frameSkipCounter % 2 != 0) {
+                    return;
+                }
+
+                render_target *target = mame_machine->render().first_target();
+                if (target == nullptr) return;
+                
+                render_primitive_list &prims = target->get_primitives();
+                prims.acquire_lock();
         
         // --- DOUBLE BUFFERED RENDERING ---
         // Draw into the buffer that is currently NOT being read by the JUCE GUI thread
@@ -428,25 +443,7 @@ public:
         }
         
         prims.release_lock();
-        
-        // ========================================================================
-        // DAW AUTOMATION INJECTION (Analog hardware port emulation)
-        // ========================================================================
-        if (mame_machine != nullptr) {
-            auto setPortValue = [](ioport_port* port, int value) {
-                if (port != nullptr) {
-                    for (ioport_field& field : port->fields()) {
-                        field.set_value(value);
-                    }
-                }
-            };
-            
-            setPortValue(portVolume, processor->mameVolume.load(std::memory_order_relaxed));
-            setPortValue(portDataEntry, processor->mameDataEntry.load(std::memory_order_relaxed));
-            setPortValue(portPitchBend, processor->mamePitchBend.load(std::memory_order_relaxed));
-            setPortValue(portModWheel, processor->mameModWheel.load(std::memory_order_relaxed));
-        }
-            
+                    
         // Swap the ready buffer index. The JUCE GUI will now pick up the fresh frame.
         processor->readyBufferIndex.store(writeIndex, std::memory_order_release);
         processor->getFrameFlag().store(true, std::memory_order_release);
@@ -586,62 +583,56 @@ juce::AudioProcessorValueTreeState::ParameterLayout EnsoniqSD1AudioProcessor::cr
 {
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
 
-    // Define the automatable parameters visible to the DAW
+    // Automated parameters
     params.push_back(std::make_unique<juce::AudioParameterFloat>("volume", "Volume", 0.0f, 1.0f, 1.0f));
     params.push_back(std::make_unique<juce::AudioParameterFloat>("data_entry", "Data Entry", 0.0f, 1.0f, 0.0f));
     params.push_back(std::make_unique<juce::AudioParameterFloat>("pitch_bend", "Pitch Bend", 0.0f, 1.0f, 0.5f));
     params.push_back(std::make_unique<juce::AudioParameterFloat>("mod_wheel", "Mod Wheel", 0.0f, 1.0f, 0.0f));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>("sustain_pedal", "Sustain Pedal", 0.0f, 1.0f, 0.0f));
     
+    // --- No automation of settings ---
+    auto nonAutomatable = juce::AudioParameterChoiceAttributes().withAutomatable(false);
+
     juce::StringArray bufferSizes = { "256", "512", "1024", "2048", "4096", "8192" };
-    params.push_back(std::make_unique<juce::AudioParameterChoice>("buffer_size", "Internal Buffer", bufferSizes, 2));
+    params.push_back(std::make_unique<juce::AudioParameterChoice>(
+        juce::ParameterID("buffer_size", 1), "Internal Buffer", bufferSizes, 2, nonAutomatable));
 
     // Dynamic Panel Layout Selector
     juce::StringArray views = { "Compact (Default)", "Full Keyboard", "Rack Panel", "Tablet View" };
-    params.push_back(std::make_unique<juce::AudioParameterChoice>("layout_view", "Panel Layout", views, 0));
+    params.push_back(std::make_unique<juce::AudioParameterChoice>(
+        juce::ParameterID("layout_view", 1), "Panel Layout", views, 0, nonAutomatable));
 
     return { params.begin(), params.end() };
 }
 
 void EnsoniqSD1AudioProcessor::parameterChanged(const juce::String& parameterID, float newValue)
 {
-    // Convert JUCE's normalized 0.0 - 1.0 range to MAME's expected 0 - 1023 (10-bit) hardware range.
-    int mameValue = static_cast<int>(newValue * 1023.0f);
-
-    if (parameterID == "volume") {
-        mameVolume.store(mameValue, std::memory_order_relaxed);
-    }
-    else if (parameterID == "data_entry") {
-        mameDataEntry.store(mameValue, std::memory_order_relaxed);
-    }
-    else if (parameterID == "pitch_bend") {
-        mamePitchBend.store(mameValue, std::memory_order_relaxed);
-    }
-    else if (parameterID == "mod_wheel") {
-        mameModWheel.store(mameValue, std::memory_order_relaxed);
-    }
-    else if (parameterID == "buffer_size") {
-        int sizes[] = { 256, 512, 1024, 2048, 4096, 8192 };
-        int index = juce::roundToInt(newValue * 5.0f); 
-        mameBufferThreshold.store(sizes[index], std::memory_order_relaxed);
-    }
+    // --- 1. SETUP ---
+        if (parameterID == "buffer_size") {
+            auto* choiceParam = dynamic_cast<juce::AudioParameterChoice*>(apvts.getParameter("buffer_size"));
+            if (choiceParam != nullptr) {
+                int sizes[] = { 256, 512, 1024, 2048, 4096, 8192 };
+                // JUCE inside index
+                int newThreshold = sizes[choiceParam->getIndex()];
+                mameBufferThreshold.store(newThreshold, std::memory_order_relaxed);
+                
+                // Safety latency refresh
+                juce::MessageManager::callAsync([this, newThreshold]() {
+                    setLatencySamples(newThreshold);
+                });
+            }
+        }
     else if (parameterID == "layout_view") {
         auto* choiceParam = dynamic_cast<juce::AudioParameterChoice*>(apvts.getParameter("layout_view"));
         int idx = choiceParam != nullptr ? choiceParam->getIndex() : 0;
         
         std::string mameViewName = "Compact";
-        int newW = 2048; int newH = 921; 
+        int newW = 2048; int newH = 921;
         
-        // Map the selected index to MAME's internal panel names. 
-        // Resolutions are upscaled to 2048 width for razor-sharp "High Resampling" rendering.
-        if (idx == 0) {
-            mameViewName = "Compact"; newW = 2048; newH = 921;
-        } else if (idx == 1) {
-            mameViewName = "Full";    newW = 2048; newH = 671;
-        } else if (idx == 2) {
-            mameViewName = "Panel";   newW = 2048; newH = 379;
-        } else if (idx == 3) {
-            mameViewName = "Tablet";  newW = 2048; newH = 1476;
-        }
+        if (idx == 0) { mameViewName = "Compact"; newW = 2048; newH = 921; }
+        else if (idx == 1) { mameViewName = "Full"; newW = 2048; newH = 671; }
+        else if (idx == 2) { mameViewName = "Panel"; newW = 2048; newH = 379; }
+        else if (idx == 3) { mameViewName = "Tablet"; newW = 2048; newH = 1476; }
         
         std::lock_guard<std::mutex> lock(viewMutex);
         requestedViewName = mameViewName;
@@ -649,6 +640,41 @@ void EnsoniqSD1AudioProcessor::parameterChanged(const juce::String& parameterID,
         mameInternalHeight.store(newH, std::memory_order_release);
         requestViewChange.store(true, std::memory_order_release);
     }
+    
+    // --- 2. AUTOMATION ---
+    else if (parameterID == "volume") {
+        uint8_t val = static_cast<uint8_t>(newValue * 127.0f);
+        pushMidiByte(0xB0); // CC signal
+        pushMidiByte(0x07); // CC 7: Volume
+        pushMidiByte(val);
+    }
+    else if (parameterID == "mod_wheel") {
+        uint8_t val = static_cast<uint8_t>(newValue * 127.0f);
+        pushMidiByte(0xB0);
+        pushMidiByte(0x01); // CC 1: Mod Wheel
+        pushMidiByte(val);
+    }
+    else if (parameterID == "data_entry") {
+        uint8_t val = static_cast<uint8_t>(newValue * 127.0f);
+        pushMidiByte(0xB0);
+        pushMidiByte(0x06); // CC 6: Data Entry MSB
+        pushMidiByte(val);
+    }
+    else if (parameterID == "pitch_bend") {
+        // Pitch Bend 14-bit value (0 - 16383)
+        int pb = static_cast<int>(newValue * 16383.0f);
+        uint8_t lsb = pb & 0x7F;
+        uint8_t msb = (pb >> 7) & 0x7F;
+        pushMidiByte(0xE0); // Pitch Bend signal
+        pushMidiByte(lsb);
+        pushMidiByte(msb);
+    }
+    else if (parameterID == "sustain_pedal") {
+            uint8_t val = static_cast<uint8_t>(newValue * 127.0f);
+            pushMidiByte(0xB0);
+            pushMidiByte(64); // CC 64: Sustain Pedal
+            pushMidiByte(val);
+        }
 }
 // ==============================================================================
 
@@ -776,7 +802,16 @@ void EnsoniqSD1AudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
 {
     if (!isMasterInstance) return;
     hostSampleRate.store(sampleRate);
+    
+    auto* choiceParam = dynamic_cast<juce::AudioParameterChoice*>(apvts.getParameter("buffer_size"));
+        if (choiceParam != nullptr) {
+            int sizes[] = { 256, 512, 1024, 2048, 4096, 8192 };
+            mameBufferThreshold.store(sizes[choiceParam->getIndex()], std::memory_order_relaxed);
+        }
 
+    // Report buffer for Latency Compensation (PDC)
+    setLatencySamples(mameBufferThreshold.load());
+    
     // Only boot MAME the very first time play is prepared
     if (!mameHasStarted.exchange(true)) {
         
@@ -807,6 +842,11 @@ void EnsoniqSD1AudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
             sampleRateMismatch.store(false, std::memory_order_release); 
         }
     }
+        // --- Buffer reset
+        totalRead.store(0, std::memory_order_release);
+        totalWritten.store(0, std::memory_order_release);
+        midiReadPos.store(0, std::memory_order_release);
+        midiWritePos.store(0, std::memory_order_release);
 }
 
 void EnsoniqSD1AudioProcessor::releaseResources()
@@ -858,47 +898,69 @@ void EnsoniqSD1AudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
         }
     }
 
-    // ========================================================
-    // 2. AUDIO OUT & RING BUFFER CONSUMPTION
-    // ========================================================
-    int numSamples = buffer.getNumSamples();
-    uint64_t currentReadPos = totalRead.load(std::memory_order_acquire);
-    uint64_t currentWritePos = totalWritten.load(std::memory_order_acquire);
-    int64_t available = static_cast<int64_t>(currentWritePos) - static_cast<int64_t>(currentReadPos);
-
-    // Output pointers (0, 1 = Main L/R | 2, 3 = Aux L/R)
-    auto* outL = buffer.getWritePointer(0);
-    auto* outR = (totalNumOutputChannels > 1) ? buffer.getWritePointer(1) : nullptr;
-    auto* outAuxL = (totalNumOutputChannels > 2) ? buffer.getWritePointer(2) : nullptr;
-    auto* outAuxR = (totalNumOutputChannels > 3) ? buffer.getWritePointer(3) : nullptr;
-
-    int samplesToProcess = (available < numSamples) ? static_cast<int>(available) : numSamples;
-
-    // Consume samples from the ring buffers
-    for (int i = 0; i < samplesToProcess; ++i) {
-        uint64_t idx = currentReadPos % RING_BUFFER_SIZE;
+        // ========================================================
+        // 2. AUDIO OUT & RING BUFFER CONSUMPTION
+        // ========================================================
+        int numSamples = buffer.getNumSamples();
+        uint64_t currentReadPos = totalRead.load(std::memory_order_acquire);
         
-        outL[i] = ringBufferL[idx];
-        if (outR != nullptr) outR[i] = ringBufferR[idx];
-        
-        if (outAuxL != nullptr) outAuxL[i] = ringBufferAuxL[idx];
-        if (outAuxR != nullptr) outAuxR[i] = ringBufferAuxR[idx];
-        
-        currentReadPos++;
-    }
+        // --- OFFLINE RENDER (BOUNCE) SYNC ---
+        if (isNonRealtime()) {
+            while (isMameRunningFlag()) {
+                uint64_t writePos = totalWritten.load(std::memory_order_acquire);
+                if (writePos - currentReadPos >= numSamples) {
+                    break; // Got it, go!
+                }
+                mameThrottleEvent.signal(); // Wake Mame and work!
+                std::this_thread::sleep_for(std::chrono::milliseconds(1)); // Sleep the Daw while working
+            }
+        }
+
+        uint64_t currentWritePos = totalWritten.load(std::memory_order_acquire);
+        int64_t available = static_cast<int64_t>(currentWritePos) - static_cast<int64_t>(currentReadPos);
+
+        // Calculate how many samples we can push
+        int samplesToProcess = (available < numSamples) ? static_cast<int>(available) : numSamples;
+
+        // Output pointers (0, 1 = Main L/R | 2, 3 = Aux L/R)
+        auto* outL = buffer.getWritePointer(0);
+        auto* outR = (totalNumOutputChannels > 1) ? buffer.getWritePointer(1) : nullptr;
+        auto* outAuxL = (totalNumOutputChannels > 2) ? buffer.getWritePointer(2) : nullptr;
+        auto* outAuxR = (totalNumOutputChannels > 3) ? buffer.getWritePointer(3) : nullptr;
+
+        // Consume samples from the ring buffers
+        for (int i = 0; i < samplesToProcess; ++i) {
+            uint64_t idx = currentReadPos % RING_BUFFER_SIZE;
+            
+            outL[i] = ringBufferL[idx];
+            if (outR != nullptr) outR[i] = ringBufferR[idx];
+            
+            if (outAuxL != nullptr) outAuxL[i] = ringBufferAuxL[idx];
+            if (outAuxR != nullptr) outAuxR[i] = ringBufferAuxR[idx];
+            
+            currentReadPos++;
+        }
 
     // Underrun protection: pad remaining required samples with zeroes
-    if (samplesToProcess < numSamples) {
-        for (int i = samplesToProcess; i < numSamples; ++i) {
-            outL[i] = 0.0f;
-            if (outR != nullptr) outR[i] = 0.0f;
-            if (outAuxL != nullptr) outAuxL[i] = 0.0f;
-            if (outAuxR != nullptr) outAuxR[i] = 0.0f;
+        if (!isNonRealtime() && samplesToProcess < numSamples) {
+            for (int i = samplesToProcess; i < numSamples; ++i) {
+                outL[i] = 0.0f;
+                if (outR != nullptr) outR[i] = 0.0f;
+                if (outAuxL != nullptr) outAuxL[i] = 0.0f;
+                if (outAuxR != nullptr) outAuxR[i] = 0.0f;
+            }
         }
-    }
 
-    totalRead.store(currentReadPos, std::memory_order_release);
-    mameThrottleEvent.signal(); // Wake up MAME to generate more audio
+        totalRead.store(currentReadPos, std::memory_order_release);
+        mameThrottleEvent.signal(); // Wake Mame for the next round
+    
+        // --- ANTI-SMART-DISABLE Protection
+        static float antiDisable = 1e-8f;
+        antiDisable = -antiDisable;
+        for (int i = 0; i < numSamples; ++i) {
+            outL[i] += antiDisable;
+            if (outR != nullptr) outR[i] += antiDisable;
+        }
 }
 
 //==============================================================================
@@ -963,22 +1025,26 @@ void EnsoniqSD1AudioProcessor::setStateInformation (const void* data, int sizeIn
         savedWindowHeight = xmlState->getIntAttribute("ui_height", 0);
         
         // 2. Restore complete MAME hardware state
-        if (xmlState->hasAttribute("mame_state") && isMameRunningFlag()) {
+        if (xmlState->hasAttribute("mame_state")) {
             juce::MemoryBlock mameData;
             mameData.fromBase64Encoding(xmlState->getStringAttribute("mame_state"));
 
-            // Write state back to a temp file for MAME to consume
+            // Always save temp file (Mame booted or not)
             juce::File tempStateDir = juce::File::getSpecialLocation(juce::File::tempDirectory).getChildFile("sd132");
-            tempStateDir.createDirectory(); 
+            tempStateDir.createDirectory();
             
             juce::File tempStateFile = tempStateDir.getChildFile("vst_temp.sta");
             tempStateFile.replaceWithData(mameData.getData(), mameData.getSize());
 
-            // Signal MAME to load the state
-            mameStateEvent.reset();
+            // Load flag, Mame read it if booted
             requestMameLoad.store(true, std::memory_order_release);
-            mameThrottleEvent.signal();
-            mameStateEvent.wait(2000); 
+
+            // Wait only for load when Mame is already run (e.g. preset change)
+            if (isMameRunningFlag()) {
+                mameStateEvent.reset();
+                mameThrottleEvent.signal();
+                mameStateEvent.wait(2000);
+            }
         }
     }
 }

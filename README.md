@@ -27,6 +27,7 @@ Everything. Check the original manual here: [Polynominal](https://www.polynomina
 # Known limitations
 - Mac Universal Binary only (Windows build is currently in progress).
 - Only 1 instance can run at a time per DAW due to engine limitations.
+- Daw automation is not visible on GUI
 - No floppy drive sound :D
 - Mac binaries require one of the following methods to run due to Apple's security policies:
   - Manual authorization: The user must go to System Settings > Privacy & Security and, after the DAW has attempted to load the plugin, click the "Open Anyway" button.
