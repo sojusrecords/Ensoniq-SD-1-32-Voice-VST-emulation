@@ -3,8 +3,8 @@ MAME®-based emulation of the Ensoniq® SD-1 32 voices version synthesizer with 
 
 ![Screenshot of Ensoniq SD-1 VST](https://github.com/kukoricajoe/Ensoniq-SD-1-32-voices-VST-emulation/blob/main/sd1.png)
 
-# Ensoniq® SD-1
-The SD-1 (1990-) comes from a long line of Ensoniq®'s evolving Transwave® wavetable digital synthesizers. It began with Ensoniq®'s earliest synthesizer, the ESQ-1. That led to the SQ-80, then the VFX and VFX-SD (the latter featuring an on-board sequencer) and then to the SD-1 (and it eventually led to the Fizmo®). The SD-1 allows for additive synthesis using waveform modulation, a sort of wavetable synthesis. This puts it into a unique class of digital synthesizers along with the PPG Wave® series and Waldorf® Microwave® series.
+# Ensoniq SD-1
+The SD-1 (1990) comes from a long line of Ensoniq's evolving Transwave® wavetable digital synthesizers. It began with Ensoniq's earliest synthesizer, the ESQ-1. That led to the SQ-80, then the VFX and VFX-SD (the latter featuring an on-board sequencer) and then to the SD-1 (and it eventually led to the Fizmo). The SD-1 allows for additive synthesis using waveform modulation, a sort of wavetable synthesis. This puts it into a unique class of digital synthesizers along with the PPG Wave series and Waldorf Microwave series.
 
 The SD-1 can create all sorts of acoustic, electric, digital, and analog-like sounds. Its piano sound has over 1 MB of 16-bit waveforms to give it a full and rich realistic tone not found in other digital synthesizers of the time.
 
@@ -12,13 +12,13 @@ A single patch can contain up to 6 of the 168 waves in its ROM memory that can b
 Like the VFX-SD, the SD-1 has a professional quality on-board sequencer making it a complete all-in-one music production workstation. This is a 24-track sequencer with 25,000 note capacity and it holds up to 60 sequences and 20 songs. There is quantization (96 ppqn), real-time or step entry, looped or linear mode, and auto-punch in/out. Tracks can be set to control the SD-1's internal voices or external MIDI equipment, or both at the same time! An on-board 3.5" disk drive allows you to store your programs, sequences, songs, and even MIDI SysEx data. The SD-1 is compatible with all VFX and VFX-SD program librarys too!
 
 # About this project
-We are Sojus Records, one of the longest-running netlabels still active. We are musicians not programmers, but we like old synths and emulations. So we decided to build a fully featured VST3 version of the MAME®-emulated Ensoniq® SD-1/32, which is never emulated before. Thanks to the recent AI coding revolution, we are successfully built it!
+We are Sojus Records, one of the longest-running netlabels still active. We are musicians not programmers, but we like old synths and emulations. So we decided to build a fully featured VST3 version of the MAME-emulated Ensoniq SD-1/32, which is never emulated before. Thanks to the recent AI coding revolution, we are successfully built it!
 
 # What's working?
 Everything. Check the original manual here: [Polynominal](https://www.polynominal.com/ensoniq-sd1/ensoniq-sd1-manual.pdf)
 
 # Features:
-- Intel® Windows® / Mac Intel®+ARM® universal binaries
+- Intel Windows / Mac Intel+ARM universal binaries
 - VST3 state saving, midi input and automation, 4 different panels, resizeable gui with VFD display and onboard keyboard
 - Can load all compatible VFX/VFX-SD/SD1-24/SD1-32 disk images and cartridges (.img .bin .crt etc)
   - Attach the disk image with Load Floppy/Cartridge button, Press Storage, then select DISK. Press LOAD. The display shows the Disk Load page, with the File Type selected. Move the data entry slider to select file.
@@ -33,10 +33,10 @@ Everything. Check the original manual here: [Polynominal](https://www.polynomina
   sudo xattr -rd com.apple.quarantine /Library/Audio/Plug-Ins/VST3/EnsoniqSD1.vst3
 
 # Requirements
-- Windows® 10 or newer / MacOS14 Ventura or newer, VST3 compatible DAW
+- Windows 10 or newer / MacOS14 Ventura or newer, VST3 compatible DAW
 - Original SD-1 32 rom files at this location (can be zipped into sd1.zip):
 
-  Windows®: 
+  Windows: 
   
   Mac: /Users/yourusername/Documents/EnsoniqSD1
   
@@ -52,7 +52,8 @@ Everything. Check the original manual here: [Polynominal](https://www.polynomina
   - u37.bin e08931013c8aca2460b4f2c3512e1d3e9a610a7f921e22012bb13bd23a3e56d7
   - u38.bin 2f185a185961a1c14472c2b706642c0d9e7a0792d57d946a349840905782e5ca
   
-- Optional: If you want to run the internal sequencer then you need the original disk image: Ensoniq® SD1 Sequencer OS v410 (SD-1 800K type).
+- Optional: If you want to run the internal sequencer then you need the original disk image:
+  - Ensoniq SD1 Sequencer OS v410 (SD-1 800K type)
   - Attach the disk image with Load Floppy/Cartridge, Press Storage, then select DISK. Press LOAD. The display shows the Disk Load page, with the File Type selected. Move the data entry slider all the way up to select TYPE=SEQUENCER OS.
 
 # License and credits
@@ -64,26 +65,15 @@ Disclaimer
 
 The source code to MAME® is provided under the GNU General Public License version 2 or later as of Git revision 35ccf865aa366845b574e1fdbc71c4866b3d6a0f and the release of MAME 0.172. Source files may also be licensed as specified in the file header. This license does not apply to prior versions of MAME. 
 
-License
+MAME® Copyright (c) 1997-2026  MAMEDev and contributors
 
-MAME®
-Copyright (c) 1997-2026  MAMEDev and contributors
+This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.<br/>
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.<br/>
+You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-
-SD-1 Emulation license: BSD 3 Clause | Copyright (c) Christian Brunschen
+SD-1 Emulation license:<br/>
+BSD 3 Clause | Copyright (c) Christian Brunschen
 
 All trademarks are property of their respective owners.
 
