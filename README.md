@@ -1,5 +1,5 @@
 # Ensoniq® SD-1 32-Voice VST Emulation
-MAME®-based emulation of the Ensoniq® SD-1 32-Voice synthesizer with JUCE® VST3
+MAME®-based VST3 emulation of the Ensoniq® SD-1 32-Voice synthesizer built with JUCE®
 
 ![Screenshot of Ensoniq SD-1 VST](https://github.com/kukoricajoe/Ensoniq-SD-1-32-voices-VST-emulation/blob/main/sd-1.png)
 Ensoniq SD-1 with Compact panel in FL Studio
@@ -35,7 +35,7 @@ Everything. Check the original manual here: [Polynominal](https://www.polynomina
   sudo xattr -rd com.apple.quarantine /Library/Audio/Plug-Ins/VST3/EnsoniqSD1.vst3
 
 # Requirements
-- macOS 13 (Ventura) or newer. (Windows 10 or newer when available).
+- macOS 14 (Ventura) or newer. (Windows 10 or newer when available).
 - A VST3 compatible DAW.
 - Original Ensoniq SD-1 32-voice variant AND Ensoniq 2x40 VFD ROM files placed at this exact location (can be zipped into (can be zipped into sd132.zip):
 
