@@ -25,6 +25,7 @@ Everything. Check the original manual here: [Polynominal](https://www.polynomina
   - Attach the disk image with Load Floppy/Cartridge button, Press Storage, then select DISK. Press LOAD. The display shows the Disk Load page, with the File Type selected. Move the data entry slider to select file.
 
 # Known limitations
+- Mac UB only, Windows build is in progress.
 - Only 1 instance can be run simultaneous.
 - No floppy drive sound :D
 - Mac binaries requires one of the following methods to run:
