@@ -62,21 +62,62 @@ Everything. Check the original manual here: [Polynominal](https://www.polynomina
 
 # License and credits
 
-Built with love by Christian Brunschen and sojusrecords.com
+Built with love by MAMEDev and contributors and sojusrecords.com
 
 MAME® Legal Information<br/>
 Disclaimer<br/>
 The source code to MAME® is provided under the GNU General Public License version 2 or later as of Git revision 35ccf865aa366845b574e1fdbc71c4866b3d6a0f and the release of MAME 0.172. Source files may also be licensed as specified in the file header. This license does not apply to prior versions of MAME. 
 
-MAME® Copyright (c) 1997-2026  MAMEDev and contributors
+MAME® Copyright (c) 1997-2026 MAMEDev and contributors
 
 This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.<br/>
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.<br/>
 You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-SD-1 Emulation license:<br/>
+es5510, vfxcart, esqpump, panels license:<br/>
 BSD 3 Clause | Copyright (c) Christian Brunschen
+
+m68000, wd_fdc Emulation license<br/>
+BSD 3 Clause | Copyright (c) Olivier Galibert
+
+esq5505 Emulation license<br/>
+BSD 3 Clause | Copyright (c) R. Belmont, Parduz
+
+esqpanel, vfd, midi Emulation license<br/>
+BSD 3 Clause | Copyright (c) R. Belmont
+
+es5506, emu, emupal, speaker Emulation license<br/>
+BSD 3 Clause | Copyright (c) Aaron Giles
+
+mc68681 Emulation license<br/>
+BSD 3 Clause | Copyright (c) Mariusz Wojcieszek, R. Belmont, Joseph Zatarski
+
+hd63450 Emulation license<br/>
+BSD 3 Clause | Copyright (c) Barry Rodewald
+
+esqlcd Emulation license<br/>
+BSD 3 Clause | Copyright (c) Parduz
+
+nvram Emulation license<br/>
+BSD 3 Clause | Copyright (c) Nigel Barnes
+
+floppy Emulation license<br/>
+BSD 3 Clause | Copyright (c) Nathan Woods, Olivier Galibert, Miodrag Milanovic
+
+softlist_dev Emulation license<br/>
+BSD 3 Clause | Copyright (c) Wilbert Pol
+
+esq16_dsk Emulation license<br/>
+BSD 3 Clause | Copyright (c) R. Belmont, Olivier Galibert
+
+hxchfe_dsk Emulation license<br/>
+BSD 3 Clause | Copyright (c) Michael Zapf
+
+logmacro Emulation license<br/>
+BSD 3 Clause | Copyright (c) Vas Crabb 
+
+and so many others. Thank you for your work!
 
 All trademarks are property of their respective owners.
 

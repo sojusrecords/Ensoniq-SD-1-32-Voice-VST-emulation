@@ -46,7 +46,7 @@ private:
 
     // --- SETTINGS PANEL GUI COMPONENTS ---
     juce::TextButton settingsButton { "Settings / About" };
-    juce::GroupComponent settingsGroup { "settings_group", "Ensoniq(R) SD-1/32 Settings v0.9.2b" };
+    juce::GroupComponent settingsGroup { "settings_group", "Ensoniq(R) SD-1/32 Settings v0.9.5b" };
     
     juce::Label bufferLabel { "buffer_label", "MAME(R) Engine buffer:" };
     juce::ComboBox bufferCombo;
@@ -57,7 +57,7 @@ private:
     juce::ComboBox viewCombo;
     std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> viewAttachment;
 
-    juce::Label aboutLabel { "about_label", "Built with love by Christian Brunschen and sojusrecords.com\n\nThis software includes MAME(R) emulator components\n and is licensed under the GPL v2/v3.\nAll trademarks are property of their respective owners." };
+    juce::Label aboutLabel { "about_label", "Built with love by MAMEDev and contributors and sojusrecords.com\n\nThis software includes MAME(R) emulator components\n and is licensed under the GPL v2/v3.\nAll trademarks are property of their respective owners." };
     juce::HyperlinkButton webLink { "visit sojusrecords.com", juce::URL("https://www.sojusrecords.com") };
     juce::TextButton closeSettingsButton { "Close" };
 
