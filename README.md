@@ -61,6 +61,8 @@ Everything. Check the original manual here: [Polynominal](https://www.polynomina
   - u36.bin 2fdb401bea78eb323fa55408760a73319aeae68b465f193dc7a46d1b21277cdd
   - u37.bin e08931013c8aca2460b4f2c3512e1d3e9a610a7f921e22012bb13bd23a3e56d7
   - u38.bin 2f185a185961a1c14472c2b706642c0d9e7a0792d57d946a349840905782e5ca
+* The final structure of sd132.zip looks like this:
+![sd132.zip](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/blob/main/roms.png)
   
 - Optional: If you want to run the internal sequencer, you need the original disk image:
   - Ensoniq SD1 Sequencer OS v410 (SD-1 800K type)
