@@ -40,9 +40,9 @@ Everything. Check the original manual here: [Polynominal](https://www.polynomina
 
 # Requirements
 - Please note that this is a hardware-level emulation of the synthesizer, so it places heavy demands on the CPU! Set the buffer setting to higher if buffer underrun occurs.
-- Windows 10 or newer or macOS 14 (Ventura) or newer.
+- Windows 10 or newer or macOS 14 (Sonoma) or newer.
 - Windows build is AVX2 optimized (Haswell or newer).
-- VST3 compatible DAW
+- A VST3 compatible DAW. If it's not working, come back later :)
 - IMPORTANT - ROM Files Required!
   Due to copyright reasons, the required Ensoniq ROM files are NOT included.
   To make the plugin work:

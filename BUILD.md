@@ -30,7 +30,7 @@ We had to make specific modifications to the MAME core to expose certain interna
 
 ## Step 2: Compiling MAME and Extracting Archives
 
-Instead of building a standalone static library, we build the standard MAME executable and extract the generated object archives (.a/lib files) created during the build process.
+Instead of building a standalone static library, we build the standard MAME executable and extract the generated object archives (.a/.o/lib files) created during the build process.
 
 1. Read the official MAME instructions. Build MAME from the source via terminal/UCRT64 (e.g., 'make SUBTARGET=sd132 USE_BGFX=0' on mac, 'make vs2022 SUBTARGET=sd132 SOURCES=src/mame/ensoniq/ensoniq.cpp -j8 USE_BGFX=0' on win). Don't forget to add universal binary switches if applicable on macOS (e.g. 'TARGETOS=macosx PTR64=1 PRECOMPILE=0 ARCHOPTS="-arch arm64"'). 
 
@@ -56,13 +56,15 @@ Instead of building a standalone static library, we build the standard MAME exec
 
    - Ensure all the required MAME .a/.o/lib files are listed in your External Libraries to Link section.
 
+   - On both platforms you must embed the mame/plugins folder. (On Windows inside Juce folder zipped into "mame_plugins.zip", on macOS just put the folder itself inside Xcode/Resources)
+
+   - MacOS only: drop the SDL 2 and 3 Frameworks folders into Xcode/Frameworks. 
+
 ## Windows-Specific Optimizations (Visual Studio 2026)
 
 To ensure flawless real-time audio performance and zero dropouts on Windows, the Visual Studio 2026 exporter must be configured precisely:
 
 - Select the Release configuration under the Visual Studio 2022 exporter.
-
-- In the Extra Library Dependencies field, add: winmm.lib; avrt.lib (Required for high-resolution timers and MMCSS real-time threading).
 
 - Set Optimisation to Maximise speed (/O2).
 
@@ -102,19 +104,14 @@ Because macOS Sequoia and strict DAW sandboxing block dynamic external library l
 
 ## Step 5: ROM Installation
 
-Due to copyright reasons, the Ensoniq ROM files are not included in this repository.
-
-1. Once built, open the plugin in your DAW.
-
-2. A warning screen will appear showing you the correct path:
-
-   - macOS: ~/Documents/EnsoniqSD1/
-
-   - Windows: C:\Users\[YourName]\Documents\EnsoniqSD1\
-
-3. Place original Ensoniq SD-1 32 variant AND Ensoniq 2x40 VFD rom files into that directory and put them into sd132.zip.
-
-  - Filename | SHA256
+- IMPORTANT - ROM Files Required!
+  Due to copyright reasons, the required Ensoniq ROM files are NOT included.
+  To make the plugin work:
+* Create a folder named EnsoniqSD1 in your user's Documents folder:
+- Win C:\Users\yourusername\Documents
+- macOS /yourusername/Documents/
+* Obtain the Ensoniq SD-1 32 variant AND Ensoniq 2x40 VFD ROM files and place EXACTLY these files in that folder AND zip them to sd132.zip.<br/>
+  Filename | SHA256
   - esqvfd_font_vfx.bin ab2f7ddc6ab7fafaf07985d01788197849cdaeb5a4a7d9f2f85098dfd65edf01
   - sd1_32_402_hi.bin 90ae35de8661f5de0793b6ea59a4d6524e90c0828a29e6ea8906ff759116136d
   - sd1_32_402_lo.bin 6b0c1235c4f813ce8698e89d66933e9c7c9168f4a095c9e2a50add7fe729481c
@@ -125,3 +122,5 @@ Due to copyright reasons, the Ensoniq ROM files are not included in this reposit
   - u36.bin 2fdb401bea78eb323fa55408760a73319aeae68b465f193dc7a46d1b21277cdd
   - u37.bin e08931013c8aca2460b4f2c3512e1d3e9a610a7f921e22012bb13bd23a3e56d7
   - u38.bin 2f185a185961a1c14472c2b706642c0d9e7a0792d57d946a349840905782e5ca
+* The final structure of sd132.zip in your Documents/EnsoniqSD1 folder looks like this:<br/>
+![sd132.zip](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/blob/main/roms.png)
