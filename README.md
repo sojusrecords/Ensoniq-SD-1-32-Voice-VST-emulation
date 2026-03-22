@@ -24,7 +24,7 @@ Everything. Check the original manual here: [SD-1 Manual at Polynominal](https:/
 
 # Features:
 - Windows 10+ 64 bit VST3, Mac Intel+ARM Universal Binary VST3
-- **NEW: FULL automation** (all keys, sliders and buttons: now you can save presets: Saving requires holding down PRESETS button and pressing a BANK button), full MIDI CC controlling, polyphonic aftertouch
+- **NEW: FULL automation** (All keys, sliders and buttons. Now you can save presets: Saving requires holding down PRESETS button and pressing a BANK button), full MIDI CC controlling, polyphonic aftertouch
 - **NEW: Global settings saving** 
 - VST3 state saving
 - 4 different panel layouts with resizable GUI and VFD display
