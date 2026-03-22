@@ -20,11 +20,16 @@ We are Sojus Records, one of the longest-running netlabels still active. We are 
 [macOS UB VST3](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/0.9.6b/EnsoniqSD1-v.0.9.6b-macVST3.7z)
 
 # What's working?
-Everything. Check the original manual here: [Polynominal](https://www.polynominal.com/ensoniq-sd1/ensoniq-sd1-manual.pdf)
+Everything. Check the original manual here: [SD-1 Manual at Polynominal](https://www.polynominal.com/ensoniq-sd1/ensoniq-sd1-manual.pdf)
 
 # Features:
 - Windows 10+ 64 bit VST3, Mac Intel+ARM Universal Binary VST3
-- VST3 state saving, MIDI input and automation, 4 different panel layouts, resizable GUI with VFD display, and an onboard keyboard, buffer setting
+- **NEW: FULL automation** (all keys, sliders and buttons: now you can save presets: Saving requires holding down PRESETS button and pressing a BANK button), full MIDI CC controlling, polyphonic aftertouch
+- **NEW: Global settings saving** 
+- VST3 state saving
+- 4 different panel layouts with resizable GUI and VFD display
+- Buffer setting
+- 4 outputs: stereo main out, optional stereo aux (dry signal with no effects)
 - Can load all compatible VFX/VFX-SD/SD1-24/SD1-32 disk images and cartridges (.img .bin .crt etc)
   - How to load: Attach the disk image using the "Load Floppy/Cartridge" button. Press Storage, then select DISK. Press LOAD. The display will show the Disk Load page with the File Type selected. Move the data entry slider to select your file.
 
@@ -36,14 +41,21 @@ Everything. Check the original manual here: [Polynominal](https://www.polynomina
   - Manual authorization: The user must go to System Settings > Privacy & Security and, after the DAW has attempted to load the plugin, click the "Open Anyway" button.
   - or
   - Removing quarantine (via Terminal): Run the following command on the plugin bundle:
+  ```
   sudo xattr -rd com.apple.quarantine /Library/Audio/Plug-Ins/VST3/EnsoniqSD1.vst3
+  ```
 
 # Requirements
-- Please note that this is a hardware-level emulation of the synthesizer, so it places heavy demands on the CPU! Set the buffer setting to higher if buffer underrun occurs.
-- Windows 10 or newer or macOS 14 (Sonoma) or newer.
+- Please note that this is a hardware-level emulation of the synthesizer, so it places **heavy demands on the CPU!** Set the buffer setting to higher if buffer underrun occurs.
+- Windows 10 or newer or macOS 10.14 (Mojave) or newer.
 - Windows build is AVX2 optimized (Haswell or newer).
 - A VST3 compatible DAW. If it's not working, come back later :)
-- IMPORTANT - ROM Files Required!
+  - Tested and working:
+    - macOS: Ableton Live 12, Bitwig Studio 6, Cubase 15, Fender Studio Pro 8, FL Studio 2025, Reaper 7.
+    - Windows: Ableton Live 12, Bitwig Studio 6, Cubase 15, FL Studio 2025, Reaper 7.
+  - Working but wav render is wrong: Reason 12 (Windows)
+  - If it's not working for you check [Troubleshooting](#Troubleshooting).
+- IMPORTANT - ROM Files Required!<br/>
   Due to copyright reasons, the required Ensoniq ROM files are NOT included.
   To make the plugin work:
 * Create a folder named EnsoniqSD1 in your user's Documents folder:
@@ -51,22 +63,32 @@ Everything. Check the original manual here: [Polynominal](https://www.polynomina
 - macOS /yourusername/Documents/
 * Obtain the Ensoniq SD-1 32 variant AND Ensoniq 2x40 VFD ROM files and place EXACTLY these files in that folder AND zip them to sd132.zip.<br/>
   Filename | SHA256
-  - esqvfd_font_vfx.bin ab2f7ddc6ab7fafaf07985d01788197849cdaeb5a4a7d9f2f85098dfd65edf01
-  - sd1_32_402_hi.bin 90ae35de8661f5de0793b6ea59a4d6524e90c0828a29e6ea8906ff759116136d
-  - sd1_32_402_lo.bin 6b0c1235c4f813ce8698e89d66933e9c7c9168f4a095c9e2a50add7fe729481c
-  - sd1_410_hi.bin 1d6d6150373fb070da8b1a6da57762749bda9210e0ca5536441bb8194a3cafb7
-  - sd1_410_lo.bin e3e42beca41989561c0d2a8266e48549561650a7606bb8a0d75b438847e8bd0c
-  - u34.bin 7a6e6e76da7eb8de5cbc3a0a2bfb27a461e312facdcc0b7ecc42b9d1eb261e12
-  - u35.bin 1df911a97e0e5a334d9345ba5e47eac7794d083282012f7ecf70901b88cf7e08
-  - u36.bin 2fdb401bea78eb323fa55408760a73319aeae68b465f193dc7a46d1b21277cdd
-  - u37.bin e08931013c8aca2460b4f2c3512e1d3e9a610a7f921e22012bb13bd23a3e56d7
-  - u38.bin 2f185a185961a1c14472c2b706642c0d9e7a0792d57d946a349840905782e5ca
+  - esqvfd_font_vfx.bin<br/>ab2f7ddc6ab7fafaf07985d01788197849cdaeb5a4a7d9f2f85098dfd65edf01
+  - sd1_32_402_hi.bin<br/>90ae35de8661f5de0793b6ea59a4d6524e90c0828a29e6ea8906ff759116136d
+  - sd1_32_402_lo.bin<br/>6b0c1235c4f813ce8698e89d66933e9c7c9168f4a095c9e2a50add7fe729481c
+  - sd1_410_hi.bin<br/>1d6d6150373fb070da8b1a6da57762749bda9210e0ca5536441bb8194a3cafb7
+  - sd1_410_lo.bin<br/>e3e42beca41989561c0d2a8266e48549561650a7606bb8a0d75b438847e8bd0c
+  - u34.bin<br/>7a6e6e76da7eb8de5cbc3a0a2bfb27a461e312facdcc0b7ecc42b9d1eb261e12
+  - u35.bin<br/>1df911a97e0e5a334d9345ba5e47eac7794d083282012f7ecf70901b88cf7e08
+  - u36.bin<br/>2fdb401bea78eb323fa55408760a73319aeae68b465f193dc7a46d1b21277cdd
+  - u37.bin<br/>e08931013c8aca2460b4f2c3512e1d3e9a610a7f921e22012bb13bd23a3e56d7
+  - u38.bin<br/>2f185a185961a1c14472c2b706642c0d9e7a0792d57d946a349840905782e5ca
 * The final structure of sd132.zip in your Documents/EnsoniqSD1 folder looks like this:<br/>
 ![sd132.zip](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/blob/main/roms.png)
   
 - Optional: If you want to run the internal sequencer, you need the original disk image:
   - Ensoniq SD1 Sequencer OS v410 (SD-1 800K type)
   - How to load: Attach the disk image using "Load Floppy/Cartridge". Press Storage, then select DISK. Press LOAD. The display will show the Disk Load page with the File Type selected. Move the data entry slider all the way up to select TYPE=SEQUENCER OS.
+
+# Troubleshooting
+- The plugin is checking the contents of sd132.zip in your Documents/EnsoniqSD1 folder. If something is not right, then it will tell you.
+- On macOS: if 'sudo xattr -rd...' fails, try codesign the plugin:
+  - Open a terminal window, install Xcode Command Line Tools if needed: ```xcode-select --install```
+  - ```sudo codesign -f -s /Library/Audio/Plug-Ins/VST3/EnsoniqSD1.vst3```
+- Whitelist the plugin in your antivirus app. The plugin is writing some data to temp folder and to your Documents/EnsoniqSD1 folder (e.g. settings.xml)
+- Your sequencer is blacklisting the plugin: if the plugin scanner provides error message or a log file then send it to us.
+- If the plugin is loaded but there's only "Load Floppy/Cartridge" and "Settings" buttons and blank window: the internal MAME engine is not loaded. Check if your OS/PC/MAC is capable to run it. 
+- Reset global settings: go to Documents/EnsoniqSD1 and delete the file "settings.xml"
 
 # License and credits
 

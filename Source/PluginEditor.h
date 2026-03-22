@@ -37,13 +37,16 @@ public:
 private:
     EnsoniqSD1AudioProcessor& audioProcessor;
         
+    // Global settings
+    void saveGlobalSettings();
+    
     juce::TextButton loadMediaButton { "Load Floppy/Cartridge" };
     std::unique_ptr<juce::FileChooser> fileChooser;
     void loadMediaButtonClicked();
 
     // --- SETTINGS PANEL GUI COMPONENTS ---
     juce::TextButton settingsButton { "Settings / About" };
-    juce::GroupComponent settingsGroup { "settings_group", "Ensoniq(R) SD-1/32 Settings v0.9.6b" };
+    juce::GroupComponent settingsGroup { "settings_group", "Ensoniq(R) SD-1/32 Settings v0.9.7b" };
     
     juce::Label bufferLabel { "buffer_label", "MAME(R) Engine buffer:" };
     juce::ComboBox bufferCombo;
@@ -66,13 +69,7 @@ private:
         
     // --- WINDOW SIZE TRACKING ---
     // Used by the Timer to detect when the MAME internal layout resolution changes
-    int lastW = 0;
-    int lastH = 0;
-    
-#ifdef _WIN32
-    // Windows UI hardware acceleration via OpenGL
-    juce::OpenGLContext openGLContext;
-#endif
+    int lastView = -1;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EnsoniqSD1AudioProcessorEditor)
 };

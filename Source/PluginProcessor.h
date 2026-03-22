@@ -40,6 +40,10 @@ class EnsoniqSD1AudioProcessor : public juce::AudioProcessor,
     public juce::AudioProcessorValueTreeState::Listener
 {
 public:
+    
+    // --- GLOBAL SETTINGS ---
+        std::atomic<bool> requestGlobalSave{ false };
+        void loadGlobalSettings();
 
     // --- MAME STATE MANAGEMENT ---
     // Used to safely orchestrate loading/saving states between the UI and the MAME thread
@@ -65,6 +69,9 @@ public:
     juce::WaitableEvent mameThrottleEvent{ false };
     bool isMameRunningFlag() const { return isMameRunning.load(); }
     std::atomic<bool> isRomMissing{ false };
+    
+    // Flag to indicate if the zip file exists but contains invalid/missing ROMs
+    std::atomic<bool> isRomInvalid{ false };
 
     std::atomic<bool> mameHasStarted{ false };
     std::atomic<double> initialSampleRate{ 0.0 };
@@ -86,6 +93,105 @@ public:
     //==============================================================================
     void prepareToPlay(double sampleRate, int samplesPerBlock) override;
     void releaseResources() override;
+    
+    // --- VST AUTOMATIZATION ---
+        struct SD1ButtonDef {
+            juce::String paramID;
+            juce::String paramName;
+            const char* ioportTag;
+            uint32_t ioportMask;
+        };
+
+        // FULL SD-1 LIST
+        const std::vector<SD1ButtonDef> sd1Buttons = {
+            // --- MASTER / MODE ---
+            { "btn_cartbankset", "Cart/BankSet", ":buttons_32", 0x00100000 },
+            { "btn_sounds",      "Sounds",       ":buttons_32", 0x00200000 },
+            { "btn_presets",     "Presets",      ":buttons_32", 0x00400000 },
+            { "btn_seq_mode",    "Seq (Mode)",   ":buttons_32", 0x00080000 },
+
+            // --- SOFT BUTTONS ---
+            { "btn_soft_tl", "Soft Top-Left",   ":buttons_32", 0x04000000 },
+            { "btn_soft_tc", "Soft Top-Center", ":buttons_32", 0x00000400 },
+            { "btn_soft_tr", "Soft Top-Right",  ":buttons_32", 0x00000800 },
+            { "btn_soft_bl", "Soft Bot-Left",   ":buttons_32", 0x00040000 },
+            { "btn_soft_bm", "Soft Bot-Middle", ":buttons_32", 0x00001000 },
+            { "btn_soft_br", "Soft Bot-Right",  ":buttons_32", 0x00002000 },
+
+            // --- BANK / NUMBER BUTTONS ---
+            { "btn_bank0", "Bank 0", ":buttons_32", 0x00800000 },
+            { "btn_bank1", "Bank 1", ":buttons_32", 0x01000000 },
+            { "btn_bank2", "Bank 2", ":buttons_32", 0x02000000 },
+            { "btn_bank3", "Bank 3", ":buttons_32", 0x00004000 },
+            { "btn_bank4", "Bank 4", ":buttons_32", 0x00008000 },
+            { "btn_bank5", "Bank 5", ":buttons_32", 0x00010000 },
+            { "btn_bank6", "Bank 6", ":buttons_32", 0x00020000 },
+            { "btn_bank7", "Bank 7", ":buttons_32", 0x00000008 },
+            { "btn_bank8", "Bank 8", ":buttons_32", 0x00000004 },
+            { "btn_bank9", "Bank 9", ":buttons_0",  0x02000000 },
+
+            // --- DATA ENTRY ---
+            { "btn_up",   "Up (Inc)",   ":buttons_32", 0x40000000 },
+            { "btn_down", "Down (Dec)", ":buttons_32", 0x80000000 },
+
+            // --- PROGRAMMING / SAVE ---
+            { "btn_replace", "Replace Program", ":buttons_0", 0x20000000 },
+            { "btn_select",  "Select Voice",    ":buttons_0", 0x00000020 },
+            { "btn_copy",    "Copy",            ":buttons_0", 0x00000200 },
+            { "btn_write",   "Write",           ":buttons_0", 0x00000008 },
+            { "btn_compare", "Compare",         ":buttons_0", 0x00000100 },
+
+            // --- PATCH / SYSTEM / MIDI / EFFECTS ---
+            { "btn_patch_menu", "Patch Select", ":buttons_0", 0x04000000 },
+            { "btn_midi",       "MIDI",         ":buttons_0", 0x08000000 },
+            { "btn_effects1",   "Effects",      ":buttons_0", 0x10000000 },
+
+            // --- KEY / ZONE ---
+            { "btn_key_zone", "Key Zone", ":buttons_32", 0x00000080 },
+            { "btn_transpose","Transpose",":buttons_32", 0x00000100 },
+            { "btn_release",  "Release",  ":buttons_32", 0x00000200 },
+            { "btn_volume",   "Volume",   ":buttons_32", 0x00000010 },
+            { "btn_pan",      "Pan",      ":buttons_32", 0x00000020 },
+            { "btn_timbre",   "Timbre",   ":buttons_32", 0x00000040 },
+
+            // --- SYNTH PARAMETERS ---
+            { "btn_wave",      "Wave",            ":buttons_0", 0x00000010 },
+            { "btn_mod_mixer", "Mod Mixer",       ":buttons_0", 0x00000040 },
+            { "btn_prog_ctrl", "Program Control", ":buttons_0", 0x00000004 },
+            { "btn_effects2",  "Effects (Synth)", ":buttons_0", 0x00000080 },
+            { "btn_pitch",     "Pitch",           ":buttons_0", 0x00000800 },
+            { "btn_pitch_mod", "Pitch Mod",       ":buttons_0", 0x00002000 },
+            { "btn_filters",   "Filters",         ":buttons_0", 0x00008000 },
+            { "btn_output",    "Output",          ":buttons_0", 0x00020000 },
+            { "btn_lfo",       "LFO",             ":buttons_0", 0x00000400 },
+            { "btn_env1",      "Env 1",           ":buttons_0", 0x00001000 },
+            { "btn_env2",      "Env 2",           ":buttons_0", 0x00004000 },
+            { "btn_env3",      "Env 3",           ":buttons_0", 0x00010000 },
+
+            // --- INTERNAL SEQUENCER TRANSPORT & TRACKS ---
+            { "btn_track_1_6",  "Tracks 1-6",  ":buttons_0",  0x40000000 },
+            { "btn_track_7_12", "Tracks 7-12", ":buttons_0",  0x80000000 },
+            { "btn_record",     "Record",      ":buttons_0",  0x00080000 },
+            { "btn_stop_cont",  "Stop/Cont",   ":buttons_0",  0x00400000 },
+            { "btn_play",       "Play",        ":buttons_0",  0x00800000 },
+            { "btn_click",      "Click",       ":buttons_32", 0x00000001 },
+            { "btn_seq_ctrl",   "Seq Control", ":buttons_0",  0x00040000 },
+            { "btn_locate",     "Locate",      ":buttons_32", 0x00000002 },
+
+            // --- PERFORMANCE / SYSTEM ---
+            { "btn_song",       "Song",         ":buttons_32", 0x10000000 },
+            { "btn_seq_track",  "Seq (Track)",  ":buttons_32", 0x08000000 },
+            { "btn_track",      "Track",        ":buttons_32", 0x20000000 },
+            { "btn_master",     "Master",       ":buttons_0",  0x00100000 },
+            { "btn_storage",    "Storage",      ":buttons_0",  0x00200000 },
+            { "btn_midi_ctrl",  "MIDI Control", ":buttons_0",  0x01000000 },
+
+            // --- PATCH SELECT ---
+            { "btn_patch_sel_r", "Patch Select Right", ":patch_select", 0x2 },
+            { "btn_patch_sel_l", "Patch Select Left",  ":patch_select", 0x1 }
+        };
+
+        std::vector<std::atomic<float>*> buttonParams;
 
 #ifndef JucePlugin_PreferredChannelConfigurations
     bool isBusesLayoutSupported(const BusesLayout& layouts) const override;
@@ -118,6 +224,9 @@ public:
 
     // Core function to boot the headless MAME environment
     void runMameEngine();
+    
+    // Verifies the contents of the sd132.zip file against known SHA-256 hashes
+    bool verifyRomChecksums(const juce::File& zipFile);
 
     // Callback to push generated audio from MAME into our ring buffers
     void pushAudioFromMame(const int16_t* pcmBuffer, int numSamples);
@@ -154,27 +263,29 @@ public:
     // Dynamic offline buffer for sync
     std::atomic<int> maxOfflineBuffer{ 1024 };
 
-    // --- DYNAMIC PANEL LAYOUT SELECTION ---
-        // LOCK-FREE OPTIMIZATION: Replaced std::mutex and std::string with a fast atomic integer.
+        // --- DYNAMIC PANEL LAYOUT SELECTION ---
         // 0 = Compact, 1 = Full, 2 = Panel, 3 = Tablet
-    std::atomic<int> requestedViewIndex{ 0 };
-    std::atomic<bool> requestViewChange{ false };
+        std::atomic<int> requestedViewIndex{ 0 };
+        std::atomic<bool> requestViewChange{ false };
 
-    // Stores the current internal rendering resolution of the selected MAME layout
-    std::atomic<int> mameInternalWidth{ 2048 };
-    std::atomic<int> mameInternalHeight{ 921 };
+        // --- PIXEL PERFECT RENDERING ---
+        // Stores the exact physical pixel dimensions of the current JUCE window.
+        // MAME will strictly render at this 1:1 resolution to save CPU and maximize sharpness.
+        std::atomic<int> windowWidth{ 1200 };
+        std::atomic<int> windowHeight{ 539 };
+        std::atomic<bool> requestRenderResize{ false };
 
-    std::atomic<bool>& getFrameFlag() { return newFrameAvailable; }
-    double getHostSampleRate() const { return hostSampleRate.load(); }
+        std::atomic<bool>& getFrameFlag() { return newFrameAvailable; }
+        double getHostSampleRate() const { return hostSampleRate.load(); }
 
-    // --- DOUBLE BUFFERED VIDEO RENDERING ---
-    juce::Image cachedTexture{ juce::Image::ARGB, 2048, 2048, true, juce::SoftwareImageType() };
+        // --- DOUBLE BUFFERED VIDEO RENDERING ---
+        // Increased to 2560x2560 to safely fit the maximum allowed VST window size
+        juce::Image cachedTexture{ juce::Image::ARGB, 2560, 2560, true, juce::SoftwareImageType() };
 
-    // Pre-allocated maximum size (2048x2048) to accommodate all layout variations safely
-    juce::Image screenBuffers[2]{
-        juce::Image(juce::Image::ARGB, 2048, 2048, true, juce::SoftwareImageType()),
-        juce::Image(juce::Image::ARGB, 2048, 2048, true, juce::SoftwareImageType())
-    };
+        juce::Image screenBuffers[2]{
+            juce::Image(juce::Image::ARGB, 2560, 2560, true, juce::SoftwareImageType()),
+            juce::Image(juce::Image::ARGB, 2560, 2560, true, juce::SoftwareImageType())
+        };
 
     // Indicates which screen buffer (0 or 1) is fully rendered and ready to be drawn by the UI
     std::atomic<int> readyBufferIndex{ 0 };
@@ -224,6 +335,9 @@ private:
     std::atomic<int> midiReadPos{ 0 };
 
     std::atomic<bool> newFrameAvailable{ false };
+    
+    bool lastOfflineState = false;
+    int64_t lastPlayheadPos = 0;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(EnsoniqSD1AudioProcessor)
 };
