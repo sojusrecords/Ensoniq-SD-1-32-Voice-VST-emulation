@@ -109,7 +109,7 @@ Step-by-step:
 
   - You will see a "Transmitting Sys-Ex Data..." overlay on the screen. Once the overlay disappears, the synth will instantly update its RAM, and your presets will be ready to play!
 
-  - You can also save the presets to a disk image (here you can find an [SD-1 formatted empty disk image.](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/blob/main/SD-1-EMPTY-DISK.img)
+  - You can also save the presets to a disk image. Here you can find an [SD-1 formatted empty disk image.](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/blob/main/SD-1-EMPTY-DISK.img)
 </details>
 
 <details>
@@ -155,7 +155,7 @@ MAME® Legal Information<br/>
 Disclaimer<br/>
 The source code to MAME® is provided under the GNU General Public License version 2 or later as of Git revision 35ccf865aa366845b574e1fdbc71c4866b3d6a0f and the release of MAME 0.172. Source files may also be licensed as specified in the file header. This license does not apply to prior versions of MAME. 
 
-MAME® Copyright (c) 1997-2026 MAMEDev and contributors
+MAME® Copyright (c) 1997-2026 [MAMEDev and contributors](https://www.mamedev.org/)
 
 This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.<br/>
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
