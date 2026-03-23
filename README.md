@@ -109,7 +109,7 @@ Step-by-step:
 
   - You will see a "Transmitting Sys-Ex Data..." overlay on the screen. Once the overlay disappears, the synth will instantly update its RAM, and your presets will be ready to play!
 
-  - You can also save the presets to a disk image (here you can find an SD-1 formatted empty disk image.)
+  - You can also save the presets to a disk image (here you can find an [SD-1 formatted empty disk image](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/blob/main/SD-1-EMPTY-DISK.img.)
 </details>
 
 <details>
