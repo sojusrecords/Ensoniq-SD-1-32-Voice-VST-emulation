@@ -24,7 +24,7 @@ Everything. Check the original manual here: [SD-1 Manual at Polynominal](https:/
 
 # Features:
 - Windows 10+ 64 bit VST3, Mac Intel+ARM Universal Binary VST3
-- **NEW: VFX, VFX-SD, SD1 .SYX SYS-EX file import.** Read the FAQ for more info!
+- **NEW: VFX, VFX-SD, SD1 .SYX SYS-EX file import.** [Read the FAQ for more info!](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation#faq)
 - **NEW: FULL automation** (All keys, sliders and buttons. Now you can save presets: Saving requires holding down PRESETS button and pressing a BANK button), full MIDI CC controlling, polyphonic aftertouch
 - **NEW: Global settings saving** 
 - VST3 state saving
