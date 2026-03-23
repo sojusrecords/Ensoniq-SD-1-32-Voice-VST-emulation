@@ -24,7 +24,7 @@ Everything. Check the original manual here: [SD-1 Manual at Polynominal](https:/
 
 # Features:
 - Windows 10+ 64 bit VST3, Mac Intel+ARM Universal Binary VST3
-- **NEW: VFX, VFX-SD, SD1 .SYX SYS-EX file import** Read the FAQ for more info!
+- **NEW: VFX, VFX-SD, SD1 .SYX SYS-EX file import.** Read the FAQ for more info!
 - **NEW: FULL automation** (All keys, sliders and buttons. Now you can save presets: Saving requires holding down PRESETS button and pressing a BANK button), full MIDI CC controlling, polyphonic aftertouch
 - **NEW: Global settings saving** 
 - VST3 state saving
@@ -109,7 +109,7 @@ Step-by-step:
 
   - You will see a "Transmitting Sys-Ex Data..." overlay on the screen. Once the overlay disappears, the synth will instantly update its RAM, and your presets will be ready to play!
 
-  - You can also save the presets to a disk image (here you can find an [SD-1 formatted empty disk image.](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/blob/main/SD-1-EMPTY-DISK.img.)
+  - You can also save the presets to a disk image (here you can find an [SD-1 formatted empty disk image.](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/blob/main/SD-1-EMPTY-DISK.img)
 </details>
 
 <details>
