@@ -7,7 +7,7 @@ Builds/*
 !Builds/LinuxMakefile/
 Builds/LinuxMakefile/build/
 
-JuceLibraryCode/
+# JuceLibraryCode/
 *.user
 *.suo
 
