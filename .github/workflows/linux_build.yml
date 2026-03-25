@@ -33,7 +33,8 @@ jobs:
              libasound2-dev libx11-dev libxinerama-dev libxext-dev \
              libfreetype6-dev libwebkit2gtk-4.1-dev libglu1-mesa-dev \
              libxrandr-dev libxcursor-dev curl libcurl4-openssl-dev \
-             libsdl2-dev libsdl2-ttf-dev libfontconfig1-dev python3 pkg-config
+             libsdl2-dev libsdl2-ttf-dev libfontconfig1-dev python3 pkg-config \
+             qtbase5-dev qt5-qmake qtbase5-dev-tools
 
     - name: Install SDL3
       uses: libsdl-org/setup-sdl@main
@@ -68,7 +69,7 @@ jobs:
         export PKG_CONFIG_PATH=${{ steps.sdl.outputs.prefix }}/lib/pkgconfig:$PKG_CONFIG_PATH
         
         # -j$(nproc) automatically uses all available CPU cores on the GitHub runner for faster compilation
-        make SUBTARGET=sd132 SOURCES=src/mame/ensoniq/esq5505.cpp REGENIE=1 NO_USE_BGFX=1 OPT_FLAGS="${{ matrix.compiler_flags }}" -j$(nproc)
+        make SUBTARGET=sd132 SOURCES=src/mame/ensoniq/esq5505.cpp USE_QTDEBUG=0 REGENIE=1 NO_USE_BGFX=1 OPT_FLAGS="${{ matrix.compiler_flags }}" -j$(nproc)
 
     - name: Compile JUCE VST3 Wrapper (${{ matrix.name }})
       run: |
