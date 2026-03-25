@@ -91,11 +91,12 @@ jobs:
       run: |
         cd Builds/LinuxMakefile
 
-        sed -i 's/JUCE_CPPFLAGS := /JUCE_CPPFLAGS := -I..\/..\/juce\/modules\/juce_audio_processors\/format_types\/VST3_SDK /g' Makefile
-        sed -i 's/JUCE_CXXFLAGS += /JUCE_CXXFLAGS += ${{ matrix.compiler_flags }} /g' Makefile
+        export CPPFLAGS="-I$GITHUB_WORKSPACE/juce/modules -I$GITHUB_WORKSPACE/juce/modules/juce_audio_processors/format_types/VST3_SDK"
+        export CXXFLAGS="${{ matrix.compiler_flags }} -I$GITHUB_WORKSPACE/juce/modules -I$GITHUB_WORKSPACE/juce/modules/juce_audio_processors/format_types/VST3_SDK"
+        
         export PKG_CONFIG_PATH=${{ steps.sdl.outputs.prefix }}/lib/pkgconfig:$PKG_CONFIG_PATH
         
-        make CONFIG=Release -j$(nproc)
+        make CONFIG=Release JUCE_CPPFLAGS="$CPPFLAGS" JUCE_CXXFLAGS="$CXXFLAGS" -j$(nproc)
 
     - name: Upload VST3 plugin artifact (${{ matrix.name }})
       uses: actions/upload-artifact@v4
