@@ -54,7 +54,6 @@ jobs:
       run: |
         git clone --depth 1 --branch 8.0.12 https://github.com/juce-framework/JUCE.git juce
 
-
     - name: Apply MAME patches (Copy modified files)
       # Overwrite original MAME files with your modified versions from the Mame_Patches folder
       run: |
