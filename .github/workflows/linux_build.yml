@@ -1,0 +1,85 @@
+name: Linux VST3 Build
+
+# When should the build trigger?
+on:
+  push:
+    branches: [ "main", "master" ] # Triggers automatically on push
+  workflow_dispatch: # Allows manual triggering from the GitHub Actions UI
+
+jobs:
+  build-linux-vst3:
+    runs-on: ubuntu-24.04 # Use the latest Ubuntu LTS runner
+    
+    # The Matrix Strategy builds multiple versions in parallel!
+    strategy:
+      matrix:
+        include:
+          - name: "Generic"      # Pre-Haswell compatible
+            compiler_flags: ""
+          - name: "AVX2"         # Optimized for Haswell and newer
+            compiler_flags: "-mavx2"
+
+    steps:
+    - name: Checkout JUCE Project (Your repository)
+      uses: actions/checkout@v4
+
+    - name: Install Linux and JUCE/MAME dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential ninja-build \
+             libasound2-dev libx11-dev libxinerama-dev libxext-dev \
+             libfreetype6-dev libwebkit2gtk-4.0-dev libglu1-mesa-dev \
+             libxrandr-dev libxcursor-dev curl libcurl4-openssl-dev \
+             libsdl2-dev libsdl2-ttf-dev libfontconfig1-dev python3 pkg-config
+
+    - name: Install SDL3
+      uses: libsdl-org/setup-sdl@main
+      id: sdl
+      with:
+        version: 3-latest
+        version-sdl-ttf: 3-latest
+        version-sdl-image: 3-latest
+
+    - name: Clone MAME v0.286 source code
+      # Clone MAME inside the workspace so relative paths in Projucer (like ../../mame/src) work perfectly
+      run: |
+        git clone --depth 1 --branch mame0286 https://github.com/mamedev/mame.git mame
+
+    - name: Apply MAME patches (Copy modified files)
+      # Overwrite original MAME files with your modified versions from the Mame_Patches folder
+      run: |
+        echo "Copying patched files..."
+        cp Mame_Patches/esq5505.cpp mame/src/devices/sound/esq5505.cpp
+        cp Mame_Patches/ui.cpp mame/src/frontend/mame/ui/ui.cpp
+        cp Mame_Patches/sd132.lay mame/src/mame/layout/sd132.lay
+        
+        # Verify that the copy was successful
+        ls -l mame/src/devices/sound/esq5505.cpp
+        ls -l mame/src/frontend/mame/ui/ui.cpp
+        ls -l mame/src/mame/layout/sd132.lay
+
+    - name: Compile MAME sd132 library (${{ matrix.name }})
+      run: |
+        cd mame
+        # Export the pkg-config path so MAME finds the SDL3 library we just built
+        export PKG_CONFIG_PATH=${{ steps.sdl.outputs.prefix }}/lib/pkgconfig:$PKG_CONFIG_PATH
+        
+        # -j$(nproc) automatically uses all available CPU cores on the GitHub runner for faster compilation
+        make SUBTARGET=sd132 SOURCES=src/mame/ensoniq/esq5505.cpp REGENIE=1 NO_USE_BGFX=1 OPT_FLAGS="${{ matrix.compiler_flags }}" -j$(nproc)
+
+    - name: Compile JUCE VST3 Wrapper (${{ matrix.name }})
+      run: |
+        cd Builds/LinuxMakefile
+        export PKG_CONFIG_PATH=${{ steps.sdl.outputs.prefix }}/lib/pkgconfig:$PKG_CONFIG_PATH
+        
+        # We inject the AVX2 flags directly into the JUCE Makefile environment using CXXFLAGS
+        export CXXFLAGS="${{ matrix.compiler_flags }}"
+        make CONFIG=Release -j$(nproc)
+
+    - name: Upload VST3 plugin artifact (${{ matrix.name }})
+      uses: actions/upload-artifact@v4
+      with:
+        # This will create two separate ZIP downloads: 
+        # "Ensoniq_SD1_Linux_VST3_Generic" and "Ensoniq_SD1_Linux_VST3_AVX2"
+        name: Ensoniq_SD1_Linux_VST3_${{ matrix.name }}
+        path: Builds/LinuxMakefile/build/*.vst3
