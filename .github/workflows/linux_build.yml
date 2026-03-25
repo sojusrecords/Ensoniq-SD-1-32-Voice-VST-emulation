@@ -44,8 +44,16 @@ jobs:
         version-sdl-ttf: 3-latest
         version-sdl-image: 3-latest
 
+    - name: MAME Cache beállítása
+      id: cache-mame
+      uses: actions/cache@v4
+      with:
+        path: mame
+        key: mame-0286-${{ matrix.name }}-${{ hashFiles('Mame_Patches/**') }}
+
     - name: Clone MAME v0.286 source code
       # Clone MAME inside the workspace so relative paths in Projucer (like ../../mame/src) work perfectly
+      if: steps.cache-mame.outputs.cache-hit != 'true'
       run: |
         git clone --depth 1 --branch mame0286 https://github.com/mamedev/mame.git mame
 
@@ -56,6 +64,7 @@ jobs:
 
     - name: Apply MAME patches (Copy modified files)
       # Overwrite original MAME files with your modified versions from the Mame_Patches folder
+      if: steps.cache-mame.outputs.cache-hit != 'true'
       run: |
         echo "Copying patched files..."
         cp Mame_Patches/esq5505.cpp mame/src/devices/sound/esq5505.cpp
@@ -68,6 +77,7 @@ jobs:
         ls -l mame/src/mame/layout/sd132.lay
 
     - name: Compile MAME sd132 library (${{ matrix.name }})
+      if: steps.cache-mame.outputs.cache-hit != 'true'
       run: |
         cd mame
         # Export the pkg-config path so MAME finds the SDL3 library we just built
@@ -80,7 +90,7 @@ jobs:
       run: |
         cd Builds/LinuxMakefile
 
-        export CPPFLAGS="-I$GITHUB_WORKSPACE/juce/modules"
+        export CPPFLAGS="-I$GITHUB_WORKSPACE/juce/modules -I$GITHUB_WORKSPACE/juce/modules/juce_audio_processors/format_types/VST3_SDK"
         export CXXFLAGS="${{ matrix.compiler_flags }} -I$GITHUB_WORKSPACE/juce/modules"
         export PKG_CONFIG_PATH=${{ steps.sdl.outputs.prefix }}/lib/pkgconfig:$PKG_CONFIG_PATH
         

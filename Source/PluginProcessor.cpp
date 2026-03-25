@@ -1278,18 +1278,28 @@ void EnsoniqSD1AudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
 
                 // Wait loop: Check if MAME has established the exact audio anchor yet
                 while (needAnchorSync.load(std::memory_order_acquire) && waitMs < timeoutMs) {
-    #ifdef _WIN32
-                    // --- WINDOWS ---
-                    std::this_thread::sleep_for(std::chrono::milliseconds(1));
-    #else
-                    // --- macOS ---
-                    if (pthread_main_np() == 0) { // Only wait if we are NOT on the main thread
-                        std::this_thread::sleep_for(std::chrono::milliseconds(1));
-                    }
-                    else {
-                        break; // Safety breakout for macOS main thread rendering
-                    }
-    #endif
+#if defined(_WIN32)
+    // --- WINDOWS ---
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
+#elif defined(__APPLE__)
+    // --- macOS ---
+    if (pthread_main_np() == 0) { // Only wait if we are NOT on the main thread
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+    else {
+        break; // Safety breakout for macOS main thread rendering
+    }
+
+#else
+    // --- LINUX ---
+    if (! juce::MessageManager::getInstance()->isThisTheMessageThread()) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+    else {
+        break;
+    }
+#endif
                     waitMs++;
                 }
 
@@ -1515,14 +1525,14 @@ void EnsoniqSD1AudioProcessor::setStateInformation (const void* data, int sizeIn
             
             // Wait only for load when MAME is already run (e.g. preset change)
 
-#ifdef _WIN32
-    // --- WINDOWS no pthread ---
-    if (!juce::MessageManager::getInstance()->isThisTheMessageThread()) {
+#if defined(__APPLE__)
+    // --- macOS ---
+    if (pthread_main_np() == 0) {
         mameStateEvent.wait(2000);
     }
 #else
-    // --- macOS ---
-    if (pthread_main_np() == 0) {
+    // --- WINDOWS and LINUX ---
+    if (!juce::MessageManager::getInstance()->isThisTheMessageThread()) {
         mameStateEvent.wait(2000);
     }
 #endif
