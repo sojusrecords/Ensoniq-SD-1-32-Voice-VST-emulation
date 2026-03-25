@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<JUCERPROJECT id="Oippeb" name="Ensoniq SD-1" projectType="audioplug" useAppConfig="0"
+              addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1" bundleIdentifier="com.sojusrecords.EnsoniqSD1"
+              companyWebsite="www.sojusrecords.com" companyCopyright="Open Source"
+              companyName="EnsoniqMAME" pluginCharacteristicsValue="pluginIsSynth,pluginWantsMidiIn"
+              pluginFormats="buildStandalone,buildVST3" version="0.9.7" pluginName="Ensoniq SD-1"
+              pluginDesc="Ensoniq SD-1 MAME Emu VST" pluginManufacturer="EnsoniqMAME"
+              pluginManufacturerCode="Esma" pluginCode="SD1A" pluginAUExportPrefix="EnsoniqSD1AU"
+              pluginAUMainType="'augn'" companyEmail="sjs@sojusrecords.com"
+              cppLanguageStandard="20">
+  <MAINGROUP id="OpvzjD" name="Ensoniq SD-1">
+    <GROUP id="{B55D6966-246C-C5C4-DBF6-55CB66D6CDB4}" name="Resources">
+      <FILE id="S8WBrn" name="q.svg" compile="0" resource="1" file="Source/q.svg"/>
+      <FILE id="PSdVGK" name="cart.svg" compile="0" resource="1" file="Source/cart.svg"/>
+      <FILE id="hK0Kgx" name="floppy.svg" compile="0" resource="1" file="Source/floppy.svg"/>
+      <FILE id="kjPtSe" name="labels_rack.png" compile="0" resource="1" file="Source/labels_rack.png"/>
+      <FILE id="vB9jmy" name="labels_compact.png" compile="0" resource="1"
+            file="Source/labels_compact.png"/>
+      <FILE id="yWo1Ky" name="labels_tablet.png" compile="0" resource="1"
+            file="Source/labels_tablet.png"/>
+      <FILE id="yKRllz" name="labels_full.png" compile="0" resource="1" file="Source/labels_full.png"/>
+      <FILE id="Lyh9Lm" name="mame_plugins.zip" compile="0" resource="1"
+            file="Source/mame_plugins.zip"/>
+    </GROUP>
+    <GROUP id="{3F88782C-AB7D-82EE-F4B6-16FDEB0AE012}" name="Source">
+      <FILE id="IWhokv" name="PluginProcessor.cpp" compile="1" resource="0"
+            file="Source/PluginProcessor.cpp"/>
+      <FILE id="YhSlmb" name="PluginProcessor.h" compile="0" resource="0"
+            file="Source/PluginProcessor.h"/>
+      <FILE id="fNCSn0" name="PluginEditor.cpp" compile="1" resource="0"
+            file="Source/PluginEditor.cpp"/>
+      <FILE id="Z6Wmy3" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
+    </GROUP>
+  </MAINGROUP>
+  <MODULES>
+    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_plugin_client" showAllCode="1" useLocalCopy="0"
+            useGlobalPath="1"/>
+    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_processors_headless" showAllCode="1" useLocalCopy="0"
+            useGlobalPath="1"/>
+    <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_cryptography" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_events" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_midi_ci" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+  </MODULES>
+  <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_VST3_CAN_REPLACE_VST2="0"
+               JUCE_USE_FLAC="0" JUCE_WEB_BROWSER="0"/>
+  <EXPORTFORMATS>
+    <VS2026 targetFolder="Builds/VisualStudio2026" externalLibraries="frontend.lib&#10;mame_sd132.lib&#10;emu.lib&#10;ocore_windows.lib&#10;utils.lib&#10;optional.lib&#10;expat.lib&#10;zlib.lib&#10;portmidi.lib&#10;flac.lib&#10;7z.lib&#10;softfloat.lib&#10;softfloat3.lib&#10;utf8proc.lib&#10;jpeg.lib&#10;sqlite3.lib&#10;zstd.lib&#10;formats.lib&#10;dasm.lib&#10;portaudio.lib&#10;lua.lib&#10;lualibs.lib&#10;asmjit.lib&#10;bgfx.lib&#10;bimg.lib&#10;bx.lib&#10;ymfm.lib&#10;wdlfft.lib&#10;linenoise.lib&#10;qtdbg_windows.lib&#10;osd_windows.lib&#10;ws2_32.lib&#10;winmm.lib&#10;dinput8.lib&#10;dxguid.lib&#10;opengl32.lib&#10;dsound.lib&#10;xinput.lib&#10;ws2_32.lib&#10;comctl32.lib&#10;shlwapi.lib"
+            extraDefs="ASIO_STANDALONE=1" extraCompilerFlags="/Ot /Oi /arch:AVX1 /fp:fast /Ob2"
+            windowsTargetPlatformVersion="10.0">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="0" name="Release" headerPath="C:\mame\src&#10;C:\mame\src\frontend\mame&#10;C:\mame\src\emu&#10;C:\mame\src\osd&#10;C:\mame\src\lib&#10;C:\mame\src\lib\util&#10;C:\mame\src\osd\modules\render&#10;C:\mame\3rdparty&#10;C:\mame\3rdparty\asio\include"
+                       libraryPath="C:\mame\build\vs2022\bin\x64\Release&#10;C:\mame\build\vs2022\bin\x64\Release\mame_sd132"
+                       winWarningLevel="2" warningsAreErrors="0" useRuntimeLibDLL="0"
+                       linkTimeOptimisation="1" intrinsicFunctions="1" optimisation="4"
+                       targetName="Ensoniq SD-1 AVX1" binaryPath="build\AVX1"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_audio_basics" path="../../juce"/>
+        <MODULEPATH id="juce_audio_devices" path="../../juce"/>
+        <MODULEPATH id="juce_audio_formats" path="../../juce"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../../juce"/>
+        <MODULEPATH id="juce_audio_processors" path="../../juce"/>
+        <MODULEPATH id="juce_audio_processors_headless" path="../../juce"/>
+        <MODULEPATH id="juce_audio_utils" path="../../juce"/>
+        <MODULEPATH id="juce_core" path="../../juce"/>
+        <MODULEPATH id="juce_data_structures" path="../../juce"/>
+        <MODULEPATH id="juce_events" path="../../juce"/>
+        <MODULEPATH id="juce_graphics" path="../../juce"/>
+        <MODULEPATH id="juce_gui_basics" path="../../juce"/>
+        <MODULEPATH id="juce_gui_extra" path="../../juce"/>
+        <MODULEPATH id="juce_midi_ci" path="../../juce"/>
+        <MODULEPATH id="juce_cryptography" path="../../../../Program Files/JUCE/modules"/>
+      </MODULEPATHS>
+    </VS2026>
+  </EXPORTFORMATS>
+</JUCERPROJECT>

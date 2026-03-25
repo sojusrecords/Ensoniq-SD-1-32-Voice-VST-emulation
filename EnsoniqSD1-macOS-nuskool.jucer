@@ -8,7 +8,7 @@
               pluginName="Ensoniq SD-1" pluginDesc="Ensoniq SD-1 MAME Emu VST"
               pluginManufacturer="EnsoniqMAME" pluginManufacturerCode="Esma"
               pluginCode="SD1A" pluginAUExportPrefix="EnsoniqSD1AU" companyEmail="sjs@sojusrecords.com"
-              pluginAUMainType="'aumu'" cppLanguageStandard="17">
+              pluginAUMainType="'aumu'" cppLanguageStandard="20">
   <MAINGROUP id="OpvzjD" name="Ensoniq SD-1">
     <GROUP id="{B55D6966-246C-C5C4-DBF6-55CB66D6CDB4}" name="Resources">
       <FILE id="fhfkAt" name="q.svg" compile="0" resource="1" file="Source/q.svg"/>
@@ -67,11 +67,11 @@
                customXcodeResourceFolders="/Users/csabibab/Documents/MameVfxDev/mame/plugins"
                xcodeValidArchs="arm64,x86_64" extraLinkerFlags="-Wl,-rpath,/Library/Frameworks -Wl,-rpath,@loader_path/../Frameworks -framework SDL2 -framework SDL3"
                postbuildCommand="# The copy operation only runs if the VST3, App, or AU is actually being built (not the Shared Code)&#10;if [[ &quot;$FULL_PRODUCT_NAME&quot; == *.vst3 ]] || [[ &quot;$FULL_PRODUCT_NAME&quot; == *.app ]] || [[ &quot;$FULL_PRODUCT_NAME&quot; == *.component ]]; then&#10;&#10;    echo &quot;Let's package the SDL Frameworks here: $FULL_PRODUCT_NAME&quot;&#10;    FRAMEWORKS_DIR=&quot;$TARGET_BUILD_DIR/$FULL_PRODUCT_NAME/Contents/Frameworks&quot;&#10;    &#10;    # 1. Create the Frameworks directory inside the bundle&#10;    mkdir -p &quot;$FRAMEWORKS_DIR&quot;&#10;&#10;    # 2. Copy SDL3 and SDL2 as well&#10;    cp -R &quot;/Library/Frameworks/SDL3.framework&quot; &quot;$FRAMEWORKS_DIR/&quot;&#10;    if [ -d &quot;/Library/Frameworks/SDL2.framework&quot; ]; then&#10;        cp -R &quot;/Library/Frameworks/SDL2.framework&quot; &quot;$FRAMEWORKS_DIR/&quot;&#10;    fi&#10;&#10;    # 3. Apply the Ad-Hoc signature to the embedded frameworks&#10;    codesign -f -s - &quot;$FRAMEWORKS_DIR/SDL3.framework&quot;&#10;    if [ -d &quot;$FRAMEWORKS_DIR/SDL2.framework&quot; ]; then&#10;        codesign -f -s - &quot;$FRAMEWORKS_DIR/SDL2.framework&quot;&#10;    fi&#10;&#10;    # 4. Re-sign the ENTIRE bundle!&#10;    codesign -f -s - &quot;$TARGET_BUILD_DIR/$FULL_PRODUCT_NAME&quot;&#10;&#10;fi"
-               smallIcon="fhfkAt" bigIcon="fhfkAt" extraDefs="_LIBCPP_AVAILABILITY_HAS_INIT_PRIMARY_EXCEPTION=0">
+               smallIcon="fhfkAt" bigIcon="fhfkAt">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="0" name="Release" targetName="EnsoniqSD1" headerPath="/Users/csabibab/Documents/MameVfxDev/mame/src&#10;/Users/csabibab/Documents/MameVfxDev/mame/src/emu&#10;/Users/csabibab/Documents/MameVfxDev/mame/src/osd&#10;/Users/csabibab/Documents/MameVfxDev/mame/src/lib&#10;/Users/csabibab/Documents/MameVfxDev/mame/src/lib/util&#10;/Users/csabibab/Documents/MameVfxDev/mame/src/frontend/mame&#10;/Users/csabibab/Documents/MameVfxDev/mame/3rdparty/bx/include"
                        libraryPath="/Users/csabibab/Documents/MameVfxDev/mame/build/osx_clang/bin/x64/Release/mame_mame&#10;/Users/csabibab/Documents/MameVfxDev/mame/build/osx_clang/bin/x64/Release&#10;/usr/local/lib"
-                       macOSDeploymentTarget="11.00" osxCompatibility="11.00 SDK" linkTimeOptimisation="0"
+                       macOSDeploymentTarget="10.14" osxCompatibility="10.14 SDK" linkTimeOptimisation="0"
                        customXcodeFlags="DEAD_CODE_STRIPPING = NO"/>
       </CONFIGURATIONS>
       <MODULEPATHS>

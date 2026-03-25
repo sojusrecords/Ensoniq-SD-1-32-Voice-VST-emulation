@@ -54,7 +54,7 @@ Instead of building a standalone static library, we build the standard MAME exec
 
 ## Step 3: Configuring Projucer
 
-1. Open EnsoniqSD1-yourOS.jucer using the Projucer application.
+1. Open EnsoniqSD1-yourOS.jucer using the Projucer application. If you want to build for older OSes or computers: you can choose C++17 version for older macOS versions (EnsoniqSD1-macOS-oldskool) or AVX1 optimized version for Windows (EnsoniqSD1-WIN-oldskool-AVX1)
 
 2. Go to the Exporters tab (e.g., Xcode macOS or Visual Studio 2026).
 

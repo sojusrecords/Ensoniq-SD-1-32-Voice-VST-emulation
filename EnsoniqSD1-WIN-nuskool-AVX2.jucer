@@ -62,7 +62,8 @@
         <CONFIGURATION isDebug="0" name="Release" headerPath="C:\mame\src&#10;C:\mame\src\frontend\mame&#10;C:\mame\src\emu&#10;C:\mame\src\osd&#10;C:\mame\src\lib&#10;C:\mame\src\lib\util&#10;C:\mame\src\osd\modules\render&#10;C:\mame\3rdparty&#10;C:\mame\3rdparty\asio\include"
                        libraryPath="C:\mame\build\vs2022\bin\x64\Release&#10;C:\mame\build\vs2022\bin\x64\Release\mame_sd132"
                        winWarningLevel="2" warningsAreErrors="0" useRuntimeLibDLL="0"
-                       linkTimeOptimisation="1" intrinsicFunctions="1" optimisation="4"/>
+                       linkTimeOptimisation="1" intrinsicFunctions="1" optimisation="4"
+                       targetName="Ensoniq SD-1"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_audio_basics" path="../../juce"/>

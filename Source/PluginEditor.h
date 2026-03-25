@@ -41,7 +41,7 @@ private:
     // Global settings
     void saveGlobalSettings();
     
-    juce::TextButton loadMediaButton { "Load Floppy/Cartridge/SYX" };
+    juce::TextButton loadMediaButton { "Load Floppy/Cart/SYX" };
     std::unique_ptr<juce::FileChooser> fileChooser;
     void loadMediaButtonClicked();
 

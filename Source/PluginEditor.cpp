@@ -479,7 +479,7 @@ void EnsoniqSD1AudioProcessorEditor::loadMediaButtonClicked()
 {
     fileChooser = std::make_unique<juce::FileChooser>("Select Floppy Image, Cartridge or SYS-EX file",
         juce::File::getSpecialLocation(juce::File::userHomeDirectory),
-        "*.img;*.hfe;*.dsk;*.eda;*.crt;*.bin;*.syx");
+        "*.img;*.hfe;*.dsk;*.eda;*.syx;*.eeprom;*.rom;*.cart");
 
     auto folderChooserFlags = juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles;
 
@@ -518,18 +518,18 @@ void EnsoniqSD1AudioProcessorEditor::loadMediaButtonClicked()
                         #endif
                                         audioProcessor.loadedMediaName = file.getFileName();
 
-                                        if (file.getFileExtension().toLowerCase() == ".crt" || file.getFileExtension().toLowerCase() == ".bin") {
-                                            audioProcessor.pendingCartPath = audioProcessor.pendingFloppyPath;
-                                            audioProcessor.requestCartLoad.store(true, std::memory_order_release);
-                                            
-                                            audioProcessor.isCartLoaded.store(true, std::memory_order_release);
-                                            audioProcessor.isFloppyLoaded.store(false, std::memory_order_release);
-                                        } else {
-                                            audioProcessor.requestFloppyLoad.store(true, std::memory_order_release);
-                                            
-                                            audioProcessor.isFloppyLoaded.store(true, std::memory_order_release);
-                                            audioProcessor.isCartLoaded.store(false, std::memory_order_release);
-                                        }
+                            juce::String ext = file.getFileExtension().toLowerCase();
+
+                            if (ext == ".eeprom" || ext == ".rom" || ext == ".cart") {
+                                audioProcessor.pendingCartPath = audioProcessor.pendingFloppyPath;
+                                audioProcessor.requestCartLoad.store(true, std::memory_order_release);
+                                audioProcessor.isCartLoaded.store(true, std::memory_order_release);
+                                audioProcessor.isFloppyLoaded.store(false, std::memory_order_release);
+                            } else {
+                                audioProcessor.requestFloppyLoad.store(true, std::memory_order_release);
+                                audioProcessor.isFloppyLoaded.store(true, std::memory_order_release);
+                                audioProcessor.isCartLoaded.store(false, std::memory_order_release);
+                            }
                                         
                                         repaint();
                                     }

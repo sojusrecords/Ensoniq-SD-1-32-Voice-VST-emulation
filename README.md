@@ -31,7 +31,7 @@ Everything. Check the original manual here: [SD-1 Manual at Polynominal](https:/
 - 4 different panel layouts with resizable GUI and VFD display
 - Buffer setting
 - 4 outputs: stereo main out, optional stereo aux (dry signal with no effects)
-- Can load all compatible VFX/VFX-SD/SD1-24/SD1-32 disk images and cartridges (.img .bin .crt etc)
+- Can load all compatible VFX/VFX-SD/SD1-24/SD1-32 disk images (.img, .hfe, .dsk, .eda) and cartridges (.eeprom, .rom, .cart)
   - How to load: Attach the disk image using the "Load Floppy/Cartridge" button. Press Storage, then select DISK. Press LOAD. The display will show the Disk Load page with the File Type selected. Move the data entry slider to select your file.
 
 # Known limitations
@@ -48,12 +48,12 @@ Everything. Check the original manual here: [SD-1 Manual at Polynominal](https:/
 
 # Requirements
 - Please note that this is a hardware-level emulation of the synthesizer, so it places **heavy demands on the CPU!** Set the buffer setting to higher if buffer underrun occurs.
-- Windows 10 or newer or macOS 10.14 (Mojave) or newer.
-- Windows build is AVX2 optimized (Haswell or newer).
+- Windows 10 or newer or macOS 11 Big Sur or newer. As MAME itself cannot be compiled lower than Big Sur (macOS 11) this is the minimum OS for mac. If your Mac is stuck on an older OS, my suggestion is to try OpenCore Legacy Patcher to update your Mac to a compatible OS.
+- Windows build is AVX1 or AVX2 optimized.
 - A VST3 compatible DAW. If it's not working, come back later :)
   - Tested and working:
     - macOS: Ableton Live 12, Bitwig Studio 6, Cubase 15, Fender Studio Pro 8, FL Studio 2025, Reaper 7.
-    - Windows: Ableton Live 12, Bitwig Studio 6, Cubase 15, FL Studio 2025, Reaper 7.
+    - Windows: Ableton Live 12, Bitwig Studio 6, Cubase 15, FL Studio 2025, Reaper 7, Cantabile.
   - Working but wav render is wrong: Reason 12 (Windows)
   - If it's not working for you check [Troubleshooting](#Troubleshooting).
 - IMPORTANT - ROM Files Required!<br/>
@@ -109,11 +109,11 @@ Step-by-step:
 
   - You will see a "Transmitting Sys-Ex Data..." overlay on the screen. Once the overlay disappears, the synth will instantly update its RAM, and your presets will be ready to play!
 
-  - You can also save the presets to a disk image. Here you can find an [SD-1 formatted empty disk image.](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/blob/main/SD-1-EMPTY-DISK.img)
+  - You can also save the presets to a disk image. Here you can find an [SD-1 formatted empty disk image.](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/blob/main/SD-1-EMPTY-DISK.img) or an [empty writeable 32K SD-1 cartridge.](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/blob/main/SD-1-EMPTY-REWRITEABLE-CARTRIDGE.eeprom)
 </details>
 
 <details>
-  <summary>How do I load Floppy Disk Images (.img etc.) or Cartridges (.crt etc.)?</summary>
+  <summary>How do I load Floppy Disk Images (.img, .hfe, .dsk, .eda) or Cartridges (.eeprom, .rom, .cart)?</summary>
 
    - Click the Load Media button on the left side of the plugin and select your file.
     Once loaded, a small green retro LED indicator will appear in the bottom-left corner of the VFD display showing ```FLOPPY: yourfile.img``` or ```CART: yourfile.crt```.

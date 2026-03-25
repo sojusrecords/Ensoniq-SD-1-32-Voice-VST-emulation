@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<JUCERPROJECT id="Oippeb" name="Ensoniq SD-1" projectType="audioplug" useAppConfig="0"
+              addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1" bundleIdentifier="com.sojusrecords.EnsoniqSD1"
+              companyWebsite="www.sojusrecords.com" companyCopyright="Open Source"
+              companyName="EnsoniqMAME" pluginCharacteristicsValue="pluginIsSynth,pluginWantsMidiIn"
+              pluginFormats="buildAU,buildStandalone,buildVST3" version="0.9.7"
+              pluginName="Ensoniq SD-1" pluginDesc="Ensoniq SD-1 MAME Emu VST"
+              pluginManufacturer="EnsoniqMAME" pluginManufacturerCode="Esma"
+              pluginCode="SD1A" pluginAUExportPrefix="EnsoniqSD1AU" companyEmail="sjs@sojusrecords.com"
+              pluginAUMainType="'aumu'" cppLanguageStandard="20">
+  <MAINGROUP id="OpvzjD" name="Ensoniq SD-1">
+    <GROUP id="{B55D6966-246C-C5C4-DBF6-55CB66D6CDB4}" name="Resources">
+      <FILE id="fhfkAt" name="q.svg" compile="0" resource="1" file="Source/q.svg"/>
+      <FILE id="vH7VVm" name="cart.svg" compile="0" resource="1" file="Source/cart.svg"/>
+      <FILE id="ADy8If" name="floppy.svg" compile="0" resource="1" file="Source/floppy.svg"/>
+      <FILE id="JROKEE" name="labels_tablet.png" compile="0" resource="1"
+            file="Source/labels_tablet.png"/>
+      <FILE id="V7wOZL" name="labels_rack.png" compile="0" resource="1" file="Source/labels_rack.png"/>
+      <FILE id="TcIvwn" name="labels_compact.png" compile="0" resource="1"
+            file="Source/labels_compact.png"/>
+      <FILE id="UmoBTy" name="labels_full.png" compile="0" resource="1" file="Source/labels_full.png"/>
+    </GROUP>
+    <GROUP id="{3F88782C-AB7D-82EE-F4B6-16FDEB0AE012}" name="Source">
+      <FILE id="IWhokv" name="PluginProcessor.cpp" compile="1" resource="0"
+            file="Source/PluginProcessor.cpp"/>
+      <FILE id="YhSlmb" name="PluginProcessor.h" compile="0" resource="0"
+            file="Source/PluginProcessor.h"/>
+      <FILE id="fNCSn0" name="PluginEditor.cpp" compile="1" resource="0"
+            file="Source/PluginEditor.cpp"/>
+      <FILE id="Z6Wmy3" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
+    </GROUP>
+  </MAINGROUP>
+  <MODULES>
+    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_plugin_client" showAllCode="1" useLocalCopy="0"
+            useGlobalPath="1"/>
+    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_processors_headless" showAllCode="1" useLocalCopy="0"
+            useGlobalPath="1"/>
+    <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_cryptography" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_events" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_midi_ci" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+  </MODULES>
+  <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_VST3_CAN_REPLACE_VST2="0"
+               JUCE_USE_FLAC="0" JUCE_WEB_BROWSER="0"/>
+  <EXPORTFORMATS>
+    <LINUX_MAKE targetFolder="Builds/LinuxMakefile" externalLibraries="frontend&#10;emu&#10;mame_sd132&#10;optional&#10;formats&#10;dasm&#10;emu&#10;mame_sd132&#10;optional&#10;formats&#10;dasm&#10;osd_sdl3&#10;qtdbg_sdl3&#10;ocore_sdl3&#10;utils&#10;lua&#10;lualibs&#10;expat&#10;zlib&#10;flac&#10;portaudio&#10;portmidi&#10;jpeg&#10;7z&#10;zstd&#10;utf8proc&#10;sqlite3&#10;asmjit&#10;bgfx&#10;bimg&#10;bx&#10;softfloat&#10;softfloat3&#10;ymfm&#10;wdlfft&#10;linenoise&#10;SDL3&#10;SDL2"
+                extraLinkerFlags="-Wl,--allow-multiple-definition" smallIcon="fhfkAt"
+                bigIcon="fhfkAt">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="0" name="Release" targetName="EnsoniqSD1" headerPath="../../mame/src&#10;../../mame/src/frontend/mame&#10;../../mame/src/emu&#10;../../mame/src/osd&#10;../../mame/src/lib&#10;../../mame/src/lib/util&#10;../../mame/3rdparty&#10;../../mame/3rdparty/bx/include&#10;../../mame/3rdparty/asio/include"
+                       libraryPath="../../mame/build/linux_gcc/bin/x64/Release&#10;../../mame/build/linux_gcc/bin/x64/Release/mame_sd132&#10;../../mame/build/linux_gcc/bin/x64/Release/mame_mame"
+                       linkTimeOptimisation="0" optimisation="3"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_audio_basics" path="../../juce"/>
+        <MODULEPATH id="juce_audio_devices" path="../../juce"/>
+        <MODULEPATH id="juce_audio_formats" path="../../juce"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../../juce"/>
+        <MODULEPATH id="juce_audio_processors" path="../../juce"/>
+        <MODULEPATH id="juce_audio_processors_headless" path="../../juce"/>
+        <MODULEPATH id="juce_audio_utils" path="../../juce"/>
+        <MODULEPATH id="juce_core" path="../../juce"/>
+        <MODULEPATH id="juce_data_structures" path="../../juce"/>
+        <MODULEPATH id="juce_events" path="../../juce"/>
+        <MODULEPATH id="juce_graphics" path="../../juce"/>
+        <MODULEPATH id="juce_gui_basics" path="../../juce"/>
+        <MODULEPATH id="juce_gui_extra" path="../../juce"/>
+        <MODULEPATH id="juce_midi_ci" path="../../juce"/>
+        <MODULEPATH id="juce_cryptography" path="../../juce"/>
+      </MODULEPATHS>
+    </LINUX_MAKE>
+  </EXPORTFORMATS>
+</JUCERPROJECT>
