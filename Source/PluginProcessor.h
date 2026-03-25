@@ -82,7 +82,7 @@ public:
     std::atomic<bool> mameHasStarted{ false };
     std::atomic<double> initialSampleRate{ 0.0 };
     std::atomic<bool> sampleRateMismatch{ false };
-
+    
     // --- SINGLE INSTANCE PROTECTION ---
     // MAME's architecture inherently limits it to a single running instance per process.
     // We must track this to disable additional VST instances in the DAW gracefully.
@@ -328,6 +328,7 @@ private:
 
     // --- Timestamped MIDI ---
     std::atomic<bool> needAnchorSync{ true };
+    std::atomic<bool> prepareWasCalled{ false }; // NEW: Prevents Logic AU double-reset
     std::atomic<double> anchorMameTime{ 0.0 };
     std::atomic<uint64_t> anchorDawSample{ 0 };
 
