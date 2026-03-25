@@ -44,12 +44,13 @@ jobs:
         version-sdl-ttf: 3-latest
         version-sdl-image: 3-latest
 
-    - name: MAME Cache beállítása
+    - name: MAME Cache Setup
       id: cache-mame
       uses: actions/cache@v4
       with:
         path: mame
         key: mame-0286-${{ matrix.name }}-${{ hashFiles('Mame_Patches/**') }}
+        save-always: true
 
     - name: Clone MAME v0.286 source code
       # Clone MAME inside the workspace so relative paths in Projucer (like ../../mame/src) work perfectly
@@ -90,8 +91,8 @@ jobs:
       run: |
         cd Builds/LinuxMakefile
 
-        echo 'JUCE_CPPFLAGS += -I../../juce/modules -I../../juce/modules/juce_audio_processors/format_types/VST3_SDK' >> Makefile
-        echo 'CXXFLAGS += ${{ matrix.compiler_flags }}' >> Makefile
+        sed -i 's/JUCE_CPPFLAGS := /JUCE_CPPFLAGS := -I..\/..\/juce\/modules\/juce_audio_processors\/format_types\/VST3_SDK /g' Makefile
+        sed -i 's/JUCE_CXXFLAGS += /JUCE_CXXFLAGS += ${{ matrix.compiler_flags }} /g' Makefile
         export PKG_CONFIG_PATH=${{ steps.sdl.outputs.prefix }}/lib/pkgconfig:$PKG_CONFIG_PATH
         
         make CONFIG=Release -j$(nproc)
