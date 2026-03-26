@@ -34,12 +34,12 @@ jobs:
              libsdl2-dev libsdl2-ttf-dev libfontconfig1-dev python3 pkg-config \
              qtbase5-dev qt5-qmake qtbase5-dev-tools
 
-    - name: Create Swap Space (Prevent OOM)
+    - name: Create Extra Swap Space
       run: |
-        sudo dd if=/dev/zero of=/swapfile bs=1M count=8192 status=progress
-        sudo chmod 600 /swapfile
-        sudo mkswap /swapfile
-        sudo swapon /swapfile
+        sudo fallocate -l 8G /swapfile_extra
+        sudo chmod 600 /swapfile_extra
+        sudo mkswap /swapfile_extra
+        sudo swapon /swapfile_extra
         free -m
 
     - name: Install SDL3
