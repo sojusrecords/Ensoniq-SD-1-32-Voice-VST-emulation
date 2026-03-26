@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="Oippeb" name="Ensoniq SD-1" projectType="audioplug" useAppConfig="0"
               addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1" bundleIdentifier="com.sojusrecords.EnsoniqSD1"
-              companyWebsite="www.sojusrecords.com" companyCopyright="Open Source"
+              companyWebsite="www.sojusrecords.com" companyCopyright="Open Source GPLv2/v3"
               companyName="EnsoniqMAME" pluginCharacteristicsValue="pluginIsSynth,pluginWantsMidiIn"
               pluginFormats="buildAU,buildStandalone,buildVST3" version="0.9.7"
               pluginName="Ensoniq SD-1" pluginDesc="Ensoniq SD-1 MAME Emu VST"
@@ -62,21 +62,21 @@
                        linkTimeOptimisation="0" optimisation="3"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
-        <MODULEPATH id="juce_audio_basics" path="../../juce"/>
-        <MODULEPATH id="juce_audio_devices" path="../../juce"/>
-        <MODULEPATH id="juce_audio_formats" path="../../juce"/>
-        <MODULEPATH id="juce_audio_plugin_client" path="../../juce"/>
-        <MODULEPATH id="juce_audio_processors" path="../../juce"/>
-        <MODULEPATH id="juce_audio_processors_headless" path="../../juce"/>
-        <MODULEPATH id="juce_audio_utils" path="../../juce"/>
-        <MODULEPATH id="juce_core" path="../../juce"/>
-        <MODULEPATH id="juce_data_structures" path="../../juce"/>
-        <MODULEPATH id="juce_events" path="../../juce"/>
-        <MODULEPATH id="juce_graphics" path="../../juce"/>
-        <MODULEPATH id="juce_gui_basics" path="../../juce"/>
-        <MODULEPATH id="juce_gui_extra" path="../../juce"/>
-        <MODULEPATH id="juce_midi_ci" path="../../juce"/>
-        <MODULEPATH id="juce_cryptography" path="../../juce"/>
+        <MODULEPATH id="juce_audio_basics" path="../../juce/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../juce/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../juce/modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../../juce/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../juce/modules"/>
+        <MODULEPATH id="juce_audio_processors_headless" path="../../juce/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../juce/modules"/>
+        <MODULEPATH id="juce_core" path="../../juce/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../juce/modules"/>
+        <MODULEPATH id="juce_events" path="../../juce/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../juce/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../juce/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../juce/modules"/>
+        <MODULEPATH id="juce_midi_ci" path="../../juce/modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../juce/modules"/>
       </MODULEPATHS>
     </LINUX_MAKE>
   </EXPORTFORMATS>
