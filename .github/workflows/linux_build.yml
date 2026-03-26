@@ -76,10 +76,16 @@ jobs:
       run: |
         cd mame
         export PKG_CONFIG_PATH=${{ steps.sdl.outputs.prefix }}/lib/pkgconfig:$PKG_CONFIG_PATH
+        
+        export C_INCLUDE_PATH="${{ steps.sdl.outputs.prefix }}/include"
+        export CPLUS_INCLUDE_PATH="${{ steps.sdl.outputs.prefix }}/include"
+        
+        ls -la ${{ steps.sdl.outputs.prefix }}/include || true
+        
         make SUBTARGET=sd132 SOURCES=src/mame/ensoniq/esq5505.cpp \
              OSD=sdl3 \
              USE_QTDEBUG=0 REGENIE=1 NO_USE_BGFX=1 \
-             OPT_FLAGS="${{ matrix.compiler_flags }} -I${{ steps.sdl.outputs.prefix }}/include" -j$(nproc)
+             OPT_FLAGS="${{ matrix.compiler_flags }}" -j$(nproc)
 
     - name: Save MAME cache
       if: steps.cache-mame.outputs.cache-hit != 'true'
