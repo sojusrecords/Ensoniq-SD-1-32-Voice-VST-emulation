@@ -34,6 +34,14 @@ jobs:
              libsdl2-dev libsdl2-ttf-dev libfontconfig1-dev python3 pkg-config \
              qtbase5-dev qt5-qmake qtbase5-dev-tools
 
+    - name: Create Swap Space (Prevent OOM)
+      run: |
+        sudo fallocate -l 8G /swapfile
+        sudo chmod 600 /swapfile
+        sudo mkswap /swapfile
+        sudo swapon /swapfile
+        free -m
+
     - name: Install SDL3
       uses: libsdl-org/setup-sdl@main
       id: sdl
