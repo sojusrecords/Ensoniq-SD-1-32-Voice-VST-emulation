@@ -14,14 +14,12 @@ env:
 jobs:
 
   # -------------------------------------------------------------------
-  # Job 1: Build SDL3 once and cache it.
-  # Runs independently of the matrix so both build variants share one
-  # SDL3 build and there is no cache key collision between parallel jobs.
+  # Job 1: Build SDL3 once, cache it. No matrix — runs once.
   # -------------------------------------------------------------------
   build-sdl3:
     runs-on: ubuntu-24.04
     steps:
-    - name: Install cmake and SDL3 build dependencies
+    - name: Install build dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y build-essential cmake \
@@ -82,24 +80,15 @@ jobs:
 
     - name: Verify SDL3 pkg-config
       run: |
-        PKG_CONFIG_PATH=$GITHUB_WORKSPACE/sdl3-install/lib/pkgconfig \
-          pkg-config --modversion sdl3 sdl3-ttf sdl3-image
+        export PKG_CONFIG_PATH=$GITHUB_WORKSPACE/sdl3-install/lib/pkgconfig
+        pkg-config --modversion sdl3 sdl3-ttf sdl3-image
 
   # -------------------------------------------------------------------
-  # Job 2: Build MAME + JUCE VST3 (matrix: Generic and AVX2).
-  # Depends on build-sdl3 so SDL3 cache is always warm before this runs.
+  # Job 2: Generic build. Depends on SDL3 job.
   # -------------------------------------------------------------------
-  build-linux-vst3:
+  build-generic:
     runs-on: ubuntu-24.04
     needs: build-sdl3
-
-    strategy:
-      matrix:
-        include:
-          - name: "Generic"
-            compiler_flags: ""
-          - name: "AVX2"
-            compiler_flags: "-mavx2"
 
     steps:
     - name: Checkout repository
@@ -125,18 +114,16 @@ jobs:
     - name: Export SDL3 paths
       run: |
         SDL3_PREFIX=$GITHUB_WORKSPACE/sdl3-install
-        echo "SDL3_PREFIX=$SDL3_PREFIX"                                        >> $GITHUB_ENV
-        echo "PKG_CONFIG_PATH=$SDL3_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH"    >> $GITHUB_ENV
-        echo "LD_LIBRARY_PATH=$SDL3_PREFIX/lib:$LD_LIBRARY_PATH"              >> $GITHUB_ENV
-        pkg-config --variable=prefix sdl3
-        pkg-config --variable=prefix sdl3-ttf
+        echo "SDL3_PREFIX=$SDL3_PREFIX" >> $GITHUB_ENV
+        echo "PKG_CONFIG_PATH=$SDL3_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH" >> $GITHUB_ENV
+        echo "LD_LIBRARY_PATH=$SDL3_PREFIX/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
 
     - name: Restore MAME cache
       id: cache-mame
       uses: actions/cache/restore@v4
       with:
         path: mame
-        key: mame-0286-${{ matrix.name }}-${{ hashFiles('Mame_Patches/**') }}
+        key: mame-0286-Generic-${{ hashFiles('Mame_Patches/**') }}
 
     - name: Clone MAME v0.286
       if: steps.cache-mame.outputs.cache-hit != 'true'
@@ -156,20 +143,20 @@ jobs:
         cp Mame_Patches/ui.cpp      mame/src/frontend/mame/ui/ui.cpp
         cp Mame_Patches/sd132.lay   mame/src/mame/layout/sd132.lay
 
-    - name: Compile MAME sd132 (${{ matrix.name }})
+    - name: Compile MAME sd132 (Generic)
       if: steps.cache-mame.outputs.cache-hit != 'true'
       run: |
         cd mame
         make SUBTARGET=sd132 SOURCES=src/mame/ensoniq/esq5505.cpp \
              OSD=sdl3 USE_QTDEBUG=0 REGENIE=1 NO_USE_BGFX=1 \
-             OPT_FLAGS="${{ matrix.compiler_flags }}" -j$(nproc)
+             -j$(nproc)
 
     - name: Save MAME cache
       if: steps.cache-mame.outputs.cache-hit != 'true'
       uses: actions/cache/save@v4
       with:
         path: mame
-        key: mame-0286-${{ matrix.name }}-${{ hashFiles('Mame_Patches/**') }}
+        key: mame-0286-Generic-${{ hashFiles('Mame_Patches/**') }}
 
     - name: Build Projucer
       run: |
@@ -182,26 +169,130 @@ jobs:
         sed -i 's|<MODULEPATH id="\([^"]*\)" path="[^"]*"/>|<MODULEPATH id="\1" path="juce/modules"/>|g' EnsoniqSD1-LINUX.jucer
         sed -i 's/pluginFormats="[^"]*"/pluginFormats="buildVST3"/' EnsoniqSD1-LINUX.jucer
         sed -i 's/qtdbg_sdl3&#10;//g' EnsoniqSD1-LINUX.jucer
-        echo "Patched values:"
-        grep -E 'useGlobalPath|MODULEPATH|pluginFormats|externalLibraries' EnsoniqSD1-LINUX.jucer | head -20
 
     - name: Regenerate JuceLibraryCode via Projucer
       run: |
         juce/extras/Projucer/Builds/LinuxMakefile/build/Projucer \
           --resave EnsoniqSD1-LINUX.jucer
-        echo "JuceLibraryCode contents:"
         ls -l JuceLibraryCode/
 
-    - name: Compile JUCE VST3 (${{ matrix.name }})
+    - name: Compile JUCE VST3 (Generic)
       run: |
         cd Builds/LinuxMakefile
         make CONFIG=Release \
-             CXXFLAGS="${{ matrix.compiler_flags }} -I${{ env.SDL3_PREFIX }}/include" \
+             CXXFLAGS="-I${{ env.SDL3_PREFIX }}/include" \
              LDFLAGS="-L${{ env.SDL3_PREFIX }}/lib -Wl,-rpath,${{ env.SDL3_PREFIX }}/lib" \
              -j$(nproc)
 
-    - name: Upload VST3 artifact (${{ matrix.name }})
+    - name: Upload VST3 artifact (Generic)
       uses: actions/upload-artifact@v4
       with:
-        name: Ensoniq_SD1_Linux_VST3_${{ matrix.name }}
+        name: Ensoniq_SD1_Linux_VST3_Generic
+        path: Builds/LinuxMakefile/build/*.vst3
+
+  # -------------------------------------------------------------------
+  # Job 3: AVX2 build. Only runs if Generic succeeded.
+  # -------------------------------------------------------------------
+  build-avx2:
+    runs-on: ubuntu-24.04
+    needs: build-generic
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential ninja-build cmake \
+             libasound2-dev libx11-dev libxinerama-dev libxext-dev \
+             libfreetype6-dev libwebkit2gtk-4.1-dev libglu1-mesa-dev \
+             libxrandr-dev libxcursor-dev curl libcurl4-openssl-dev \
+             libfontconfig1-dev python3 pkg-config \
+             libharfbuzz-dev libpng-dev libjpeg-dev \
+             qtbase5-dev qt5-qmake qtbase5-dev-tools
+
+    - name: Restore SDL3 cache
+      uses: actions/cache/restore@v4
+      with:
+        path: sdl3-install
+        key: sdl3-ubuntu24-${{ env.SDL3_VERSION }}
+
+    - name: Export SDL3 paths
+      run: |
+        SDL3_PREFIX=$GITHUB_WORKSPACE/sdl3-install
+        echo "SDL3_PREFIX=$SDL3_PREFIX" >> $GITHUB_ENV
+        echo "PKG_CONFIG_PATH=$SDL3_PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH" >> $GITHUB_ENV
+        echo "LD_LIBRARY_PATH=$SDL3_PREFIX/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
+
+    - name: Restore MAME cache (AVX2)
+      id: cache-mame
+      uses: actions/cache/restore@v4
+      with:
+        path: mame
+        key: mame-0286-AVX2-${{ hashFiles('Mame_Patches/**') }}
+
+    - name: Clone MAME v0.286
+      if: steps.cache-mame.outputs.cache-hit != 'true'
+      run: |
+        git clone --depth 1 --branch mame0286 \
+          https://github.com/mamedev/mame.git mame
+
+    - name: Clone JUCE 8.0.12
+      run: |
+        git clone --depth 1 --branch 8.0.12 \
+          https://github.com/juce-framework/JUCE.git juce
+
+    - name: Apply MAME patches
+      if: steps.cache-mame.outputs.cache-hit != 'true'
+      run: |
+        cp Mame_Patches/esq5505.cpp mame/src/devices/sound/esq5505.cpp
+        cp Mame_Patches/ui.cpp      mame/src/frontend/mame/ui/ui.cpp
+        cp Mame_Patches/sd132.lay   mame/src/mame/layout/sd132.lay
+
+    - name: Compile MAME sd132 (AVX2)
+      if: steps.cache-mame.outputs.cache-hit != 'true'
+      run: |
+        cd mame
+        make SUBTARGET=sd132 SOURCES=src/mame/ensoniq/esq5505.cpp \
+             OSD=sdl3 USE_QTDEBUG=0 REGENIE=1 NO_USE_BGFX=1 \
+             OPT_FLAGS="-mavx2" -j$(nproc)
+
+    - name: Save MAME cache (AVX2)
+      if: steps.cache-mame.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v4
+      with:
+        path: mame
+        key: mame-0286-AVX2-${{ hashFiles('Mame_Patches/**') }}
+
+    - name: Build Projucer
+      run: |
+        cd juce/extras/Projucer/Builds/LinuxMakefile
+        make CONFIG=Release -j$(nproc)
+
+    - name: Patch .jucer for CI
+      run: |
+        sed -i 's/useGlobalPath="1"/useGlobalPath="0"/g' EnsoniqSD1-LINUX.jucer
+        sed -i 's|<MODULEPATH id="\([^"]*\)" path="[^"]*"/>|<MODULEPATH id="\1" path="juce/modules"/>|g' EnsoniqSD1-LINUX.jucer
+        sed -i 's/pluginFormats="[^"]*"/pluginFormats="buildVST3"/' EnsoniqSD1-LINUX.jucer
+        sed -i 's/qtdbg_sdl3&#10;//g' EnsoniqSD1-LINUX.jucer
+
+    - name: Regenerate JuceLibraryCode via Projucer
+      run: |
+        juce/extras/Projucer/Builds/LinuxMakefile/build/Projucer \
+          --resave EnsoniqSD1-LINUX.jucer
+        ls -l JuceLibraryCode/
+
+    - name: Compile JUCE VST3 (AVX2)
+      run: |
+        cd Builds/LinuxMakefile
+        make CONFIG=Release \
+             CXXFLAGS="-mavx2 -I${{ env.SDL3_PREFIX }}/include" \
+             LDFLAGS="-L${{ env.SDL3_PREFIX }}/lib -Wl,-rpath,${{ env.SDL3_PREFIX }}/lib" \
+             -j$(nproc)
+
+    - name: Upload VST3 artifact (AVX2)
+      uses: actions/upload-artifact@v4
+      with:
+        name: Ensoniq_SD1_Linux_VST3_AVX2
         path: Builds/LinuxMakefile/build/*.vst3
