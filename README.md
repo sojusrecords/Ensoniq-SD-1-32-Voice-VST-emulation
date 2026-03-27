@@ -19,7 +19,8 @@ We are Sojus Records, one of the longest-running netlabels still active. We are 
   - [Win x64 VST3 W10+](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v0.9.7b2/EnsoniqSD1-v.0.9.7b2-winVST3.7z)
   - [Win x64 VST3 oldskool AVX1 for pre-Haswell machines](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v0.9.7b2/EnsoniqSD1-v.0.9.7b2-winVST3-AVX1.7z)
   - [macOS UB VST3 macOS 11 or newer](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v0.9.7b2/EnsoniqSD1-v.0.9.7b2-macVST3.7z)
-
+  - [Linux experimental builds](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/issues/4)
+  
 # What's working?
 Everything. Check the original manual here: [SD-1 Manual at Polynominal](https://www.polynominal.com/ensoniq-sd1/ensoniq-sd1-manual.pdf)
 
@@ -145,7 +146,7 @@ We are working on it. The AU version is really tricky; we haven't managed to cre
 
 <details>
   <summary>Why there is no Linux build?</summary>
-Maybe in the future, or do it yourself if you can :)
+There is an experimental Linux build to test here: [Linux experimental builds](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/issues/4)
 </details>
 
 # License and credits
