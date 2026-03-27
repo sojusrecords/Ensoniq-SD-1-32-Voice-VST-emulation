@@ -173,8 +173,7 @@ jobs:
         sed -i 's/useGlobalPath="1"/useGlobalPath="0"/g' EnsoniqSD1-LINUX.jucer
         sed -i 's|<MODULEPATH id="\([^"]*\)" path="[^"]*"/>|<MODULEPATH id="\1" path="juce/modules"/>|g' EnsoniqSD1-LINUX.jucer
         sed -i 's/pluginFormats="[^"]*"/pluginFormats="buildVST3"/' EnsoniqSD1-LINUX.jucer
-        # Remove qtdbg (only needed when USE_QTDEBUG=1)
-        sed -i 's/qtdbg_sdl3&#10;//g' EnsoniqSD1-LINUX.jucer
+        sed -i 's/SDL2"/SDL2\&#10;GL\&#10;asound"/' EnsoniqSD1-LINUX.jucer
 
     - name: Regenerate JuceLibraryCode via Projucer
       run: |
@@ -281,8 +280,7 @@ jobs:
         sed -i 's/useGlobalPath="1"/useGlobalPath="0"/g' EnsoniqSD1-LINUX.jucer
         sed -i 's|<MODULEPATH id="\([^"]*\)" path="[^"]*"/>|<MODULEPATH id="\1" path="juce/modules"/>|g' EnsoniqSD1-LINUX.jucer
         sed -i 's/pluginFormats="[^"]*"/pluginFormats="buildVST3"/' EnsoniqSD1-LINUX.jucer
-        # Remove qtdbg (only needed when USE_QTDEBUG=1)
-        sed -i 's/qtdbg_sdl3&#10;//g' EnsoniqSD1-LINUX.jucer
+        sed -i 's/SDL2"/SDL2\&#10;GL\&#10;asound"/' EnsoniqSD1-LINUX.jucer
 
     - name: Regenerate JuceLibraryCode via Projucer
       run: |
