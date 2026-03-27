@@ -1,8 +1,6 @@
 name: Linux VST3 Build
 
 on:
-  push:
-    branches: [ "main", "master" ]
   workflow_dispatch:
 
 env:
