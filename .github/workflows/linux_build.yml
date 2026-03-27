@@ -45,12 +45,12 @@ jobs:
       uses: actions/cache/restore@v4
       with:
         path: sdl3-install
-        key: sdl3-ubuntu24-3.2.10
+        key: sdl3-ubuntu24-3.2.30
 
     - name: Build SDL3 from source
       if: steps.cache-sdl3.outputs.cache-hit != 'true'
       run: |
-        git clone --depth 1 --branch release-3.2.10 \
+        git clone --depth 1 --branch release-3.2.30 \
           https://github.com/libsdl-org/SDL.git sdl3-src
         cmake -S sdl3-src -B sdl3-build \
               -DCMAKE_BUILD_TYPE=Release \
@@ -90,7 +90,7 @@ jobs:
       uses: actions/cache/save@v4
       with:
         path: sdl3-install
-        key: sdl3-ubuntu24-3.2.10
+        key: sdl3-ubuntu24-3.2.30
 
     # Export SDL3 paths once for all subsequent steps via $GITHUB_ENV.
     # PKG_CONFIG_PATH is how MAME's genie/premake finds SDL3 on Linux.
@@ -102,10 +102,10 @@ jobs:
         echo "LD_LIBRARY_PATH=$SDL3_PREFIX/lib:$LD_LIBRARY_PATH"           >> $GITHUB_ENV
         # Verify pkg-config can see SDL3
         PKG_CONFIG_PATH=$SDL3_PREFIX/lib/pkgconfig pkg-config --modversion sdl3
-        PKG_CONFIG_PATH=$SDL3_PREFIX/lib/pkgconfig pkg-config --modversion sdl3-ttf
+        PKG_CONFIG_PATH=$SDL3_PREFIX/lib/pkgconfig pkg-config --modversion SDL3_ttf
 
     # -------------------------------------------------------------------
-    # MAME cache: restore first, save immediately after compile.
+    # MAME cache: restore first, save immediately after compile
     # -------------------------------------------------------------------
     - name: Restore MAME cache
       id: cache-mame
