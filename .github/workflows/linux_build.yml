@@ -84,6 +84,11 @@ jobs:
         pkg-config --modversion sdl3 sdl3-ttf sdl3-image
 
   # -------------------------------------------------------------------
+  # Shared step definitions as a YAML anchor (not supported in GHA —
+  # steps are just duplicated between build-generic and build-avx2).
+  # -------------------------------------------------------------------
+
+  # -------------------------------------------------------------------
   # Job 2: Generic build. Depends on SDL3 job.
   # -------------------------------------------------------------------
   build-generic:
@@ -102,7 +107,7 @@ jobs:
              libfreetype6-dev libwebkit2gtk-4.1-dev libglu1-mesa-dev \
              libxrandr-dev libxcursor-dev curl libcurl4-openssl-dev \
              libfontconfig1-dev python3 pkg-config \
-             libharfbuzz-dev libpng-dev libjpeg-dev libpulse-dev \
+             libharfbuzz-dev libpng-dev libjpeg-dev libpulse-dev libsdl2-dev \
              qtbase5-dev qt5-qmake qtbase5-dev-tools
 
     - name: Restore SDL3 cache
@@ -168,6 +173,7 @@ jobs:
         sed -i 's/useGlobalPath="1"/useGlobalPath="0"/g' EnsoniqSD1-LINUX.jucer
         sed -i 's|<MODULEPATH id="\([^"]*\)" path="[^"]*"/>|<MODULEPATH id="\1" path="juce/modules"/>|g' EnsoniqSD1-LINUX.jucer
         sed -i 's/pluginFormats="[^"]*"/pluginFormats="buildVST3"/' EnsoniqSD1-LINUX.jucer
+        # Remove qtdbg (only needed when USE_QTDEBUG=1)
         sed -i 's/qtdbg_sdl3&#10;//g' EnsoniqSD1-LINUX.jucer
 
     - name: Regenerate JuceLibraryCode via Projucer
@@ -209,7 +215,7 @@ jobs:
              libfreetype6-dev libwebkit2gtk-4.1-dev libglu1-mesa-dev \
              libxrandr-dev libxcursor-dev curl libcurl4-openssl-dev \
              libfontconfig1-dev python3 pkg-config \
-             libharfbuzz-dev libpng-dev libjpeg-dev libpulse-dev \
+             libharfbuzz-dev libpng-dev libjpeg-dev libpulse-dev libsdl2-dev \
              qtbase5-dev qt5-qmake qtbase5-dev-tools
 
     - name: Restore SDL3 cache
@@ -275,6 +281,7 @@ jobs:
         sed -i 's/useGlobalPath="1"/useGlobalPath="0"/g' EnsoniqSD1-LINUX.jucer
         sed -i 's|<MODULEPATH id="\([^"]*\)" path="[^"]*"/>|<MODULEPATH id="\1" path="juce/modules"/>|g' EnsoniqSD1-LINUX.jucer
         sed -i 's/pluginFormats="[^"]*"/pluginFormats="buildVST3"/' EnsoniqSD1-LINUX.jucer
+        # Remove qtdbg (only needed when USE_QTDEBUG=1)
         sed -i 's/qtdbg_sdl3&#10;//g' EnsoniqSD1-LINUX.jucer
 
     - name: Regenerate JuceLibraryCode via Projucer
