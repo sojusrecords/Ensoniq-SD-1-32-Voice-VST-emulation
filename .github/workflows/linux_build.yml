@@ -128,7 +128,7 @@ jobs:
       uses: actions/cache/restore@v4
       with:
         path: mame
-        key: mame-0286-Generic-${{ hashFiles('Mame_Patches/**') }}
+        key: mame-0286-pic-Generic-${{ hashFiles('Mame_Patches/**') }}
 
     - name: Clone MAME v0.286
       if: steps.cache-mame.outputs.cache-hit != 'true'
@@ -153,7 +153,7 @@ jobs:
       run: |
         cd mame
         make SUBTARGET=sd132 SOURCES=src/mame/ensoniq/esq5505.cpp \
-             OSD=sdl3 USE_QTDEBUG=0 REGENIE=1 NO_USE_BGFX=1 \
+             OSD=sdl3 USE_QTDEBUG=0 REGENIE=1 NO_USE_BGFX=1 ARCHOPTS=-fPIC \
              -j$(nproc)
 
     - name: Save MAME cache
@@ -161,7 +161,7 @@ jobs:
       uses: actions/cache/save@v4
       with:
         path: mame
-        key: mame-0286-Generic-${{ hashFiles('Mame_Patches/**') }}
+        key: mame-0286-pic-Generic-${{ hashFiles('Mame_Patches/**') }}
 
     - name: Build Projucer
       run: |
@@ -236,7 +236,7 @@ jobs:
       uses: actions/cache/restore@v4
       with:
         path: mame
-        key: mame-0286-AVX2-${{ hashFiles('Mame_Patches/**') }}
+        key: mame-0286-pic-AVX2-${{ hashFiles('Mame_Patches/**') }}
 
     - name: Clone MAME v0.286
       if: steps.cache-mame.outputs.cache-hit != 'true'
@@ -261,7 +261,7 @@ jobs:
       run: |
         cd mame
         make SUBTARGET=sd132 SOURCES=src/mame/ensoniq/esq5505.cpp \
-             OSD=sdl3 USE_QTDEBUG=0 REGENIE=1 NO_USE_BGFX=1 \
+             OSD=sdl3 USE_QTDEBUG=0 REGENIE=1 NO_USE_BGFX=1 ARCHOPTS=-fPIC \
              OPT_FLAGS="-mavx2" -j$(nproc)
 
     - name: Save MAME cache (AVX2)
@@ -269,7 +269,7 @@ jobs:
       uses: actions/cache/save@v4
       with:
         path: mame
-        key: mame-0286-AVX2-${{ hashFiles('Mame_Patches/**') }}
+        key: mame-0286-pic-AVX2-${{ hashFiles('Mame_Patches/**') }}
 
     - name: Build Projucer
       run: |
