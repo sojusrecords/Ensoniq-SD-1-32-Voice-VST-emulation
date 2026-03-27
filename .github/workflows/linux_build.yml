@@ -102,7 +102,7 @@ jobs:
              libfreetype6-dev libwebkit2gtk-4.1-dev libglu1-mesa-dev \
              libxrandr-dev libxcursor-dev curl libcurl4-openssl-dev \
              libfontconfig1-dev python3 pkg-config \
-             libharfbuzz-dev libpng-dev libjpeg-dev \
+             libharfbuzz-dev libpng-dev libjpeg-dev libpulse-dev \
              qtbase5-dev qt5-qmake qtbase5-dev-tools
 
     - name: Restore SDL3 cache
@@ -209,7 +209,7 @@ jobs:
              libfreetype6-dev libwebkit2gtk-4.1-dev libglu1-mesa-dev \
              libxrandr-dev libxcursor-dev curl libcurl4-openssl-dev \
              libfontconfig1-dev python3 pkg-config \
-             libharfbuzz-dev libpng-dev libjpeg-dev \
+             libharfbuzz-dev libpng-dev libjpeg-dev libpulse-dev \
              qtbase5-dev qt5-qmake qtbase5-dev-tools
 
     - name: Restore SDL3 cache
