@@ -100,7 +100,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential ninja-build cmake \
+        sudo apt-get install -y build-essential ninja-build cmake patchelf \
              libasound2-dev libx11-dev libxinerama-dev libxext-dev \
              libfreetype6-dev libwebkit2gtk-4.1-dev libglu1-mesa-dev \
              libxrandr-dev libxcursor-dev curl libcurl4-openssl-dev \
@@ -187,6 +187,21 @@ jobs:
              LDFLAGS="-L${{ env.SDL3_PREFIX }}/lib -Wl,-rpath,${{ env.SDL3_PREFIX }}/lib" \
              -j$(nproc)
 
+    - name: Inject Lua and SDL3 into VST3 Bundle (Generic)
+      run: |
+        # Put Resources folder into VST3 bundle
+        mkdir -p Builds/LinuxMakefile/build/EnsoniqSD1.vst3/Contents/Resources
+        cp -R mame/plugins Builds/LinuxMakefile/build/EnsoniqSD1.vst3/Contents/Resources/
+        
+        # copy SDL3 and SDL3_ttf into VST3
+        cp -P ${{ env.SDL3_PREFIX }}/lib/libSDL3*.so* Builds/LinuxMakefile/build/EnsoniqSD1.vst3/Contents/x86_64-linux/
+        
+        # RPATH (Run-time search path) rewrite with patchelf
+        patchelf --set-rpath '$ORIGIN' Builds/LinuxMakefile/build/EnsoniqSD1.vst3/Contents/x86_64-linux/EnsoniqSD1.so
+        
+        # Check
+        ls -la Builds/LinuxMakefile/build/EnsoniqSD1.vst3/Contents/x86_64-linux/
+
     - name: Upload VST3 artifact (Generic)
       uses: actions/upload-artifact@v4
       with:
@@ -207,7 +222,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential ninja-build cmake \
+        sudo apt-get install -y build-essential ninja-build cmake patchelf \
              libasound2-dev libx11-dev libxinerama-dev libxext-dev \
              libfreetype6-dev libwebkit2gtk-4.1-dev libglu1-mesa-dev \
              libxrandr-dev libxcursor-dev curl libcurl4-openssl-dev \
@@ -293,6 +308,21 @@ jobs:
              CXXFLAGS="-mavx2 -I${{ env.SDL3_PREFIX }}/include" \
              LDFLAGS="-L${{ env.SDL3_PREFIX }}/lib -Wl,-rpath,${{ env.SDL3_PREFIX }}/lib" \
              -j$(nproc)
+
+    - name: Inject Lua and SDL3 into VST3 Bundle (AVX2)
+      run: |
+        # Put Resources folder into VST3 bundle
+        mkdir -p Builds/LinuxMakefile/build/EnsoniqSD1.vst3/Contents/Resources
+        cp -R mame/plugins Builds/LinuxMakefile/build/EnsoniqSD1.vst3/Contents/Resources/
+        
+        # copy SDL3 and SDL3_ttf into VST3
+        cp -P ${{ env.SDL3_PREFIX }}/lib/libSDL3*.so* Builds/LinuxMakefile/build/EnsoniqSD1.vst3/Contents/x86_64-linux/
+        
+        # RPATH (Run-time search path) rewrite with patchelf
+        patchelf --set-rpath '$ORIGIN' Builds/LinuxMakefile/build/EnsoniqSD1.vst3/Contents/x86_64-linux/EnsoniqSD1.so
+        
+        # Check
+        ls -la Builds/LinuxMakefile/build/EnsoniqSD1.vst3/Contents/x86_64-linux/
 
     - name: Upload VST3 artifact (AVX2)
       uses: actions/upload-artifact@v4
