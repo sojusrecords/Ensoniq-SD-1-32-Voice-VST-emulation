@@ -189,7 +189,7 @@ jobs:
         cd Builds/LinuxMakefile
         make CONFIG=Release \
              CXXFLAGS="-I${{ env.SDL3_PREFIX }}/include" \
-             LDFLAGS="-L${{ env.SDL3_PREFIX }}/lib -Wl,-rpath,${{ env.SDL3_PREFIX }}/lib -lz" \
+             LDFLAGS="-L${{ env.SDL3_PREFIX }}/lib -Wl,-rpath,${{ env.SDL3_PREFIX }}/lib -lz -lX11 -lXext" \
              -j$(nproc)
 
     - name: Inject Lua and SDL3 into VST3 Bundle (Generic)
@@ -312,7 +312,7 @@ jobs:
         cd Builds/LinuxMakefile
         make CONFIG=Release \
              CXXFLAGS="-mavx2 -I${{ env.SDL3_PREFIX }}/include" \
-             LDFLAGS="-L${{ env.SDL3_PREFIX }}/lib -Wl,-rpath,${{ env.SDL3_PREFIX }}/lib -lz" \
+             LDFLAGS="-L${{ env.SDL3_PREFIX }}/lib -Wl,-rpath,${{ env.SDL3_PREFIX }}/lib -lz -lX11 -lXext" \
              -j$(nproc)
 
     - name: Inject Lua and SDL3 into VST3 Bundle (AVX2)

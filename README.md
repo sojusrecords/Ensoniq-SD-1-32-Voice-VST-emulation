@@ -17,18 +17,22 @@ We are Sojus Records, one of the longest-running netlabels still active. We are 
 
 # Download 
   - [Win x64 VST3 W10+](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v0.9.8/EnsoniqSD1-v.0.9.8-winVST3.7z)
+
   - [Win x64 VST3 oldskool AVX1 for pre-Haswell machines](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v0.9.8/EnsoniqSD1-v.0.9.8-winVST3-AVX1.7z)
+
   - [macOS UB VST3 macOS 11 or newer](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v0.9.8/EnsoniqSD1-v.0.9.8-macVST3.7z)
-  - [Linux AVX2 and generic](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/issues/4)
+
+  - [Linux AVX2](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v0.9.8/EnsoniqSD1-v.0.9.8-LINUX-AVX2.7z)
+  - [Linux Generic for oldskool CPUs](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v0.9.8/EnsoniqSD1-v.0.9.8-LINUX-Generic.7z)
   
 # What's working?
 Everything. Check the original manual here: [SD-1 Manual at Polynominal](https://www.polynominal.com/ensoniq-sd1/ensoniq-sd1-manual.pdf)
 
 # Features:
-- Windows 10+ 64 bit VST3, Mac Intel+ARM Universal Binary VST3
-- **NEW: VFX, VFX-SD, SD1 .SYX SYS-EX file import.** [Read the FAQ for more info!](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation#faq)
-- **NEW: FULL automation** (All keys, sliders and buttons. Now you can save presets: Saving requires holding down PRESETS button and pressing a BANK button), full MIDI CC controlling, polyphonic aftertouch
-- **NEW: Global settings saving** 
+- Windows 10+ 64 bit VST3 AVX1/AVX2, Mac Intel+ARM Universal Binary VST3, Linux VST3 Generic/AVX2
+- VFX, VFX-SD, SD1 .SYX SYS-EX file import. [Read the FAQ for more info!](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation#faq)
+- FULL VST automation (All keys, sliders and buttons. Now you can save presets: Saving requires holding down PRESETS button and pressing a BANK button), full MIDI CC controlling, polyphonic aftertouch
+- Global settings saving 
 - VST3 state saving
 - 4 different panel layouts with resizable GUI and VFD display
 - Buffer setting
@@ -63,7 +67,7 @@ Everything. Check the original manual here: [SD-1 Manual at Polynominal](https:/
 - IMPORTANT - ROM Files Required!<br/>
   Due to copyright reasons, the required Ensoniq ROM files are NOT included.
 
-  * We've removed the strict ROM verification. Now it's up to MAME to accept your files; we only check for their presence, and it doesn't matter whether they're packaged in a folder or not. At startup, it checks for the presence of sd132.zip; if it doesn't find it, you can set the exact path using a button. We also check to see if all 10 files are present, and you can rescan the zip file without reloading the plugin. The plugin performs a self-check at every startup, which checks the following: whether it has write permissions to the temp folder and the EnsoniqSD1 folder, checks the Lua plugins, and verifies if the MAME engine failed to start for any reason.
+  * We've removed the strict ROM verification. Now it's up to MAME to accept your files; we only check for their presence, and it doesn't matter whether they're packaged in a folder or not. If your ROM has been good so far, it will continue to be good. At startup, it checks for the presence of sd132.zip; if it doesn't find it, you can set the exact path using a button. We also check to see if all 10 files are present, and you can rescan the zip file without reloading the plugin. The plugin performs a self-check at every startup, which checks the following: whether it has write permissions to the temp folder and the EnsoniqSD1 folder, checks the Lua plugins, and verifies if the MAME engine failed to start for any reason.
 
   To make the plugin work:
   * Create a folder named EnsoniqSD1 in your user's Documents folder:
@@ -93,7 +97,7 @@ Everything. Check the original manual here: [SD-1 Manual at Polynominal](https:/
 
 # Troubleshooting
 - The plugin performs a self-check at every startup, which checks the following: whether it has write permissions to the temp folder and the EnsoniqSD1 folder, checks the Lua plugins, and verifies if the MAME engine failed to start for any reason. It will notify you if it finds any errors.
-- We've removed the strict ROM verification. Now it's up to MAME to accept your files; we only check for their presence, and it doesn't matter whether they're packaged in a folder or not. At startup, it checks for the presence of sd132.zip; if it doesn't find it, you can set the exact path using a button. We also check to see if all 10 files are present, and you can rescan the zip file without reloading the plugin.
+- We've removed the strict ROM verification. Now it's up to MAME to accept your files; we only check for their presence, and it doesn't matter whether they're packaged in a folder or not. If your ROM has been good so far, it will continue to be good. At startup, it checks for the presence of sd132.zip; if it doesn't find it, you can set the exact path using a button. We also check to see if all 10 files are present, and you can rescan the zip file without reloading the plugin.
 - On macOS: if 'sudo xattr -rd...' fails, try codesign the plugin:
   - Open a terminal window, install Xcode Command Line Tools if needed: ```xcode-select --install```
   - ```sudo codesign -f -s /Library/Audio/Plug-Ins/VST3/EnsoniqSD1.vst3```
