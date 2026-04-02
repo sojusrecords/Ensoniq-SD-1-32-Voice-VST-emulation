@@ -20,10 +20,12 @@ jobs:
     - name: Install build dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential cmake \
+        sudo apt-get install -y build-essential cmake pkg-config \
              libharfbuzz-dev libpng-dev libjpeg-dev libfreetype6-dev \
-             pkg-config libx11-dev libxcursor-dev libxext-dev \
-             libxinerama-dev libxrandr-dev libxi-dev libasound2-dev libpulse-dev
+             libx11-dev libxcursor-dev libxext-dev libxinerama-dev \
+             libxrandr-dev libxi-dev libxss-dev libxxf86vm-dev \
+             libwayland-dev libxkbcommon-dev libdbus-1-dev libudev-dev \
+             libasound2-dev libpulse-dev
 
     - name: Restore SDL3 cache
       id: cache-sdl3
