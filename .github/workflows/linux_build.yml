@@ -149,6 +149,7 @@ jobs:
         cp Mame_Patches/esq5505.cpp mame/src/devices/sound/esq5505.cpp
         cp Mame_Patches/ui.cpp      mame/src/frontend/mame/ui/ui.cpp
         cp Mame_Patches/sd132.lay   mame/src/mame/layout/sd132.lay
+        cp Mame_Patches/esq16_dsk.cpp mame/src/lib/formats/esq16_dsk.cpp
 
     - name: Compile MAME sd132 (Generic)
       if: steps.cache-mame.outputs.cache-hit != 'true'
@@ -271,6 +272,7 @@ jobs:
         cp Mame_Patches/esq5505.cpp mame/src/devices/sound/esq5505.cpp
         cp Mame_Patches/ui.cpp      mame/src/frontend/mame/ui/ui.cpp
         cp Mame_Patches/sd132.lay   mame/src/mame/layout/sd132.lay
+        cp Mame_Patches/esq16_dsk.cpp mame/src/lib/formats/esq16_dsk.cpp
 
     - name: Compile MAME sd132 (AVX2)
       if: steps.cache-mame.outputs.cache-hit != 'true'
