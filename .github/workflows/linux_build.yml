@@ -106,7 +106,7 @@ jobs:
              libxrandr-dev libxcursor-dev curl libcurl4-openssl-dev \
              libfontconfig1-dev python3 pkg-config \
              libharfbuzz-dev libpng-dev libjpeg-dev libpulse-dev libsdl2-dev \
-             qtbase5-dev qt5-qmake qtbase5-dev-tools
+             qtbase5-dev qt5-qmake qtbase5-dev-tools zlib1g-dev
 
     - name: Restore SDL3 cache
       uses: actions/cache/restore@v4
@@ -184,7 +184,7 @@ jobs:
         cd Builds/LinuxMakefile
         make CONFIG=Release \
              CXXFLAGS="-I${{ env.SDL3_PREFIX }}/include" \
-             LDFLAGS="-L${{ env.SDL3_PREFIX }}/lib -Wl,-rpath,${{ env.SDL3_PREFIX }}/lib" \
+             LDFLAGS="-L${{ env.SDL3_PREFIX }}/lib -Wl,-rpath,${{ env.SDL3_PREFIX }}/lib -lz" \
              -j$(nproc)
 
     - name: Inject Lua and SDL3 into VST3 Bundle (Generic)
@@ -228,7 +228,7 @@ jobs:
              libxrandr-dev libxcursor-dev curl libcurl4-openssl-dev \
              libfontconfig1-dev python3 pkg-config \
              libharfbuzz-dev libpng-dev libjpeg-dev libpulse-dev libsdl2-dev \
-             qtbase5-dev qt5-qmake qtbase5-dev-tools
+             qtbase5-dev qt5-qmake qtbase5-dev-tools zlib1g-dev
 
     - name: Restore SDL3 cache
       uses: actions/cache/restore@v4
@@ -306,7 +306,7 @@ jobs:
         cd Builds/LinuxMakefile
         make CONFIG=Release \
              CXXFLAGS="-mavx2 -I${{ env.SDL3_PREFIX }}/include" \
-             LDFLAGS="-L${{ env.SDL3_PREFIX }}/lib -Wl,-rpath,${{ env.SDL3_PREFIX }}/lib" \
+             LDFLAGS="-L${{ env.SDL3_PREFIX }}/lib -Wl,-rpath,${{ env.SDL3_PREFIX }}/lib -lz" \
              -j$(nproc)
 
     - name: Inject Lua and SDL3 into VST3 Bundle (AVX2)

@@ -8,7 +8,7 @@ Because MAME is not natively designed to be run as a shared library inside a DAW
 
 **JUCE Framework** (v7 or v8, built on V8)
 
-**MAME Source Code** (Built on version 0.286) ```git clone --depth 1 https://github.com/mamedev/mame.git```
+**MAME Source Code** (Built on version 0.287) ```git clone --depth 1 https://github.com/mamedev/mame.git```
 
 **macOS Build:** Xcode, SDL2 & SDL3 Frameworks (Installed in /Library/Frameworks) ```xcode-select --install``` then ```brew install pcre2 qt asio sqlite utf8proc flac pugixml portmidi portaudio pkg-config```
 
