@@ -22,8 +22,8 @@ We are Sojus Records, one of the longest-running netlabels still active. We are 
 
   - [macOS UB VST3 macOS 11 or newer](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v0.9.8/EnsoniqSD1-v.0.9.8-macVST3.7z)
 
-  - [Linux AVX2](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v0.9.8/EnsoniqSD1-v.0.9.8-LINUX-AVX2.7z)
-  - [Linux Generic for oldskool CPUs](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v0.9.8/EnsoniqSD1-v.0.9.8-LINUX-Generic.7z)
+  - [Linux VST3 AVX2](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v0.9.8/EnsoniqSD1-v.0.9.8-LINUX-AVX2.7z)
+  - [Linux VST3 Generic for oldskool CPUs](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v0.9.8/EnsoniqSD1-v.0.9.8-LINUX-Generic.7z)
   
 # What's working?
 Everything. Check the original manual here: [SD-1 Manual at Polynominal](https://www.polynominal.com/ensoniq-sd1/ensoniq-sd1-manual.pdf)
@@ -153,6 +153,20 @@ The Usual Suspects are also developing an SD-1 emulation, so it's guaranteed tha
   <summary>Why there is no AU version?</summary>
 We are working on it. The AU version is really tricky and needs a different syncing method; we haven't managed to create a build that works properly yet either (there are some AU specific codes already.)
 </details>
+
+# In the news
+
+- [Synth Anatomy](https://synthanatomy.com/2026/03/sojus-records-ensoniq-sd-1-an-open-source-emulation-of-the-1990-transewavetm-synth.html)
+
+- [GearNews](https://www.gearnews.com/synth-emulations-synth/)
+
+- [PrismNews](https://www.prismnews.com/hobbies/vintage-synthesizers/rom-based-synth-emulators-legal-and-practical-guide-for)
+
+- [Bedroom Producers Blog](https://bedroomproducersblog.com/2026/04/02/sojus-ensoniq-sd/)
+
+- [MatrixSynth](https://www.matrixsynth.com/2026/03/free-synth-ensoniq-sd-1-emulator-by.html)
+
+- [project of napskint](https://projectofnapskint.com/sd-1-emulation/)
 
 # License and credits
 
