@@ -24,6 +24,7 @@ jobs:
              libharfbuzz-dev libpng-dev libjpeg-dev libfreetype6-dev \
              libx11-dev libxcursor-dev libxext-dev libxinerama-dev \
              libxrandr-dev libxi-dev libxss-dev libxxf86vm-dev \
+             libxtst-dev \
              libwayland-dev libxkbcommon-dev libdbus-1-dev libudev-dev \
              libasound2-dev libpulse-dev
 
