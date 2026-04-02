@@ -4,11 +4,11 @@
               addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1" bundleIdentifier="com.sojusrecords.EnsoniqSD1"
               companyWebsite="www.sojusrecords.com" companyCopyright="Open Source GPLv2/v3"
               companyName="EnsoniqMAME" pluginCharacteristicsValue="pluginIsSynth,pluginWantsMidiIn"
-              pluginFormats="buildVST3" version="0.9.7"
-              pluginName="Ensoniq SD-1" pluginDesc="Ensoniq SD-1 MAME Emu VST"
-              pluginManufacturer="EnsoniqMAME" pluginManufacturerCode="Esma"
-              pluginCode="SD1A" pluginAUExportPrefix="EnsoniqSD1AU" companyEmail="sjs@sojusrecords.com"
-              pluginAUMainType="'aumu'" cppLanguageStandard="20">
+              pluginFormats="buildVST3" version="0.9.8" pluginName="Ensoniq SD-1"
+              pluginDesc="Ensoniq SD-1 MAME Emu VST" pluginManufacturer="EnsoniqMAME"
+              pluginManufacturerCode="Esma" pluginCode="SD1A" pluginAUExportPrefix="EnsoniqSD1AU"
+              companyEmail="sjs@sojusrecords.com" pluginAUMainType="'aumu'"
+              cppLanguageStandard="20">
   <MAINGROUP id="OpvzjD" name="Ensoniq SD-1">
     <GROUP id="{B55D6966-246C-C5C4-DBF6-55CB66D6CDB4}" name="Resources">
       <FILE id="fhfkAt" name="q.svg" compile="0" resource="1" file="Source/q.svg"/>
@@ -42,7 +42,6 @@
             useGlobalPath="0"/>
     <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
-    <MODULE id="juce_cryptography" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_events" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
@@ -76,7 +75,6 @@
         <MODULEPATH id="juce_gui_basics" path="../../juce/modules"/>
         <MODULEPATH id="juce_gui_extra" path="../../juce/modules"/>
         <MODULEPATH id="juce_midi_ci" path="../../juce/modules"/>
-        <MODULEPATH id="juce_cryptography" path="../../juce/modules"/>
       </MODULEPATHS>
     </LINUX_MAKE>
   </EXPORTFORMATS>

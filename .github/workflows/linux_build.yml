@@ -5,9 +5,9 @@ on:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-  SDL3_VERSION: "3.2.30"
+  SDL3_VERSION: "3.4.2"
   SDL3_TTF_VERSION: "3.2.2"
-  SDL3_IMAGE_VERSION: "3.2.4"
+  SDL3_IMAGE_VERSION: "3.4.0"
 
 jobs:
 
@@ -15,7 +15,7 @@ jobs:
   # Job 1: Build SDL3 once, cache it. No matrix — runs once.
   # -------------------------------------------------------------------
   build-sdl3:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     steps:
     - name: Install build dependencies
       run: |
@@ -29,7 +29,7 @@ jobs:
       uses: actions/cache/restore@v4
       with:
         path: sdl3-install
-        key: sdl3-ubuntu24-${{ env.SDL3_VERSION }}
+        key: sdl3-ubuntu22-${{ env.SDL3_VERSION }}
 
     - name: Build SDL3 from source
       if: steps.cache-sdl3.outputs.cache-hit != 'true'
@@ -74,7 +74,7 @@ jobs:
       uses: actions/cache/save@v4
       with:
         path: sdl3-install
-        key: sdl3-ubuntu24-${{ env.SDL3_VERSION }}
+        key: sdl3-ubuntu22-${{ env.SDL3_VERSION }}
 
     - name: Verify SDL3 pkg-config
       run: |
@@ -90,7 +90,7 @@ jobs:
   # Job 2: Generic build. Depends on SDL3 job.
   # -------------------------------------------------------------------
   build-generic:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     needs: build-sdl3
 
     steps:
@@ -112,7 +112,7 @@ jobs:
       uses: actions/cache/restore@v4
       with:
         path: sdl3-install
-        key: sdl3-ubuntu24-${{ env.SDL3_VERSION }}
+        key: sdl3-ubuntu22-${{ env.SDL3_VERSION }}
 
     - name: Export SDL3 paths
       run: |
@@ -126,12 +126,12 @@ jobs:
       uses: actions/cache/restore@v4
       with:
         path: mame
-        key: mame-0286-pic-Generic-${{ hashFiles('Mame_Patches/**') }}
+        key: mame-0287-pic-Generic-${{ hashFiles('Mame_Patches/**') }}
 
-    - name: Clone MAME v0.286
+    - name: Clone MAME v0.287
       if: steps.cache-mame.outputs.cache-hit != 'true'
       run: |
-        git clone --depth 1 --branch mame0286 \
+        git clone --depth 1 --branch mame0287 \
           https://github.com/mamedev/mame.git mame
 
     - name: Clone JUCE 8.0.12
@@ -159,7 +159,7 @@ jobs:
       uses: actions/cache/save@v4
       with:
         path: mame
-        key: mame-0286-pic-Generic-${{ hashFiles('Mame_Patches/**') }}
+        key: mame-0287-pic-Generic-${{ hashFiles('Mame_Patches/**') }}
 
     - name: Build Projucer
       run: |
@@ -212,7 +212,7 @@ jobs:
   # Job 3: AVX2 build. Only runs if Generic succeeded.
   # -------------------------------------------------------------------
   build-avx2:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     needs: build-generic
 
     steps:
@@ -234,7 +234,7 @@ jobs:
       uses: actions/cache/restore@v4
       with:
         path: sdl3-install
-        key: sdl3-ubuntu24-${{ env.SDL3_VERSION }}
+        key: sdl3-ubuntu22-${{ env.SDL3_VERSION }}
 
     - name: Export SDL3 paths
       run: |
@@ -248,12 +248,12 @@ jobs:
       uses: actions/cache/restore@v4
       with:
         path: mame
-        key: mame-0286-pic-AVX2-${{ hashFiles('Mame_Patches/**') }}
+        key: mame-0287-pic-AVX2-${{ hashFiles('Mame_Patches/**') }}
 
-    - name: Clone MAME v0.286
+    - name: Clone MAME v0.287
       if: steps.cache-mame.outputs.cache-hit != 'true'
       run: |
-        git clone --depth 1 --branch mame0286 \
+        git clone --depth 1 --branch mame0287 \
           https://github.com/mamedev/mame.git mame
 
     - name: Clone JUCE 8.0.12
@@ -281,7 +281,7 @@ jobs:
       uses: actions/cache/save@v4
       with:
         path: mame
-        key: mame-0286-pic-AVX2-${{ hashFiles('Mame_Patches/**') }}
+        key: mame-0287-pic-AVX2-${{ hashFiles('Mame_Patches/**') }}
 
     - name: Build Projucer
       run: |

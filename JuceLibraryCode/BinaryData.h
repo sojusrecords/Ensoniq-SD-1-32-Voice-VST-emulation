@@ -18,16 +18,16 @@ namespace BinaryData
     const int            floppy_svgSize = 1457;
 
     extern const char*   labels_tablet_png;
-    const int            labels_tablet_pngSize = 33658;
+    const int            labels_tablet_pngSize = 35964;
 
     extern const char*   labels_rack_png;
-    const int            labels_rack_pngSize = 17779;
+    const int            labels_rack_pngSize = 18137;
 
     extern const char*   labels_compact_png;
-    const int            labels_compact_pngSize = 19569;
+    const int            labels_compact_pngSize = 20672;
 
     extern const char*   labels_full_png;
-    const int            labels_full_pngSize = 19098;
+    const int            labels_full_pngSize = 18978;
 
     // Number of elements in the namedResourceList and originalFileNames arrays.
     const int namedResourceListSize = 7;

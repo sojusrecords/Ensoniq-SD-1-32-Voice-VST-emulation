@@ -41,6 +41,15 @@ class EnsoniqSD1AudioProcessor : public juce::AudioProcessor,
 {
 public:
     
+    // --- SELF CHECK ---
+        std::atomic<bool> isSelfCheckFailed{ false };
+        juce::String selfCheckErrorMsg { "" };
+        bool runSelfCheck();
+    
+    // --- ROM MANAGEMENT ---
+        juce::String customRomPath { "" };
+        void checkRomAndBootMame();
+    
     // --- GLOBAL SETTINGS ---
         std::atomic<bool> requestGlobalSave{ false };
         void loadGlobalSettings();
@@ -51,6 +60,9 @@ public:
     std::atomic<bool> requestMameLoad{ false };
     std::atomic<bool> mameStateIsReady{ false };
     juce::WaitableEvent mameStateEvent{ false };
+    
+    // Countdown timer (in samples) to trigger a delayed MIDI Panic after a state load
+    std::atomic<int> panicDelaySamples{ 0 };
 
     // --- MEDIA HANDLING (FLOPPY/CARTRIDGE/SYSEX) ---
     std::atomic<bool> requestFloppyLoad{ false };
@@ -231,8 +243,10 @@ public:
     // Core function to boot the headless MAME environment
     void runMameEngine();
     
-    // Verifies the contents of the sd132.zip file against known SHA-256 hashes
-    bool verifyRomChecksums(const juce::File& zipFile);
+    // Verifies the contents of the sd132.zip
+    bool verifyRomFiles(const juce::File& zipFile);
+    // Stores the list of missing ROM files to be displayed on the UI
+    juce::String missingFilesList;
 
     // Callback to push generated audio from MAME into our ring buffers
     void pushAudioFromMame(const int16_t* pcmBuffer, int numSamples);
@@ -268,6 +282,12 @@ public:
 
     // Dynamic offline buffer for sync
     std::atomic<int> maxOfflineBuffer{ 1024 };
+        
+        
+    // --- RAM INJECTION BUFFERS ---
+        juce::MemoryBlock pendingOsram;
+        juce::MemoryBlock pendingSeqRam;
+        std::atomic<bool> pendingRamInjection{ false };
 
     // SysEx loading
         void loadSysExFile(const juce::File& syxFile);
@@ -303,12 +323,13 @@ public:
     
 private:
 
+    bool extractLegacyMameState(const juce::String& base64State, juce::MemoryBlock& outOsram, juce::MemoryBlock& outSeqram);
     std::thread mameThread;
     std::atomic<bool> isMameRunning{ false };
 
     std::atomic<uint64_t> totalRead{ 0 };
     std::atomic<double> hostSampleRate{ 44100.0 };
-    
+                
     int getInternalHardwareLatencySamples() const {
         return static_cast<int>(0.0244 * hostSampleRate.load(std::memory_order_relaxed));
     }

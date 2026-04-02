@@ -189,7 +189,7 @@
 #include <cstdio>
 
 
-//#define VERBOSE 1
+// #define VERBOSE 1
 #include "logmacro.h"
 
 
@@ -775,7 +775,7 @@ void esq5505_state::common(machine_config &config)
 
 	auto &mdin(MIDI_PORT(config, "mdin"));
 	midiin_slot(mdin);
-	mdin.rxd_handler().set(m_duart, FUNC(scn2681_device::rx_a_w)); // route MIDI Tx send directly to 68681 channel A Rx
+	mdin.rxd_handler().set(m_duart, FUNC(mc68681_device::rx_a_w)); // route MIDI Tx send directly to 68681 channel A Rx
 
 	midiout_slot(MIDI_PORT(config, "mdout"));
 
@@ -906,7 +906,7 @@ void esq5505_state::common32(machine_config &config)
 
 	auto &mdin(MIDI_PORT(config, "mdin"));
 	midiin_slot(mdin);
-	mdin.rxd_handler().set(m_duart, FUNC(scn2681_device::rx_a_w)); // route MIDI Tx send directly to 68681 channel A Rx
+	mdin.rxd_handler().set(m_duart, FUNC(mc68681_device::rx_a_w)); // route MIDI Tx send directly to 68681 channel A Rx
 
 	midiout_slot(MIDI_PORT(config, "mdout"));
 
@@ -1062,8 +1062,12 @@ INPUT_PORTS_END
 
 ROM_START( vfx )
 	ROM_REGION16_BE(0x40000, "osrom", 0)
-	ROM_LOAD16_BYTE( "vfx210b-low.bin",  0x000001, 0x010000, CRC(c51b19cd) SHA1(2a125b92ffa02ae9d7fb88118d525491d785e87e) )
-	ROM_LOAD16_BYTE( "vfx210b-high.bin", 0x000000, 0x010000, CRC(59853be8) SHA1(8e07f69d53f80885d15f624e0b912aeaf3212ee4) )
+	ROM_SYSTEM_BIOS( 0, "v230", "V230" )
+	ROM_LOAD16_BYTE_BIOS( 0, "vfx230-low.bin",  0x000001, 0x010000, CRC(6a93f5b4) SHA1(dea208b182be71da973a2e4867944cf7e2958df6) )
+	ROM_LOAD16_BYTE_BIOS( 0, "vfx230-high.bin", 0x000000, 0x010000, CRC(86994661) SHA1(2efb52f6d51625c9be545d5cd018dc7b24f25ac7) )
+	ROM_SYSTEM_BIOS( 1, "v210b", "V210b" )
+	ROM_LOAD16_BYTE_BIOS( 1, "vfx210b-low.bin",  0x000001, 0x010000, CRC(c51b19cd) SHA1(2a125b92ffa02ae9d7fb88118d525491d785e87e) )
+	ROM_LOAD16_BYTE_BIOS( 1, "vfx210b-high.bin", 0x000000, 0x010000, CRC(59853be8) SHA1(8e07f69d53f80885d15f624e0b912aeaf3212ee4) )
 
 	ROM_REGION(0x200000, "waverom", ROMREGION_ERASE00)
 	ROM_LOAD16_BYTE( "u14.bin", 0x000001, 0x080000, CRC(85592299) SHA1(1aa7cf612f91972baeba15991d9686ccde01599c) )
@@ -1265,10 +1269,10 @@ void esq5505_state::init_denib()
 
 
 CONS( 1988, eps,    0,     0, eps,   eps, esq5505_state, init_eps,    "Ensoniq", "EPS",             MACHINE_NOT_WORKING )       // custom VFD: one alphanumeric 22-char row, one graphics-capable row (alpha row can also do bar graphs)
-CONS( 1989, vfx,    0,     0, vfx,   vfx, esq5505_state, init_denib,  "Ensoniq", "VFX",             0 )  // 2x40 VFD
-CONS( 1989, vfxsd,  0,     0, vfxsd, vfx, esq5505_state, init_denib,  "Ensoniq", "VFX-SD",          0 )  // 2x40 VFD
+CONS( 1989, vfx,    0,     0, vfx,   vfx, esq5505_state, init_denib,  "Ensoniq", "VFX",             MACHINE_IMPERFECT_SOUND )  // 2x40 VFD
+CONS( 1989, vfxsd,  0,     0, vfxsd, vfx, esq5505_state, init_denib,  "Ensoniq", "VFX-SD",          MACHINE_IMPERFECT_SOUND )  // 2x40 VFD
 CONS( 1990, eps16p, eps,   0, eps,   eps, esq5505_state, init_eps,    "Ensoniq", "EPS-16 Plus",     MACHINE_NOT_WORKING )       // custom VFD: one alphanumeric 22-char row, one graphics-capable row (alpha row can also do bar graphs)
-CONS( 1990, sd1,    sd132, 0, sd1,   vfx, esq5505_state, init_denib,  "Ensoniq", "SD-1 (21 voice)", 0 )  // 2x40 VFD
+CONS( 1990, sd1,    sd132, 0, sd1,   vfx, esq5505_state, init_denib,  "Ensoniq", "SD-1 (21 voice)", MACHINE_IMPERFECT_SOUND )  // 2x40 VFD
 CONS( 1990, sq1,    0,     0, sq1,   sq1, esq5505_state, init_sq1,    "Ensoniq", "SQ-1",            MACHINE_NOT_WORKING )       // 2x16 LCD
 CONS( 1990, sqrack, sq1,   0, sq1,   sq1, esq5505_state, init_sq1,    "Ensoniq", "SQ-Rack",         MACHINE_NOT_WORKING )       // 2x16 LCD
 CONS( 1991, sq2,    0,     0, ks32,  sq1, esq5505_state, init_sq1,    "Ensoniq", "SQ-2",            MACHINE_NOT_WORKING )       // 2x16 LCD

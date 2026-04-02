@@ -16,10 +16,10 @@ Like the VFX-SD, the SD-1 has a professional quality on-board sequencer making i
 We are Sojus Records, one of the longest-running netlabels still active. We are musicians, not programmers, but we love old synths and emulations. We decided to build a fully featured VST3 version of the MAME-emulated Ensoniq SD-1/32, which has never been emulated before. Thanks to the recent AI coding revolution, we have successfully built it. This proof-of-concept is an important step for both musicians and coders. We are looking forward to bringing other MAME synths to life in the future!
 
 # Download 
-  - [Win x64 VST3 W10+](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v0.9.7b2/EnsoniqSD1-v.0.9.7b2-winVST3.7z)
-  - [Win x64 VST3 oldskool AVX1 for pre-Haswell machines](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v0.9.7b2/EnsoniqSD1-v.0.9.7b2-winVST3-AVX1.7z)
-  - [macOS UB VST3 macOS 11 or newer](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v0.9.7b2/EnsoniqSD1-v.0.9.7b2-macVST3.7z)
-  - [Linux experimental builds](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/issues/4)
+  - [Win x64 VST3 W10+](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v0.9.8/EnsoniqSD1-v.0.9.8-winVST3.7z)
+  - [Win x64 VST3 oldskool AVX1 for pre-Haswell machines](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v0.9.8/EnsoniqSD1-v.0.9.8-winVST3-AVX1.7z)
+  - [macOS UB VST3 macOS 11 or newer](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v0.9.8/EnsoniqSD1-v.0.9.8-macVST3.7z)
+  - [Linux AVX2 and generic](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/issues/4)
   
 # What's working?
 Everything. Check the original manual here: [SD-1 Manual at Polynominal](https://www.polynominal.com/ensoniq-sd1/ensoniq-sd1-manual.pdf)
@@ -33,7 +33,7 @@ Everything. Check the original manual here: [SD-1 Manual at Polynominal](https:/
 - 4 different panel layouts with resizable GUI and VFD display
 - Buffer setting
 - 4 outputs: stereo main out, optional stereo aux (dry signal with no effects)
-- Can load all compatible VFX/VFX-SD/SD1-24/SD1-32 disk images (.img, .hfe, .dsk, .eda) and cartridges (.eeprom, .rom, .cart)
+- Can load all compatible VFX/VFX-SD/SD1-24/SD1-32 disk images (.img, .hfe, .dsk, .eda) and cartridges (.eeprom, .rom, .cart, .sc32)
   - How to load: Attach the disk image using the "Load Floppy/Cartridge" button. Press Storage, then select DISK. Press LOAD. The display will show the Disk Load page with the File Type selected. Move the data entry slider to select your file.
 
 # Known limitations
@@ -47,36 +47,42 @@ Everything. Check the original manual here: [SD-1 Manual at Polynominal](https:/
   ```
   sudo xattr -rd com.apple.quarantine /Library/Audio/Plug-Ins/VST3/EnsoniqSD1.vst3
   ```
+  - Get Sentinel if you stuck with authorization: https://github.com/alienator88/Sentinel
 
 # Requirements
 - Please note that this is a hardware-level emulation of the synthesizer, so it places **heavy demands on the CPU!** Set the buffer setting to higher if buffer underrun occurs.
 - Windows 10 or newer or macOS 11 Big Sur or newer. As MAME itself cannot be compiled lower than Big Sur (macOS 11) this is the minimum OS for mac. If your Mac is stuck on an older OS, my suggestion is to try OpenCore Legacy Patcher to update your Mac to a compatible OS.
-- Windows build is AVX1 or AVX2 optimized.
+- Windows build is AVX1 or AVX2 optimized, Linux build is AVX2 or Generic optimized.
 - A VST3 compatible DAW. If it's not working, come back later :)
   - Tested and working:
     - macOS: Ableton Live 12, Bitwig Studio 6, Cubase 15, Fender Studio Pro 8, FL Studio 2025, Reaper 7.
     - Windows: Ableton Live 12, Bitwig Studio 6, Cubase 15, FL Studio 2025, Reaper 7, Cantabile.
+    - Linux: Bitwig Studio 6, Reaper 7
   - Working but wav render is wrong: Reason 12 (Windows)
   - If it's not working for you check [Troubleshooting](#Troubleshooting).
 - IMPORTANT - ROM Files Required!<br/>
   Due to copyright reasons, the required Ensoniq ROM files are NOT included.
+
+  * We've removed the strict ROM verification. Now it's up to MAME to accept your files; we only check for their presence, and it doesn't matter whether they're packaged in a folder or not. At startup, it checks for the presence of sd132.zip; if it doesn't find it, you can set the exact path using a button. We also check to see if all 10 files are present, and you can rescan the zip file without reloading the plugin. The plugin performs a self-check at every startup, which checks the following: whether it has write permissions to the temp folder and the EnsoniqSD1 folder, checks the Lua plugins, and verifies if the MAME engine failed to start for any reason.
+
   To make the plugin work:
   * Create a folder named EnsoniqSD1 in your user's Documents folder:
     - Win C:\Users\yourusername\Documents
-    - macOS /yourusername/Documents/
-  * Obtain the Ensoniq SD-1 32 variant AND Ensoniq 2x40 VFD ROM files and place EXACTLY these files in that folder AND zip them to sd132.zip.<br/>
+    - macOS /yourusername/Documents
+    - Linux /Documents
 
-    Filename | SHA256
-    - esqvfd_font_vfx.bin<br/>ab2f7ddc6ab7fafaf07985d01788197849cdaeb5a4a7d9f2f85098dfd65edf01
-    - sd1_32_402_hi.bin<br/>90ae35de8661f5de0793b6ea59a4d6524e90c0828a29e6ea8906ff759116136d
-    - sd1_32_402_lo.bin<br/>6b0c1235c4f813ce8698e89d66933e9c7c9168f4a095c9e2a50add7fe729481c
-    - sd1_410_hi.bin<br/>1d6d6150373fb070da8b1a6da57762749bda9210e0ca5536441bb8194a3cafb7
-    - sd1_410_lo.bin<br/>e3e42beca41989561c0d2a8266e48549561650a7606bb8a0d75b438847e8bd0c
-    - u34.bin<br/>7a6e6e76da7eb8de5cbc3a0a2bfb27a461e312facdcc0b7ecc42b9d1eb261e12
-    - u35.bin<br/>1df911a97e0e5a334d9345ba5e47eac7794d083282012f7ecf70901b88cf7e08
-    - u36.bin<br/>2fdb401bea78eb323fa55408760a73319aeae68b465f193dc7a46d1b21277cdd
-    - u37.bin<br/>e08931013c8aca2460b4f2c3512e1d3e9a610a7f921e22012bb13bd23a3e56d7
-    - u38.bin<br/>2f185a185961a1c14472c2b706642c0d9e7a0792d57d946a349840905782e5ca<br/>
+  * Obtain the Ensoniq SD-1/32 ```sd132``` variant AND Ensoniq 2x40 VFD ROM files and place these files in that folder AND zip them to sd132.zip.<br/>
+
+    - ```esqvfd_font_vfx.bin```<br/>
+    - ```sd1_32_402_hi.bin```<br/>
+    - ```sd1_32_402_lo.bin```<br/>
+    - ```sd1_410_hi.bin```<br/>
+    - ```sd1_410_lo.bin```<br/>
+    - ```u34.bin```<br/>
+    - ```u35.bin```<br/>
+    - ```u36.bin```<br/>
+    - ```u37.bin```<br/>
+    - ```u38.bin```<br/>
 
   * The final structure of sd132.zip in your Documents/EnsoniqSD1 folder looks like this:<br/>
     ![sd132.zip](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/blob/main/roms.png)<br/>
@@ -86,36 +92,36 @@ Everything. Check the original manual here: [SD-1 Manual at Polynominal](https:/
     - How to load: Attach the disk image using "Load Floppy/Cartridge". Press Storage, then select DISK. Press LOAD. The display will show the Disk Load page with the File Type selected. Move the data entry slider all the way up to select TYPE=SEQUENCER OS.
 
 # Troubleshooting
-- The plugin is checking the contents of sd132.zip in your Documents/EnsoniqSD1 folder. If something is not right, then it will tell you.
+- The plugin performs a self-check at every startup, which checks the following: whether it has write permissions to the temp folder and the EnsoniqSD1 folder, checks the Lua plugins, and verifies if the MAME engine failed to start for any reason. It will notify you if it finds any errors.
+- We've removed the strict ROM verification. Now it's up to MAME to accept your files; we only check for their presence, and it doesn't matter whether they're packaged in a folder or not. At startup, it checks for the presence of sd132.zip; if it doesn't find it, you can set the exact path using a button. We also check to see if all 10 files are present, and you can rescan the zip file without reloading the plugin.
 - On macOS: if 'sudo xattr -rd...' fails, try codesign the plugin:
   - Open a terminal window, install Xcode Command Line Tools if needed: ```xcode-select --install```
   - ```sudo codesign -f -s /Library/Audio/Plug-Ins/VST3/EnsoniqSD1.vst3```
 - Whitelist the plugin in your antivirus app. The plugin is writing some data to temp folder (e.g. nvram and osram files, lua plugins) and to your Documents/EnsoniqSD1 folder (e.g. settings.xml)
 - Your sequencer is blacklisting the plugin: if the plugin scanner provides error message or a log file then send it to us.
-- If the plugin is loaded but there's only "Load Floppy/Cartridge" and "Settings" buttons and blank window: the internal MAME engine is not loaded. Check if your OS/PC/MAC is capable to run it. 
 - Reset global settings: go to Documents/EnsoniqSD1 and delete the file "settings.xml" and delete temp files
 
 # FAQ
 <details>
-  <summary>How do I load my old SysEx (.syx) preset banks?</summary>
+  <summary>How do I load my old SYS-EX (.syx) preset banks?</summary>
 
-Loading SysEx files works exactly like the original 1990 hardware, simulating a physical MIDI cable connection at a 31250 baud rate.
+Loading SYS-EX files works exactly like the original 1990 hardware, simulating a physical MIDI cable connection at a 31250 baud rate.
 
 Step-by-step:
 
-  - **IMPORTANT** Enable Sys-Ex on the Synth: On the SD-1 front panel, press System/MIDI CONTROL button TWICE, and set SYS-EX to ON.
+  - **IMPORTANT** Enable SYS-EX on the Synth: On the SD-1 front panel, press System/MIDI CONTROL button TWICE, and set SYS-EX to ON.
 
   - Go to a safe screen: Press the Sounds or Presets button to return to the main playing screen.
 
   - Load the file: Click the Load Media button on the plugin interface and select your .syx file. A standard 64KB bank takes about 12 to 15 seconds to transfer. This is an authentic hardware limitation (the maximum speed of a physical MIDI cable).
 
-  - You will see a "Transmitting Sys-Ex Data..." overlay on the screen. Once the overlay disappears, the synth will instantly update its RAM, and your presets will be ready to play!
+  - You will see a "Transmitting SYS-EX Data..." overlay on the screen. Once the overlay disappears, the synth will instantly update its RAM, and your presets will be ready to play!
 
-  - You can also save the presets to a disk image. Here you can find an [SD-1 formatted empty disk image.](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/blob/main/SD-1-EMPTY-DISK.img) or an [empty writeable 32K SD-1 cartridge.](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/blob/main/SD-1-EMPTY-REWRITEABLE-CARTRIDGE.eeprom)
+  - You can also save the presets to a disk image. Here you can find an [SD-1 formatted empty hfe disk image (1.44MB).](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/blob/main/SD-1-EMPTY-DISK.hfe) Thanks to Headroom for it.
 </details>
 
 <details>
-  <summary>How do I load Floppy Disk Images (.img, .hfe, .dsk, .eda) or Cartridges (.eeprom, .rom, .cart)?</summary>
+  <summary>How do I load Floppy Disk Images (.img, .hfe, .dsk, .eda) or Cartridges (.eeprom, .rom, .cart, .sc32)?</summary>
 
    - Click the Load Media button on the left side of the plugin and select your file.
     Once loaded, a small green retro LED indicator will appear in the bottom-left corner of the VFD display showing ```FLOPPY: yourfile.img``` or ```CART: yourfile.crt```.
@@ -141,12 +147,7 @@ The Usual Suspects are also developing an SD-1 emulation, so it's guaranteed tha
 
 <details>
   <summary>Why there is no AU version?</summary>
-We are working on it. The AU version is really tricky; we haven't managed to create a build that works properly yet either (there are some AU specific codes already.)
-</details>
-
-<details>
-  <summary>Why there is no Linux build?</summary>
-There is an experimental Linux build to test here: [Linux experimental builds](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/issues/4)
+We are working on it. The AU version is really tricky and needs a different syncing method; we haven't managed to create a build that works properly yet either (there are some AU specific codes already.)
 </details>
 
 # License and credits

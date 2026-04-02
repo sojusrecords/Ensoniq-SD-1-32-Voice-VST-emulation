@@ -39,7 +39,7 @@ ifeq ($(CONFIG),Release)
     TARGET_ARCH := 
   endif
 
-  JUCE_CPPFLAGS := $(DEPFLAGS) "-DLINUX=1" "-DNDEBUG=1" "-DJUCE_PROJUCER_VERSION=0x8000c" "-DJUCE_MODULE_AVAILABLE_juce_audio_basics=1" "-DJUCE_MODULE_AVAILABLE_juce_audio_devices=1" "-DJUCE_MODULE_AVAILABLE_juce_audio_formats=1" "-DJUCE_MODULE_AVAILABLE_juce_audio_plugin_client=1" "-DJUCE_MODULE_AVAILABLE_juce_audio_processors=1" "-DJUCE_MODULE_AVAILABLE_juce_audio_processors_headless=1" "-DJUCE_MODULE_AVAILABLE_juce_audio_utils=1" "-DJUCE_MODULE_AVAILABLE_juce_core=1" "-DJUCE_MODULE_AVAILABLE_juce_cryptography=1" "-DJUCE_MODULE_AVAILABLE_juce_data_structures=1" "-DJUCE_MODULE_AVAILABLE_juce_events=1" "-DJUCE_MODULE_AVAILABLE_juce_graphics=1" "-DJUCE_MODULE_AVAILABLE_juce_gui_basics=1" "-DJUCE_MODULE_AVAILABLE_juce_gui_extra=1" "-DJUCE_MODULE_AVAILABLE_juce_midi_ci=1" "-DJUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1" "-DJUCE_USE_FLAC=0" "-DJUCE_VST3_CAN_REPLACE_VST2=0" "-DJUCE_STRICT_REFCOUNTEDPOINTER=1" "-DJUCE_WEB_BROWSER=0" "-DJucePlugin_Build_VST=0" "-DJucePlugin_Build_VST3=1" "-DJucePlugin_Build_AU=1" "-DJucePlugin_Build_AUv3=0" "-DJucePlugin_Build_AAX=0" "-DJucePlugin_Build_Standalone=1" "-DJucePlugin_Build_Unity=0" "-DJucePlugin_Build_LV2=0" "-DJucePlugin_Enable_IAA=0" "-DJucePlugin_Enable_ARA=0" "-DJucePlugin_Name=\"Ensoniq SD-1\"" "-DJucePlugin_Desc=\"Ensoniq SD-1 MAME Emu VST\"" "-DJucePlugin_Manufacturer=\"EnsoniqMAME\"" "-DJucePlugin_ManufacturerWebsite=\"www.sojusrecords.com\"" "-DJucePlugin_ManufacturerEmail=\"sjs@sojusrecords.com\"" "-DJucePlugin_ManufacturerCode=0x45736d61" "-DJucePlugin_PluginCode=0x53443141" "-DJucePlugin_IsSynth=1" "-DJucePlugin_WantsMidiInput=1" "-DJucePlugin_ProducesMidiOutput=0" "-DJucePlugin_IsMidiEffect=0" "-DJucePlugin_EditorRequiresKeyboardFocus=0" "-DJucePlugin_Version=0.9.7" "-DJucePlugin_VersionCode=0x907" "-DJucePlugin_VersionString=\"0.9.7\"" "-DJucePlugin_VSTUniqueID=JucePlugin_PluginCode" "-DJucePlugin_VSTCategory=kPlugCategSynth" "-DJucePlugin_Vst3Category=\"Instrument|Synth\"" "-DJucePlugin_AUMainType='aumu'" "-DJucePlugin_AUSubType=JucePlugin_PluginCode" "-DJucePlugin_AUExportPrefix=EnsoniqSD1AU" "-DJucePlugin_AUExportPrefixQuoted=\"EnsoniqSD1AU\"" "-DJucePlugin_AUManufacturerCode=JucePlugin_ManufacturerCode" "-DJucePlugin_CFBundleIdentifier=com.sojusrecords.EnsoniqSD1" "-DJucePlugin_AAXIdentifier=com.EnsoniqMAME.EnsoniqSD1" "-DJucePlugin_AAXManufacturerCode=JucePlugin_ManufacturerCode" "-DJucePlugin_AAXProductId=JucePlugin_PluginCode" "-DJucePlugin_AAXCategory=2048" "-DJucePlugin_AAXDisableBypass=0" "-DJucePlugin_AAXDisableMultiMono=0" "-DJucePlugin_IAAType=0x61757269" "-DJucePlugin_IAASubType=JucePlugin_PluginCode" "-DJucePlugin_IAAName=\"EnsoniqMAME: Ensoniq SD-1\"" "-DJucePlugin_VSTNumMidiInputs=16" "-DJucePlugin_VSTNumMidiOutputs=16" "-DJucePlugin_ARAContentTypes=0" "-DJucePlugin_ARATransformationFlags=0" "-DJucePlugin_ARAFactoryID=\"com.EnsoniqMAME.EnsoniqSD1.factory\"" "-DJucePlugin_ARADocumentArchiveID=\"com.EnsoniqMAME.EnsoniqSD1.aradocumentarchive.0.9.7\"" "-DJucePlugin_ARACompatibleArchiveIDs=\"\"" "-DJUCE_STANDALONE_APPLICATION=JucePlugin_Build_Standalone" "-DJUCER_LINUX_MAKE_6D53C8B4=1" "-DJUCE_APP_VERSION=0.9.7" "-DJUCE_APP_VERSION_HEX=0x907" $(shell $(PKG_CONFIG) --cflags alsa freetype2 fontconfig libcurl) -pthread -I../../../modules/juce_audio_processors_headless/format_types/VST3_SDK -I../../JuceLibraryCode -I../../../modules -I../../mame/src -I../../mame/src/frontend/mame -I../../mame/src/emu -I../../mame/src/osd -I../../mame/src/lib -I../../mame/src/lib/util -I../../mame/3rdparty -I../../mame/3rdparty/bx/include -I../../mame/3rdparty/asio/include $(CPPFLAGS)
+  JUCE_CPPFLAGS := $(DEPFLAGS) "-DLINUX=1" "-DNDEBUG=1" "-DJUCE_PROJUCER_VERSION=0x8000c" "-DJUCE_MODULE_AVAILABLE_juce_audio_basics=1" "-DJUCE_MODULE_AVAILABLE_juce_audio_devices=1" "-DJUCE_MODULE_AVAILABLE_juce_audio_formats=1" "-DJUCE_MODULE_AVAILABLE_juce_audio_plugin_client=1" "-DJUCE_MODULE_AVAILABLE_juce_audio_processors=1" "-DJUCE_MODULE_AVAILABLE_juce_audio_processors_headless=1" "-DJUCE_MODULE_AVAILABLE_juce_audio_utils=1" "-DJUCE_MODULE_AVAILABLE_juce_core=1" "-DJUCE_MODULE_AVAILABLE_juce_data_structures=1" "-DJUCE_MODULE_AVAILABLE_juce_events=1" "-DJUCE_MODULE_AVAILABLE_juce_graphics=1" "-DJUCE_MODULE_AVAILABLE_juce_gui_basics=1" "-DJUCE_MODULE_AVAILABLE_juce_gui_extra=1" "-DJUCE_MODULE_AVAILABLE_juce_midi_ci=1" "-DJUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1" "-DJUCE_USE_FLAC=0" "-DJUCE_VST3_CAN_REPLACE_VST2=0" "-DJUCE_STRICT_REFCOUNTEDPOINTER=1" "-DJUCE_WEB_BROWSER=0" "-DJucePlugin_Build_VST=0" "-DJucePlugin_Build_VST3=1" "-DJucePlugin_Build_AU=0" "-DJucePlugin_Build_AUv3=0" "-DJucePlugin_Build_AAX=0" "-DJucePlugin_Build_Standalone=0" "-DJucePlugin_Build_Unity=0" "-DJucePlugin_Build_LV2=0" "-DJucePlugin_Enable_IAA=0" "-DJucePlugin_Enable_ARA=0" "-DJucePlugin_Name=\"Ensoniq SD-1\"" "-DJucePlugin_Desc=\"Ensoniq SD-1 MAME Emu VST\"" "-DJucePlugin_Manufacturer=\"EnsoniqMAME\"" "-DJucePlugin_ManufacturerWebsite=\"www.sojusrecords.com\"" "-DJucePlugin_ManufacturerEmail=\"sjs@sojusrecords.com\"" "-DJucePlugin_ManufacturerCode=0x45736d61" "-DJucePlugin_PluginCode=0x53443141" "-DJucePlugin_IsSynth=1" "-DJucePlugin_WantsMidiInput=1" "-DJucePlugin_ProducesMidiOutput=0" "-DJucePlugin_IsMidiEffect=0" "-DJucePlugin_EditorRequiresKeyboardFocus=0" "-DJucePlugin_Version=0.9.8" "-DJucePlugin_VersionCode=0x908" "-DJucePlugin_VersionString=\"0.9.8\"" "-DJucePlugin_VSTUniqueID=JucePlugin_PluginCode" "-DJucePlugin_VSTCategory=kPlugCategSynth" "-DJucePlugin_Vst3Category=\"Instrument|Synth\"" "-DJucePlugin_AUMainType='aumu'" "-DJucePlugin_AUSubType=JucePlugin_PluginCode" "-DJucePlugin_AUExportPrefix=EnsoniqSD1AU" "-DJucePlugin_AUExportPrefixQuoted=\"EnsoniqSD1AU\"" "-DJucePlugin_AUManufacturerCode=JucePlugin_ManufacturerCode" "-DJucePlugin_CFBundleIdentifier=com.sojusrecords.EnsoniqSD1" "-DJucePlugin_AAXIdentifier=com.EnsoniqMAME.EnsoniqSD1" "-DJucePlugin_AAXManufacturerCode=JucePlugin_ManufacturerCode" "-DJucePlugin_AAXProductId=JucePlugin_PluginCode" "-DJucePlugin_AAXCategory=2048" "-DJucePlugin_AAXDisableBypass=0" "-DJucePlugin_AAXDisableMultiMono=0" "-DJucePlugin_IAAType=0x61757269" "-DJucePlugin_IAASubType=JucePlugin_PluginCode" "-DJucePlugin_IAAName=\"EnsoniqMAME: Ensoniq SD-1\"" "-DJucePlugin_VSTNumMidiInputs=16" "-DJucePlugin_VSTNumMidiOutputs=16" "-DJucePlugin_ARAContentTypes=0" "-DJucePlugin_ARATransformationFlags=0" "-DJucePlugin_ARAFactoryID=\"com.EnsoniqMAME.EnsoniqSD1.factory\"" "-DJucePlugin_ARADocumentArchiveID=\"com.EnsoniqMAME.EnsoniqSD1.aradocumentarchive.0.9.8\"" "-DJucePlugin_ARACompatibleArchiveIDs=\"\"" "-DJUCE_STANDALONE_APPLICATION=JucePlugin_Build_Standalone" "-DJUCER_LINUX_MAKE_6D53C8B4=1" "-DJUCE_APP_VERSION=0.9.8" "-DJUCE_APP_VERSION_HEX=0x908" $(shell $(PKG_CONFIG) --cflags alsa freetype2 fontconfig libcurl) -pthread -I../../../modules/juce_audio_processors_headless/format_types/VST3_SDK -I../../JuceLibraryCode -I../../../modules -I../../mame/src -I../../mame/src/frontend/mame -I../../mame/src/emu -I../../mame/src/osd -I../../mame/src/lib -I../../mame/src/lib/util -I../../mame/3rdparty -I../../mame/3rdparty/bx/include -I../../mame/3rdparty/asio/include $(CPPFLAGS)
 
   JUCE_CPPFLAGS_VST3 := 
   JUCE_CFLAGS_VST3 := -fPIC -fvisibility=hidden
@@ -50,9 +50,6 @@ ifeq ($(CONFIG),Release)
   JUCE_TARGET_VST3 := $(JUCE_VST3DIR)/$(JUCE_VST3SUBDIR)/EnsoniqSD1.so
   JUCE_VST3DESTDIR := $(HOME)/.vst3
   JUCE_COPYCMD_VST3 := $(JUCE_OUTDIR)/$(JUCE_VST3DIR) $(JUCE_VST3DESTDIR)
-
-  JUCE_CPPFLAGS_STANDALONE_PLUGIN := 
-  JUCE_TARGET_STANDALONE_PLUGIN := EnsoniqSD1
 
   JUCE_CPPFLAGS_SHARED_CODE :=  "-DJUCE_SHARED_CODE=1"
   JUCE_CFLAGS_SHARED_CODE := -fPIC -fvisibility=hidden
@@ -65,16 +62,13 @@ ifeq ($(CONFIG),Release)
   JUCE_CXXFLAGS += $(JUCE_CFLAGS) -std=c++20 $(CXXFLAGS)
   JUCE_LDFLAGS += $(TARGET_ARCH) -L$(JUCE_BINDIR) -L$(JUCE_LIBDIR) -L../../mame/build/linux_gcc/bin/x64/Release -L../../mame/build/linux_gcc/bin/x64/Release/mame_sd132 -L../../mame/build/linux_gcc/bin/x64/Release/mame_mame $(shell $(PKG_CONFIG) --libs alsa freetype2 fontconfig libcurl) -fvisibility=hidden -Wl,--allow-multiple-definition -lrt -ldl -lpthread -lfrontend -lemu -lmame_sd132 -loptional -lformats -ldasm -lemu -lmame_sd132 -loptional -lformats -ldasm -losd_sdl3 -lqtdbg_sdl3 -locore_sdl3 -lutils -llua -llualibs -lexpat -lzlib -lflac -lportaudio -lportmidi -ljpeg -l7z -lzstd -lutf8proc -lsqlite3 -lasmjit -lbgfx -lbimg -lbx -lsoftfloat -lsoftfloat3 -lymfm -lwdlfft -llinenoise -lSDL3 -lSDL2 $(LDFLAGS)
 
-  CLEANCMD = rm -rf $(JUCE_OUTDIR)/$(JUCE_TARGET_VST3) $(JUCE_OUTDIR)/$(JUCE_TARGET_STANDALONE_PLUGIN) $(JUCE_OUTDIR)/$(JUCE_TARGET_SHARED_CODE) $(JUCE_OUTDIR)/$(JUCE_TARGET_VST3_MANIFEST_HELPER) $(JUCE_OBJDIR)
+  CLEANCMD = rm -rf $(JUCE_OUTDIR)/$(JUCE_TARGET_VST3) $(JUCE_OUTDIR)/$(JUCE_TARGET_SHARED_CODE) $(JUCE_OUTDIR)/$(JUCE_TARGET_VST3_MANIFEST_HELPER) $(JUCE_OBJDIR)
 endif
 
 OBJECTS_ALL := \
 
 OBJECTS_VST3 := \
   $(JUCE_OBJDIR)/include_juce_audio_plugin_client_VST3_dd633589.o \
-
-OBJECTS_STANDALONE_PLUGIN := \
-  $(JUCE_OBJDIR)/include_juce_audio_plugin_client_Standalone_1a871192.o \
 
 OBJECTS_SHARED_CODE := \
   $(JUCE_OBJDIR)/PluginProcessor_a059e380.o \
@@ -91,7 +85,6 @@ OBJECTS_SHARED_CODE := \
   $(JUCE_OBJDIR)/include_juce_audio_utils_9f9fb2d6.o \
   $(JUCE_OBJDIR)/include_juce_core_f26d17db.o \
   $(JUCE_OBJDIR)/include_juce_core_CompilationTime_9257742c.o \
-  $(JUCE_OBJDIR)/include_juce_cryptography_8cb807a8.o \
   $(JUCE_OBJDIR)/include_juce_data_structures_7471b1e3.o \
   $(JUCE_OBJDIR)/include_juce_events_fd7d695.o \
   $(JUCE_OBJDIR)/include_juce_graphics_f817e147.o \
@@ -104,12 +97,11 @@ OBJECTS_SHARED_CODE := \
 OBJECTS_VST3_MANIFEST_HELPER := \
   $(JUCE_OBJDIR)/juce_VST3ManifestHelper_a45508a9.o \
 
-.PHONY: clean all strip VST3 Standalone VST3_MANIFEST_HELPER
+.PHONY: clean all strip VST3 VST3_MANIFEST_HELPER
 
-all : VST3 Standalone VST3_MANIFEST_HELPER
+all : VST3 VST3_MANIFEST_HELPER
 
 VST3 : $(JUCE_OUTDIR)/$(JUCE_TARGET_VST3)
-Standalone : $(JUCE_OUTDIR)/$(JUCE_TARGET_STANDALONE_PLUGIN)
 VST3_MANIFEST_HELPER : $(JUCE_OUTDIR)/$(JUCE_TARGET_VST3_MANIFEST_HELPER)
 
 
@@ -126,15 +118,6 @@ $(JUCE_OUTDIR)/$(JUCE_TARGET_VST3) : $(OBJECTS_VST3) $(JUCE_OBJDIR)/execinfo.cmd
 	-$(V_AT)rm -f $(JUCE_OUTDIR)/$(JUCE_VST3DIR)/Contents/moduleinfo.json
 	$(V_AT) $(JUCE_OUTDIR)/$(JUCE_TARGET_VST3_MANIFEST_HELPER) > $(JUCE_OUTDIR)/$(JUCE_VST3DIR)/Contents/Resources/moduleinfo.json
 	-$(V_AT)[ ! "$(JUCE_VST3DESTDIR)" ] || (mkdir -p $(JUCE_VST3DESTDIR) && cp -R $(JUCE_COPYCMD_VST3))
-
-$(JUCE_OUTDIR)/$(JUCE_TARGET_STANDALONE_PLUGIN) : $(OBJECTS_STANDALONE_PLUGIN) $(JUCE_OBJDIR)/execinfo.cmd $(RESOURCES) $(JUCE_OUTDIR)/$(JUCE_TARGET_SHARED_CODE)
-	@command -v $(PKG_CONFIG) >/dev/null 2>&1 || { echo >&2 "pkg-config not installed. Please, install it."; exit 1; }
-	@$(PKG_CONFIG) --print-errors alsa freetype2 fontconfig libcurl
-	@echo Linking "Ensoniq SD-1 - Standalone Plugin"
-	-$(V_AT)mkdir -p $(JUCE_BINDIR)
-	-$(V_AT)mkdir -p $(JUCE_LIBDIR)
-	-$(V_AT)mkdir -p $(JUCE_OUTDIR)
-	$(V_AT)$(CXX) -o $(JUCE_OUTDIR)/$(JUCE_TARGET_STANDALONE_PLUGIN) $(OBJECTS_STANDALONE_PLUGIN) $(JUCE_OUTDIR)/$(JUCE_TARGET_SHARED_CODE) $(JUCE_LDFLAGS) $(shell cat $(JUCE_OBJDIR)/execinfo.cmd) $(JUCE_LDFLAGS_STANDALONE_PLUGIN) $(RESOURCES) $(TARGET_ARCH)
 
 $(JUCE_OUTDIR)/$(JUCE_TARGET_SHARED_CODE) : $(OBJECTS_SHARED_CODE) $(JUCE_OBJDIR)/execinfo.cmd $(RESOURCES)
 	@command -v $(PKG_CONFIG) >/dev/null 2>&1 || { echo >&2 "pkg-config not installed. Please, install it."; exit 1; }
@@ -158,11 +141,6 @@ $(JUCE_OBJDIR)/include_juce_audio_plugin_client_VST3_dd633589.o: ../../JuceLibra
 	-$(V_AT)mkdir -p $(@D)
 	@echo "Compiling include_juce_audio_plugin_client_VST3.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_VST3) $(JUCE_CFLAGS_VST3) -o "$@" -c "$<"
-
-$(JUCE_OBJDIR)/include_juce_audio_plugin_client_Standalone_1a871192.o: ../../JuceLibraryCode/include_juce_audio_plugin_client_Standalone.cpp
-	-$(V_AT)mkdir -p $(@D)
-	@echo "Compiling include_juce_audio_plugin_client_Standalone.cpp"
-	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_STANDALONE_PLUGIN) $(JUCE_CFLAGS_STANDALONE_PLUGIN) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/PluginProcessor_a059e380.o: ../../Source/PluginProcessor.cpp
 	-$(V_AT)mkdir -p $(@D)
@@ -234,11 +212,6 @@ $(JUCE_OBJDIR)/include_juce_core_CompilationTime_9257742c.o: ../../JuceLibraryCo
 	@echo "Compiling include_juce_core_CompilationTime.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_SHARED_CODE) $(JUCE_CFLAGS_SHARED_CODE) -o "$@" -c "$<"
 
-$(JUCE_OBJDIR)/include_juce_cryptography_8cb807a8.o: ../../JuceLibraryCode/include_juce_cryptography.cpp
-	-$(V_AT)mkdir -p $(@D)
-	@echo "Compiling include_juce_cryptography.cpp"
-	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_SHARED_CODE) $(JUCE_CFLAGS_SHARED_CODE) -o "$@" -c "$<"
-
 $(JUCE_OBJDIR)/include_juce_data_structures_7471b1e3.o: ../../JuceLibraryCode/include_juce_data_structures.cpp
 	-$(V_AT)mkdir -p $(@D)
 	@echo "Compiling include_juce_data_structures.cpp"
@@ -301,10 +274,8 @@ clean:
 strip:
 	@echo Stripping Ensoniq SD-1
 	-$(V_AT)$(STRIP) --strip-unneeded $(JUCE_OUTDIR)/$(JUCE_TARGET_VST3)
-	-$(V_AT)$(STRIP) --strip-unneeded $(JUCE_OUTDIR)/$(JUCE_TARGET_STANDALONE_PLUGIN)
 	-$(V_AT)$(STRIP) --strip-unneeded $(JUCE_OUTDIR)/$(JUCE_TARGET_VST3_MANIFEST_HELPER)
 
 -include $(OBJECTS_VST3:%.o=%.d)
--include $(OBJECTS_STANDALONE_PLUGIN:%.o=%.d)
 -include $(OBJECTS_SHARED_CODE:%.o=%.d)
 -include $(OBJECTS_VST3_MANIFEST_HELPER:%.o=%.d)

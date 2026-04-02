@@ -1653,7 +1653,8 @@
 			function KeyboardHandler:velocity(state)
 
 				local function velocityWithin(pos, top, bottom)
-					local fraction = (bottom - pos) / (bottom - top)
+					-- VST FIX: INVERTED VELOCITY (pos - top) divided by the total distance
+					local fraction = (pos - top) / (bottom - top)
 					local velocity = math.floor(1.5 + 126 * fraction)
 					velocity = clamp(velocity, 1, 127)
 					return velocity

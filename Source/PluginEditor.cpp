@@ -56,6 +56,15 @@ EnsoniqSD1AudioProcessorEditor::EnsoniqSD1AudioProcessorEditor (EnsoniqSD1AudioP
         loadMediaButton.setVisible(false);
     }
     
+    // --- ROM BUTTONS ---
+        addAndMakeVisible(locateRomButton);
+        locateRomButton.setColour(juce::TextButton::buttonColourId, juce::Colour(0xff0055aa));
+        locateRomButton.onClick = [this] { locateRomButtonClicked(); };
+
+        addAndMakeVisible(rescanRomButton);
+        rescanRomButton.setColour(juce::TextButton::buttonColourId, juce::Colour(0xffaa5500));
+        rescanRomButton.onClick = [this] { audioProcessor.checkRomAndBootMame(); repaint(); };
+    
     // --- SETTINGS BUTTON & PANEL INITIALIZATION ---
     addAndMakeVisible(settingsButton);
     settingsButton.setWantsKeyboardFocus(false);
@@ -155,6 +164,20 @@ void EnsoniqSD1AudioProcessorEditor::timerCallback()
     if (audioProcessor.getFrameFlag().exchange(false, std::memory_order_acquire)) {
         repaint();
     }
+    
+        bool missing = audioProcessor.isRomMissing.load(std::memory_order_acquire);
+        bool invalid = audioProcessor.isRomInvalid.load(std::memory_order_acquire);
+        bool blocked = audioProcessor.isBlockedByAnotherInstance.load(std::memory_order_acquire);
+        bool checkFailed = audioProcessor.isSelfCheckFailed.load(std::memory_order_acquire);
+        
+        // ROM error buttons visibility
+        locateRomButton.setVisible(missing);
+        rescanRomButton.setVisible(invalid);
+
+        // Main UI buttons should only be visible if there are no errors and MAME can run
+        bool showMainUi = !(missing || invalid || blocked || checkFailed);
+        loadMediaButton.setVisible(showMainUi);
+        settingsButton.setVisible(showMainUi);
 }
 
 void EnsoniqSD1AudioProcessorEditor::paint (juce::Graphics& g)
@@ -191,24 +214,58 @@ void EnsoniqSD1AudioProcessorEditor::paint (juce::Graphics& g)
         g.setColour(juce::Colours::red);
         g.setFont(24.0f);
         
-        juce::String errorMsg = "Ensoniq(R) SD-1/32 MAME(R) Emulation\n\nError! Roms not found!\n\nPlease copy the 'sd132.zip' file into the following folder:\n\n";
+        juce::String errorMsg = "Ensoniq(R) SD-1/32 MAME(R) Emulation\n\nError! Roms not found!\n\n";
         errorMsg += juce::File::getSpecialLocation(juce::File::userDocumentsDirectory).getChildFile("EnsoniqSD1").getFullPathName();
-        errorMsg += "\n\nThen restart the plugin!";
-        g.drawFittedText(errorMsg, getLocalBounds().reduced(20), juce::Justification::centred, 10);
+        errorMsg += "\n\nPlease locate 'sd132.zip' file:";
+        g.drawFittedText(errorMsg, getLocalBounds().reduced(20).withTrimmedBottom(120), juce::Justification::centred, 10);
         return;
     }
     
-    // --- INVALID ROM WARNING MESSAGE ---
+    // --- MISSING FILES WARNING MESSAGE ---
     if (audioProcessor.isRomInvalid.load(std::memory_order_acquire)) {
         g.fillAll(juce::Colour(0xff222222));
         g.setColour(juce::Colours::red);
-        g.setFont(24.0f);
+        g.setFont(20.0f);
         
-        juce::String errorMsg = "Ensoniq(R) SD-1/32 MAME(R) Emulation\n\nError! Invalid ROM Checksum!\n\nThe 'sd132.zip' file was found but contains incorrect or modified files.\nPlease ensure you have the exact, unmodified MAME ROM dump.\n\nThen restart the plugin!";
-        g.drawFittedText(errorMsg, getLocalBounds().reduced(20), juce::Justification::centred, 10);
+        juce::String errorMsg = "Ensoniq(R) SD-1/32 MAME(R) Emulation\n\nError! Missing ROM files in zip!\n\nThe 'sd132.zip' file was found, but the following required files are missing from it:\n\n";
+        errorMsg += audioProcessor.missingFilesList;
+        errorMsg += "\nPlease add them to the zip (folders inside the zip are allowed)\nand push the Rescan button!";
+        g.drawFittedText(errorMsg, getLocalBounds().reduced(20).withTrimmedBottom(120), juce::Justification::centred, 10);
         return;
     }
+    
+    // --- SELF CHECK FAILED WARNING MESSAGE ---
+        if (audioProcessor.isSelfCheckFailed.load(std::memory_order_acquire)) {
+            g.fillAll(juce::Colour(0xff222222));
+            g.setColour(juce::Colours::red);
+            g.setFont(22.0f);
+            
+            juce::String errorMsg = "Ensoniq(R) SD-1/32 MAME(R) Emulation\n\nSystem Integrity Check Failed!\n\nThe plugin cannot start due to the following issues:\n\n";
+            errorMsg += audioProcessor.selfCheckErrorMsg;
+            errorMsg += "\n\nPlease fix these permission/installation issues and reload the plugin.";
+            
+            // Draw the text without trimming for buttons, as there is no retry button for this
+            g.drawFittedText(errorMsg, getLocalBounds().reduced(20), juce::Justification::centred, 15);
+            return;
+        }
+    
+    // --- ENGINE STANDBY / OFFLINE MESSAGE ---
+        // If ROMs are fine, no instance blocks exist, NO self-check errors, but MAME is simply not running.
+        if (!audioProcessor.isMameRunningFlag() &&
+            !audioProcessor.isRomMissing.load(std::memory_order_acquire) &&
+            !audioProcessor.isRomInvalid.load(std::memory_order_acquire) &&
+            !audioProcessor.isBlockedByAnotherInstance.load(std::memory_order_acquire) &&
+            !audioProcessor.isSelfCheckFailed.load(std::memory_order_acquire))
+        {
+            g.fillAll(juce::Colour(0xff222222));
+            g.setColour(juce::Colours::red);
+            g.setFont(22.0f);
 
+            juce::String msg = "Ensoniq(R) SD-1/32 MAME(R) Emulation\n\nMAME(R) Engine Offline\n\nThe emulator is halted or waiting for the host's audio engine.\n\nIf your DAW is currently scanning plugins, this is normal.\nIf the emulator crashed or failed to start, please reload the plugin!";
+            g.drawFittedText(msg, getLocalBounds().reduced(20), juce::Justification::centred, 10);
+            return;
+        }
+   
     // ==============================================================================
     // --- 1. MAME RENDER ROUTINE (Base Layer: Physical machine, grey panel, buttons)
     // ==============================================================================
@@ -353,7 +410,7 @@ void EnsoniqSD1AudioProcessorEditor::paintOverChildren(juce::Graphics& g)
         
         g.setColour(juce::Colours::white);
         g.setFont(22.0f);
-        g.drawText("Transmitting Sys-Ex Data...", panelRect.withTrimmedTop(20.0f).withHeight(30.0f), juce::Justification::centred);
+        g.drawText("Transmitting SYS-EX Data...", panelRect.withTrimmedTop(20.0f).withHeight(30.0f), juce::Justification::centred);
         
         g.setColour(juce::Colours::lightgrey);
         g.setFont(15.0f);
@@ -449,6 +506,10 @@ void EnsoniqSD1AudioProcessorEditor::resized()
     y += rowHeight + spacing;
 
     closeSettingsButton.setBounds(panelRect.getCentreX() - 50, y, 100, rowHeight);
+    
+    // ROM Buttons positions (anchored to the bottom to avoid text overlap)
+        locateRomButton.setBounds(getWidth() / 2 - 100, getHeight() - 100, 200, 40);
+        rescanRomButton.setBounds(getWidth() / 2 - 100, getHeight() - 100, 200, 40);
 }
 
 // ==============================================================================
@@ -479,7 +540,7 @@ void EnsoniqSD1AudioProcessorEditor::loadMediaButtonClicked()
 {
     fileChooser = std::make_unique<juce::FileChooser>("Select Floppy Image, Cartridge or SYS-EX file",
         juce::File::getSpecialLocation(juce::File::userHomeDirectory),
-        "*.img;*.hfe;*.dsk;*.eda;*.syx;*.eeprom;*.rom;*.cart");
+        "*.img;*.hfe;*.dsk;*.eda;*.syx;*.eeprom;*.rom;*.cart;*.sc32");
 
     auto folderChooserFlags = juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles;
 
@@ -520,7 +581,7 @@ void EnsoniqSD1AudioProcessorEditor::loadMediaButtonClicked()
 
                             juce::String ext = file.getFileExtension().toLowerCase();
 
-                            if (ext == ".eeprom" || ext == ".rom" || ext == ".cart") {
+                            if (ext == ".eeprom" || ext == ".rom" || ext == ".sc32" || ext == ".cart") {
                                 audioProcessor.pendingCartPath = audioProcessor.pendingFloppyPath;
                                 audioProcessor.requestCartLoad.store(true, std::memory_order_release);
                                 audioProcessor.isCartLoaded.store(true, std::memory_order_release);
@@ -600,5 +661,34 @@ void EnsoniqSD1AudioProcessorEditor::saveGlobalSettings()
     xml.setAttribute("window_width", audioProcessor.savedWindowWidth);
     xml.setAttribute("window_height", audioProcessor.savedWindowHeight);
 
+    // Save the custom ROM path
+    xml.setAttribute("rom_path", audioProcessor.customRomPath);
+    
     xml.writeTo(settingsFile);
+}
+
+// Check ROMs
+void EnsoniqSD1AudioProcessorEditor::locateRomButtonClicked()
+{
+    romChooser = std::make_unique<juce::FileChooser>("Locate sd132.zip",
+        juce::File::getSpecialLocation(juce::File::userHomeDirectory),
+        "*.zip");
+
+    auto folderChooserFlags = juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles;
+
+    romChooser->launchAsync(folderChooserFlags, [this](const juce::FileChooser& fc) {
+        auto file = fc.getResult();
+        if (file.existsAsFile()) {
+            
+            // Set the custom path directly to the selected zip file
+            audioProcessor.customRomPath = file.getFullPathName();
+            
+            // Immediately save global settings so the path is remembered for the next session
+            saveGlobalSettings();
+            
+            // Re-check ROMs and attempt to boot the engine
+            audioProcessor.checkRomAndBootMame();
+            repaint();
+        }
+    });
 }

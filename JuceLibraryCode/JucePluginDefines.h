@@ -17,7 +17,7 @@
  #define JucePlugin_Build_VST3             1
 #endif
 #ifndef  JucePlugin_Build_AU
- #define JucePlugin_Build_AU               1
+ #define JucePlugin_Build_AU               0
 #endif
 #ifndef  JucePlugin_Build_AUv3
  #define JucePlugin_Build_AUv3             0
@@ -26,7 +26,7 @@
  #define JucePlugin_Build_AAX              0
 #endif
 #ifndef  JucePlugin_Build_Standalone
- #define JucePlugin_Build_Standalone       1
+ #define JucePlugin_Build_Standalone       0
 #endif
 #ifndef  JucePlugin_Build_Unity
  #define JucePlugin_Build_Unity            0
@@ -77,13 +77,13 @@
  #define JucePlugin_EditorRequiresKeyboardFocus  0
 #endif
 #ifndef  JucePlugin_Version
- #define JucePlugin_Version                0.9.7
+ #define JucePlugin_Version                0.9.8
 #endif
 #ifndef  JucePlugin_VersionCode
- #define JucePlugin_VersionCode            0x907
+ #define JucePlugin_VersionCode            0x908
 #endif
 #ifndef  JucePlugin_VersionString
- #define JucePlugin_VersionString          "0.9.7"
+ #define JucePlugin_VersionString          "0.9.8"
 #endif
 #ifndef  JucePlugin_VSTUniqueID
  #define JucePlugin_VSTUniqueID            JucePlugin_PluginCode
@@ -155,7 +155,7 @@
  #define JucePlugin_ARAFactoryID           "com.EnsoniqMAME.EnsoniqSD1.factory"
 #endif
 #ifndef  JucePlugin_ARADocumentArchiveID
- #define JucePlugin_ARADocumentArchiveID   "com.EnsoniqMAME.EnsoniqSD1.aradocumentarchive.0.9.7"
+ #define JucePlugin_ARADocumentArchiveID   "com.EnsoniqMAME.EnsoniqSD1.aradocumentarchive.0.9.8"
 #endif
 #ifndef  JucePlugin_ARACompatibleArchiveIDs
  #define JucePlugin_ARACompatibleArchiveIDs  ""

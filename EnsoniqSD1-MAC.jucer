@@ -4,7 +4,7 @@
               addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1" bundleIdentifier="com.sojusrecords.EnsoniqSD1"
               companyWebsite="www.sojusrecords.com" companyCopyright="Open Source"
               companyName="EnsoniqMAME" pluginCharacteristicsValue="pluginIsSynth,pluginWantsMidiIn"
-              pluginFormats="buildAU,buildStandalone,buildVST3" version="0.9.7"
+              pluginFormats="buildAU,buildStandalone,buildVST3" version="0.9.8"
               pluginName="Ensoniq SD-1" pluginDesc="Ensoniq SD-1 MAME Emu VST"
               pluginManufacturer="EnsoniqMAME" pluginManufacturerCode="Esma"
               pluginCode="SD1A" pluginAUExportPrefix="EnsoniqSD1AU" companyEmail="sjs@sojusrecords.com"
@@ -50,7 +50,6 @@
             useGlobalPath="1"/>
     <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
     <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
-    <MODULE id="juce_cryptography" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
     <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
     <MODULE id="juce_events" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
     <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
@@ -89,7 +88,6 @@
         <MODULEPATH id="juce_gui_basics" path="../../Documents/JUCE/modules"/>
         <MODULEPATH id="juce_gui_extra" path="../../Documents/JUCE/modules"/>
         <MODULEPATH id="juce_midi_ci" path="../../Documents/JUCE/modules"/>
-        <MODULEPATH id="juce_cryptography" path="../../Documents/JUCE/modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
   </EXPORTFORMATS>
