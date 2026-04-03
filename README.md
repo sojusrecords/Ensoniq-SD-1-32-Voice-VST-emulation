@@ -104,6 +104,7 @@ Everything. Check the original manual here: [SD-1 Manual at Polynominal](https:/
 - Whitelist the plugin in your antivirus app. The plugin is writing some data to temp folder (e.g. nvram and osram files, lua plugins) and to your Documents/EnsoniqSD1 folder (e.g. settings.xml)
 - Your sequencer is blacklisting the plugin: if the plugin scanner provides error message or a log file then send it to us.
 - Reset global settings: go to Documents/EnsoniqSD1 and delete the file "settings.xml" and delete temp files
+- Saving requires holding down PRESETS button and pressing a BANK button. You can save the presets with a little trick: assign the buttons to a physical or virtual midi controller. With this workaround you can save the preset as you can hold down any buttons simultaneous.
 
 # FAQ
 <details>
@@ -122,6 +123,11 @@ Step-by-step:
   - You will see a "Transmitting SYS-EX Data..." overlay on the screen. Once the overlay disappears, the synth will instantly update its RAM, and your presets will be ready to play!
 
   - You can also save the presets to a disk image. Here you can find an [SD-1 formatted empty hfe disk image (1.44MB).](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/blob/main/SD-1-EMPTY-DISK.hfe) Thanks to Headroom for it.
+</details>
+
+<details>
+  <summary>How can I save my presets?</summary>
+  Saving requires holding down PRESETS button and pressing a BANK button. You can save the presets with a little trick: assign the buttons to a physical or virtual midi controller. With this workaround you can save the preset as you can hold down any buttons simultaneous.
 </details>
 
 <details>

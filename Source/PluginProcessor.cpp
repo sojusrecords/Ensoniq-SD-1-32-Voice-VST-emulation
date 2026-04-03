@@ -1546,7 +1546,7 @@ bool EnsoniqSD1AudioProcessor::extractLegacyMameState(const juce::String& base64
     // 2. Exactly locate the ZLIB header (it is usually located at offset 32 after the MAME header)
     int zlibOffset = 32;
     if (compData[zlibOffset] != 0x78) {
-        // Ha valamiért nem a 32. bájton indul, megkeressük:
+        // If for some reason it doesn't start at byte 32, we'll look for it:
         zlibOffset = -1;
         for (size_t i = 32; i < compSize - 1; ++i) {
             if (compData[i] == 0x78 && (compData[i+1] == 0x9C || compData[i+1] == 0xDA || compData[i+1] == 0x01)) {
@@ -1801,27 +1801,51 @@ bool EnsoniqSD1AudioProcessor::runSelfCheck()
         errors.add("- No write permission to OS Temp directory!");
     }
 
-    // --- 3. PLUGINS FOLDER EXISTENCE (Mac/Linux AU/VST3 Sandbox check) ---
-#ifndef _WIN32
-    juce::File exeFile = juce::File::getSpecialLocation(juce::File::currentExecutableFile);
-    juce::File contentsDir = exeFile.getParentDirectory().getParentDirectory();
-    juce::File pluginsDir = contentsDir.getChildFile("Resources").getChildFile("plugins");
-    
-    if (!pluginsDir.isDirectory() && wrapperType == juce::AudioProcessor::wrapperType_AudioUnit) {
-        juce::File candidate = exeFile;
-        for (int i = 0; i < 6 && candidate.exists(); ++i) {
-            if (candidate.getFileExtension() == ".component") {
-                pluginsDir = candidate.getChildFile("Contents/Resources/plugins");
-                break;
+    // --- 3. PLUGINS FOLDER EXISTENCE & EXTRACTION (Cross-platform Sandbox & Antivirus check) ---
+    #ifndef _WIN32
+        // macOS / Linux AU/VST3 Sandbox check
+        juce::File exeFile = juce::File::getSpecialLocation(juce::File::currentExecutableFile);
+        juce::File contentsDir = exeFile.getParentDirectory().getParentDirectory();
+        juce::File pluginsDir = contentsDir.getChildFile("Resources").getChildFile("plugins");
+        
+        if (!pluginsDir.isDirectory() && wrapperType == juce::AudioProcessor::wrapperType_AudioUnit) {
+            juce::File candidate = exeFile;
+            for (int i = 0; i < 6 && candidate.exists(); ++i) {
+                if (candidate.getFileExtension() == ".component") {
+                    pluginsDir = candidate.getChildFile("Contents/Resources/plugins");
+                    break;
+                }
+                candidate = candidate.getParentDirectory();
             }
-            candidate = candidate.getParentDirectory();
         }
-    }
 
-    if (!pluginsDir.isDirectory()) {
-        errors.add("- Missing MAME plugins folder: Resources/plugins");
-    }
-#endif
+        if (!pluginsDir.isDirectory()) {
+            errors.add("- Missing MAME plugins folder: Resources/plugins");
+        }
+    #else
+        // Windows: Extract plugins to Temp dir safely AND check permissions here
+        juce::File tempMameDir = juce::File::getSpecialLocation(juce::File::tempDirectory).getChildFile("EnsoniqSD1_MAME_Data");
+        juce::File requiredPluginFile = tempMameDir.getChildFile("plugins").getChildFile("layout").getChildFile("init.lua");
+
+        // Extract only if the required plugin script is completely missing
+        if (!requiredPluginFile.existsAsFile())
+        {
+            tempMameDir.createDirectory();
+            juce::MemoryInputStream zipStream(BinaryData::mame_plugins_zip, BinaryData::mame_plugins_zipSize, false);
+            juce::ZipFile zip(zipStream);
+            
+            auto result = zip.uncompressTo(tempMameDir);
+            if (!result.wasOk()) {
+                // Send error directly to the GUI instead of the silent logger!
+                errors.add("- Failed to extract MAME plugins to the Windows Temp directory. Blocked by Antivirus or missing permissions?");
+            }
+        }
+        
+        // Double-check that it actually exists after potential extraction (Catches aggressive real-time Antivirus deletion)
+        if (!requiredPluginFile.existsAsFile()) {
+            errors.add("- MAME layout plugins are missing from the Windows Temp directory.");
+        }
+    #endif
 
     // --- EVALUATE RESULTS ---
     if (errors.size() > 0) {
@@ -1983,31 +2007,19 @@ void EnsoniqSD1AudioProcessor::runMameEngine()
         args.push_back(safePath);
                      
     // --- 3. PLUGINS PATH CONFIGURATION ---
-#ifdef _WIN32
-    // Windows: Unzip Lua plugins to Temp dir safely
-    juce::File tempMameDir = juce::File::getSpecialLocation(juce::File::tempDirectory).getChildFile("EnsoniqSD1_MAME_Data");
-
-    // Only extract on the first run
-    if (!tempMameDir.exists())
-    {
-        tempMameDir.createDirectory();
-
-        // Extracting from BinaryData
-        juce::MemoryInputStream zipStream(BinaryData::mame_plugins_zip, BinaryData::mame_plugins_zipSize, false);
-        juce::ZipFile zip(zipStream);
-        zip.uncompressTo(tempMameDir);
-    }
-
-    // Real Windows path (UTF-8 protected)
-    juce::String finalPluginsPath = tempMameDir.getChildFile("plugins").getFullPathName();
-    args.push_back("-pluginspath");
-    args.push_back(finalPluginsPath.toUTF8().getAddress());
-#else
+    #ifdef _WIN32
+        // Extraction and verification is now securely handled in runSelfCheck() beforehand
+        juce::File tempMameDir = juce::File::getSpecialLocation(juce::File::tempDirectory).getChildFile("EnsoniqSD1_MAME_Data");
+        juce::String finalPluginsPath = tempMameDir.getChildFile("plugins").getFullPathName();
+        
+        args.push_back("-pluginspath");
+        args.push_back(finalPluginsPath.toUTF8().getAddress());
+    #else
         // Original macOS solution
         juce::File exeFile = juce::File::getSpecialLocation(juce::File::currentExecutableFile);
         juce::File pluginsDir = exeFile.getParentDirectory().getParentDirectory().getChildFile("Resources").getChildFile("plugins");
         
-        // NEW: AU Sandbox fallback routine
+        // AU Sandbox fallback routine
         if (!pluginsDir.isDirectory() && wrapperType == juce::AudioProcessor::wrapperType_AudioUnit) {
             juce::File candidate = exeFile;
             for (int i = 0; i < 6 && candidate.exists(); ++i) {
@@ -2021,7 +2033,7 @@ void EnsoniqSD1AudioProcessor::runMameEngine()
         
         args.push_back("-pluginspath");
         args.push_back(pluginsDir.getFullPathName().toStdString());
-#endif
+    #endif
 
     args.push_back("-plugin");
     args.push_back("layout");
