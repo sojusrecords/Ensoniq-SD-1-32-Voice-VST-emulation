@@ -60,14 +60,13 @@ Everything. Check the original manual here: [SD-1 Manual at Polynominal](https:/
 - A VST3 compatible DAW. If it's not working, come back later :)
   - Tested and working:
     - macOS: Ableton Live 12, Bitwig Studio 6, Cubase 15, Fender Studio Pro 8, FL Studio 2025, Reaper 7.
-    - Windows: Ableton Live 12, Bitwig Studio 6, Cubase 15, FL Studio 2025, Reaper 7, Cantabile.
+    - Windows: Ableton Live 12, Bitwig Studio 6, Cubase 15, FL Studio 2025, Reaper 7, Cantabile, Reason 12.5
     - Linux: Bitwig Studio 6, Reaper 7
-  - Working but wav render is wrong: Reason 12 (Windows)
   - If it's not working for you check [Troubleshooting](#Troubleshooting).
 - IMPORTANT - ROM Files Required!<br/>
   Due to copyright reasons, the required Ensoniq ROM files are NOT included.
 
-  * We've removed the strict ROM verification. Now it's up to MAME to accept your files; we only check for their presence, and it doesn't matter whether they're packaged in a folder or not. If your ROM has been good so far, it will continue to be good. At startup, it checks for the presence of sd132.zip; if it doesn't find it, you can set the exact path using a button. We also check to see if all 10 files are present, and you can rescan the zip file without reloading the plugin. The plugin performs a self-check at every startup, which checks the following: whether it has write permissions to the temp folder and the EnsoniqSD1 folder, checks the Lua plugins, and verifies if the MAME engine failed to start for any reason.
+  * We've removed the strict ROM verification. Now it's up to MAME to accept your files; we only check for their presence, and it doesn't matter whether they're organized into a folder within the zip file or not. If your ROM has been good so far, it will continue to be good. At startup, it checks for the presence of sd132.zip; if it doesn't find it, you can set the exact path using a button. We also check to see if all 10 files are present, and you can rescan the zip file without reloading the plugin. The plugin performs a self-check at every startup, which checks the following: whether it has write permissions to the temp folder and the EnsoniqSD1 folder, checks the Lua plugins, and verifies if the MAME engine failed to start for any reason.
 
   To make the plugin work:
   * Create a folder named EnsoniqSD1 in your user's Documents folder:
@@ -97,7 +96,7 @@ Everything. Check the original manual here: [SD-1 Manual at Polynominal](https:/
 
 # Troubleshooting
 - The plugin performs a self-check at every startup, which checks the following: whether it has write permissions to the temp folder and the EnsoniqSD1 folder, checks the Lua plugins, and verifies if the MAME engine failed to start for any reason. It will notify you if it finds any errors.
-- We've removed the strict ROM verification. Now it's up to MAME to accept your files; we only check for their presence, and it doesn't matter whether they're packaged in a folder or not. If your ROM has been good so far, it will continue to be good. At startup, it checks for the presence of sd132.zip; if it doesn't find it, you can set the exact path using a button. We also check to see if all 10 files are present, and you can rescan the zip file without reloading the plugin.
+- We've removed the strict ROM verification. Now it's up to MAME to accept your files; we only check for their presence, and it doesn't matter whether they're organized into a folder within the zip file or not. If your ROM has been good so far, it will continue to be good. At startup, it checks for the presence of sd132.zip; if it doesn't find it, you can set the exact path using a button. We also check to see if all 10 files are present, and you can rescan the zip file without reloading the plugin.
 - On macOS: if 'sudo xattr -rd...' fails, try codesign the plugin:
   - Open a terminal window, install Xcode Command Line Tools if needed: ```xcode-select --install```
   - ```sudo codesign -f -s /Library/Audio/Plug-Ins/VST3/EnsoniqSD1.vst3```
