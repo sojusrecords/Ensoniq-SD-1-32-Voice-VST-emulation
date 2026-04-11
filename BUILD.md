@@ -176,7 +176,7 @@ To ensure flawless real-time audio performance and zero dropouts on Windows, the
 
 - AU is only for LOGIC/GARAGEBAND ONLY! Please note that the AU plugin is ONLY for Logic and GarageBand! Any other DAW must use the VST3 version! Tested on Logic 11.
 
-### A Note on macOS Sandboxing & Post-Build Scripts
+## A Note on macOS Sandboxing & Post-Build Scripts
 If you check the Projucer settings, you will see a custom Post-Build Script.
 Because macOS Sequoia and strict DAW sandboxing block dynamic external library loading, this script automatically:
 
@@ -188,7 +188,7 @@ Because macOS Sequoia and strict DAW sandboxing block dynamic external library l
 
 - The project uses double @rpath linker flags (-Wl,-rpath,/Library/Frameworks -Wl,-rpath,@loader_path/../Frameworks) so it works seamlessly both on the developer's machine and the end-user's machine.
 
-**Windows (Visual Studio 2026)**
+## Windows (Visual Studio 2026)
 
 - In Visual Studio, ensure your build target is set to Release and x64.
 
@@ -202,7 +202,28 @@ Because macOS Sequoia and strict DAW sandboxing block dynamic external library l
   Due to copyright reasons, the required Ensoniq ROM files are NOT included.
   To make the plugin work:
 * Create a folder named EnsoniqSD1 in your user's Documents folder:
+
 - Win C:\Users\yourusername\Documents
+
 - macOS /yourusername/Documents/
+
 - Linux /yourusername/Documents/
-* Obtain the Ensoniq SD-1 32 variant AND Ensoniq 2x40 VFD ROM files and place files in that folder AND zip them to sd132.zip.<br/>
+
+  * Obtain the Ensoniq SD-1/32 ```sd132``` variant AND Ensoniq ```2x40 VFD ROM``` files and place these files in that folder AND zip them to sd132.zip.<br/>
+
+    - ```esqvfd_font_vfx.bin```<br/>
+    - ```sd1_32_402_hi.bin```<br/>
+    - ```sd1_32_402_lo.bin```<br/>
+    - ```sd1_410_hi.bin```<br/>
+    - ```sd1_410_lo.bin```<br/>
+    - ```u34.bin```<br/>
+    - ```u35.bin```<br/>
+    - ```u36.bin```<br/>
+    - ```u37.bin```<br/>
+    - ```u38.bin```<br/>
+
+  * The final structure of sd132.zip in your Documents/EnsoniqSD1 folder looks like this:<br/>
+    ![sd132.zip](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/blob/main/roms.png)<br/>
+
+## Fire up your favourite DAW and go create!
+
