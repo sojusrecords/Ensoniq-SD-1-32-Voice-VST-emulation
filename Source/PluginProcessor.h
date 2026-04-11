@@ -24,6 +24,7 @@
 #endif
 
 #include <JuceHeader.h>
+#include <fstream> 
 
 // MAME Core Includes
 #include "emu.h"
@@ -75,7 +76,8 @@ public:
     // --- MEDIA STATE TRACKING ---
         std::atomic<bool> isFloppyLoaded{ false };
         std::atomic<bool> isCartLoaded{ false };
-        juce::String loadedMediaName{ "" };
+        juce::String loadedFloppyName{ "" };
+        juce::String loadedCartName{ "" };
 
     // --- WINDOW SIZE PERSISTENCE ---
     // Stores the last window size set by the user to recall it upon project load
@@ -95,12 +97,9 @@ public:
     std::atomic<double> initialSampleRate{ 0.0 };
     std::atomic<bool> sampleRateMismatch{ false };
     
-    // --- SINGLE INSTANCE PROTECTION ---
-    // MAME's architecture inherently limits it to a single running instance per process.
-    // We must track this to disable additional VST instances in the DAW gracefully.
-    std::atomic<bool> isBlockedByAnotherInstance{ false };
-    bool isMasterInstance = false;
-
+    // Flag to indicate if the plugin is running as an AU in an unsupported host (e.g., FL Studio, Ableton)
+    std::atomic<bool> isUnsupportedAUHost{ false };
+    
     uint64_t getTotalRead() const { return totalRead.load(std::memory_order_acquire); }
     uint64_t getTotalWritten() const { return totalWritten.load(std::memory_order_acquire); }
 
@@ -282,14 +281,16 @@ public:
 
     // Dynamic offline buffer for sync
     std::atomic<int> maxOfflineBuffer{ 1024 };
-        
-        
-    // --- RAM INJECTION BUFFERS ---
+                
+        // --- RAM INJECTION BUFFERS ---
         juce::MemoryBlock pendingOsram;
         juce::MemoryBlock pendingSeqRam;
         std::atomic<bool> pendingRamInjection{ false };
+    
+        // AU COLD BOOT HACK
+        std::atomic<bool> needsBootPreRoll { false };
 
-    // SysEx loading
+        // SysEx loading
         void loadSysExFile(const juce::File& syxFile);
     
         // --- DYNAMIC PANEL LAYOUT SELECTION ---
@@ -318,6 +319,15 @@ public:
 
     // Indicates which screen buffer (0 or 1) is fully rendered and ready to be drawn by the UI
     std::atomic<int> readyBufferIndex{ 0 };
+    
+    // PendingAUMidi
+    std::vector<std::pair<juce::MidiMessage, int>> pendingAUMidi;
+    
+    // AnchorSet for AU
+    std::atomic<bool> auAnchorSet{ false };
+    
+    // --- MACRO STATE ---
+    std::atomic<bool> isSaveMacroActive{ false };
 
     void shutdownMame();
     
@@ -331,7 +341,9 @@ private:
     std::atomic<double> hostSampleRate{ 44100.0 };
                 
     int getInternalHardwareLatencySamples() const {
-        return static_cast<int>(0.0244 * hostSampleRate.load(std::memory_order_relaxed));
+        double sr = hostSampleRate.load(std::memory_order_relaxed);
+                int base = static_cast<int>(0.0244 * sr);
+                return base;
     }
 
     // Audio Ring Buffers (Generously sized to prevent underruns)
@@ -369,6 +381,6 @@ private:
     
     bool lastOfflineState = false;
     int64_t lastPlayheadPos = 0;
-
+    
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(EnsoniqSD1AudioProcessor)
 };

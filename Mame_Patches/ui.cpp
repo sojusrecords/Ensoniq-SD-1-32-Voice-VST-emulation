@@ -642,6 +642,7 @@ void mame_ui_manager::display_startup_screens(bool first_time)
 }
 
 
+
 //-------------------------------------------------
 //  set_startup_text - set the text to display
 //  at startup
@@ -686,7 +687,7 @@ bool mame_ui_manager::update_and_render(render_container &container)
 
 	// render any cheat stuff at the bottom
 	if (machine().phase() >= machine_phase::RESET)
-		mame_machine_manager::instance()->cheat().render_text(*this, container);
+		machine().manager().cheat().render_text(*this, container);
 
 	// draw the FPS counter if it should be visible
 	if (show_fps_counter())
@@ -1500,7 +1501,7 @@ uint32_t mame_ui_manager::handler_ingame(render_container &container)
 
 	// handle a toggle cheats request
 	if (machine().ui_input().pressed(IPT_UI_TOGGLE_CHEAT))
-		mame_machine_manager::instance()->cheat().set_enable(!mame_machine_manager::instance()->cheat().enabled(), true);
+		machine().manager().cheat().set_enable(!machine().manager().cheat().enabled(), true);
 
 	// toggle MNG recording
 	if (machine().ui_input().pressed(IPT_UI_RECORD_MNG))
@@ -1828,9 +1829,9 @@ int32_t mame_ui_manager::slider_volume(std::string *str, int32_t newval)
 		if (curval == -960)
 			*str = _("Mute");
 		else if (curval % 10)
-			*str = string_format(_(u8"%1$5.1f\u00a0dB"), float(curval) * 0.1f);
+			*str = string_format(_("%1$5.1f\u00a0dB"), float(curval) * 0.1f);
 		else
-			*str = string_format(_(u8"%1$3d\u00a0dB"), curval / 10);
+			*str = string_format(_("%1$3d\u00a0dB"), curval / 10);
 	}
 	return curval;
 }
@@ -1853,9 +1854,9 @@ int32_t mame_ui_manager::slider_devvol(device_sound_interface *snd, std::string 
 		if (curval == -960)
 			*str = _("Mute");
 		else if (curval % 10)
-			*str = string_format(_(u8"%1$5.1f\u00a0dB"), float(curval) * 0.1f);
+			*str = string_format(_("%1$5.1f\u00a0dB"), float(curval) * 0.1f);
 		else
-			*str = string_format(_(u8"%1$3d\u00a0dB"), curval / 10);
+			*str = string_format(_("%1$3d\u00a0dB"), curval / 10);
 	}
 	return curval;
 }
@@ -1878,9 +1879,9 @@ int32_t mame_ui_manager::slider_devvol_chan(device_sound_interface *snd, int cha
 		if (curval == -960)
 			*str = _("Mute");
 		else if (curval % 10)
-			*str = string_format(_(u8"%1$5.1f\u00a0dB"), float(curval) * 0.1f);
+			*str = string_format(_("%1$5.1f\u00a0dB"), float(curval) * 0.1f);
 		else
-			*str = string_format(_(u8"%1$3d\u00a0dB"), curval / 10);
+			*str = string_format(_("%1$3d\u00a0dB"), curval / 10);
 	}
 	return curval;
 }
@@ -1970,7 +1971,7 @@ int32_t mame_ui_manager::slider_refresh(screen_device &screen, std::string *str,
 	}
 
 	if (str)
-		*str = string_format(_(u8"%1$.3f\u00a0Hz"), screen.frame_period().as_hz());
+		*str = string_format(_("%1$.3f\u00a0Hz"), screen.frame_period().as_hz());
 	double refresh = screen.frame_period().as_hz();
 	return floor((refresh - defrefresh) * 1000.0 + 0.5);
 }

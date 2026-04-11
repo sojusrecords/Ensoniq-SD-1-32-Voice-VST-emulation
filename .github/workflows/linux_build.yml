@@ -12,7 +12,7 @@ env:
 jobs:
 
   # -------------------------------------------------------------------
-  # Job 1: Build SDL3 once, cache it. No matrix — runs once.
+  # Job 1: Build SDL3 once, cache it. 
   # -------------------------------------------------------------------
   build-sdl3:
     runs-on: ubuntu-22.04
@@ -86,11 +86,6 @@ jobs:
         pkg-config --modversion sdl3 sdl3-ttf sdl3-image
 
   # -------------------------------------------------------------------
-  # Shared step definitions as a YAML anchor (not supported in GHA —
-  # steps are just duplicated between build-generic and build-avx2).
-  # -------------------------------------------------------------------
-
-  # -------------------------------------------------------------------
   # Job 2: Generic build. Depends on SDL3 job.
   # -------------------------------------------------------------------
   build-generic:
@@ -146,10 +141,43 @@ jobs:
     - name: Apply MAME patches
       if: steps.cache-mame.outputs.cache-hit != 'true'
       run: |
-        cp Mame_Patches/esq5505.cpp mame/src/devices/sound/esq5505.cpp
-        cp Mame_Patches/ui.cpp      mame/src/frontend/mame/ui/ui.cpp
-        cp Mame_Patches/sd132.lay   mame/src/mame/layout/sd132.lay
+        cp Mame_Patches/esq5505.cpp mame/src/mame/ensoniq/esq5505.cpp
+        cp Mame_Patches/sd132.lay mame/src/mame/layout/sd132.lay
         cp Mame_Patches/esq16_dsk.cpp mame/src/lib/formats/esq16_dsk.cpp
+        cp Mame_Patches/main.h mame/src/emu/main.h
+        cp Mame_Patches/render.cpp mame/src/emu/render.cpp
+        cp Mame_Patches/emufwd.h mame/src/emu/emufwd.h
+        cp Mame_Patches/machine.h mame/src/emu/machine.h
+        cp Mame_Patches/video.cpp mame/src/emu/video.cpp
+        cp Mame_Patches/emu.h mame/src/emu/emu.h
+        cp Mame_Patches/sound.cpp mame/src/emu/sound.cpp
+        cp Mame_Patches/machine.cpp mame/src/emu/machine.cpp
+        cp Mame_Patches/rendlay.cpp mame/src/emu/rendlay.cpp
+        cp Mame_Patches/debugcpu.cpp mame/src/emu/debug/debugcpu.cpp
+        cp Mame_Patches/cheat.cpp mame/src/frontend/mame/cheat.cpp
+        cp Mame_Patches/clifront.cpp mame/src/frontend/mame/clifront.cpp
+        cp Mame_Patches/luaengine.cpp mame/src/frontend/mame/luaengine.cpp
+        cp Mame_Patches/luaengine.h mame/src/frontend/mame/luaengine.h
+        cp Mame_Patches/luaengine_render.cpp mame/src/frontend/mame/luaengine_render.cpp
+        cp Mame_Patches/mame.cpp mame/src/frontend/mame/mame.cpp
+        cp Mame_Patches/mame.h mame/src/frontend/mame/mame.h
+        cp Mame_Patches/ui.cpp mame/src/frontend/mame/ui/ui.cpp
+        cp Mame_Patches/pluginopt.cpp mame/src/frontend/mame/ui/pluginopt.cpp
+        cp Mame_Patches/selgame.cpp mame/src/frontend/mame/ui/selgame.cpp
+        cp Mame_Patches/mainmenu.cpp mame/src/frontend/mame/ui/mainmenu.cpp
+        cp Mame_Patches/utils.cpp mame/src/frontend/mame/ui/utils.cpp
+        cp Mame_Patches/datmenu.cpp mame/src/frontend/mame/ui/datmenu.cpp
+        cp Mame_Patches/devopt.cpp mame/src/frontend/mame/ui/devopt.cpp
+        cp Mame_Patches/viewgfx.cpp mame/src/frontend/mame/ui/viewgfx.cpp
+        cp Mame_Patches/cheatopt.cpp mame/src/frontend/mame/ui/cheatopt.cpp
+        cp Mame_Patches/selmenu.cpp mame/src/frontend/mame/ui/selmenu.cpp
+        cp Mame_Patches/selsoft.cpp mame/src/frontend/mame/ui/selsoft.cpp
+        cp Mame_Patches/miscmenu.cpp mame/src/frontend/mame/ui/miscmenu.cpp
+        cp Mame_Patches/info.cpp mame/src/frontend/mame/ui/info.cpp
+        cp Mame_Patches/simpleselgame.cpp mame/src/frontend/mame/ui/simpleselgame.cpp
+        cp Mame_Patches/main.cpp mame/src/zexall/main.cpp
+        cp Mame_Patches/ioport.h mame/src/emu/ioport.h
+        cp Mame_Patches/language.h mame/src/lib/util/language.h
 
     - name: Compile MAME sd132 (Generic)
       if: steps.cache-mame.outputs.cache-hit != 'true'
@@ -269,10 +297,43 @@ jobs:
     - name: Apply MAME patches
       if: steps.cache-mame.outputs.cache-hit != 'true'
       run: |
-        cp Mame_Patches/esq5505.cpp mame/src/devices/sound/esq5505.cpp
-        cp Mame_Patches/ui.cpp      mame/src/frontend/mame/ui/ui.cpp
-        cp Mame_Patches/sd132.lay   mame/src/mame/layout/sd132.lay
+        cp Mame_Patches/esq5505.cpp mame/src/mame/ensoniq/esq5505.cpp
+        cp Mame_Patches/sd132.lay mame/src/mame/layout/sd132.lay
         cp Mame_Patches/esq16_dsk.cpp mame/src/lib/formats/esq16_dsk.cpp
+        cp Mame_Patches/main.h mame/src/emu/main.h
+        cp Mame_Patches/render.cpp mame/src/emu/render.cpp
+        cp Mame_Patches/emufwd.h mame/src/emu/emufwd.h
+        cp Mame_Patches/machine.h mame/src/emu/machine.h
+        cp Mame_Patches/video.cpp mame/src/emu/video.cpp
+        cp Mame_Patches/emu.h mame/src/emu/emu.h
+        cp Mame_Patches/sound.cpp mame/src/emu/sound.cpp
+        cp Mame_Patches/machine.cpp mame/src/emu/machine.cpp
+        cp Mame_Patches/rendlay.cpp mame/src/emu/rendlay.cpp
+        cp Mame_Patches/debugcpu.cpp mame/src/emu/debug/debugcpu.cpp
+        cp Mame_Patches/cheat.cpp mame/src/frontend/mame/cheat.cpp
+        cp Mame_Patches/clifront.cpp mame/src/frontend/mame/clifront.cpp
+        cp Mame_Patches/luaengine.cpp mame/src/frontend/mame/luaengine.cpp
+        cp Mame_Patches/luaengine.h mame/src/frontend/mame/luaengine.h
+        cp Mame_Patches/luaengine_render.cpp mame/src/frontend/mame/luaengine_render.cpp
+        cp Mame_Patches/mame.cpp mame/src/frontend/mame/mame.cpp
+        cp Mame_Patches/mame.h mame/src/frontend/mame/mame.h
+        cp Mame_Patches/ui.cpp mame/src/frontend/mame/ui/ui.cpp
+        cp Mame_Patches/pluginopt.cpp mame/src/frontend/mame/ui/pluginopt.cpp
+        cp Mame_Patches/selgame.cpp mame/src/frontend/mame/ui/selgame.cpp
+        cp Mame_Patches/mainmenu.cpp mame/src/frontend/mame/ui/mainmenu.cpp
+        cp Mame_Patches/utils.cpp mame/src/frontend/mame/ui/utils.cpp
+        cp Mame_Patches/datmenu.cpp mame/src/frontend/mame/ui/datmenu.cpp
+        cp Mame_Patches/devopt.cpp mame/src/frontend/mame/ui/devopt.cpp
+        cp Mame_Patches/viewgfx.cpp mame/src/frontend/mame/ui/viewgfx.cpp
+        cp Mame_Patches/cheatopt.cpp mame/src/frontend/mame/ui/cheatopt.cpp
+        cp Mame_Patches/selmenu.cpp mame/src/frontend/mame/ui/selmenu.cpp
+        cp Mame_Patches/selsoft.cpp mame/src/frontend/mame/ui/selsoft.cpp
+        cp Mame_Patches/miscmenu.cpp mame/src/frontend/mame/ui/miscmenu.cpp
+        cp Mame_Patches/info.cpp mame/src/frontend/mame/ui/info.cpp
+        cp Mame_Patches/simpleselgame.cpp mame/src/frontend/mame/ui/simpleselgame.cpp
+        cp Mame_Patches/main.cpp mame/src/zexall/main.cpp
+        cp Mame_Patches/ioport.h mame/src/emu/ioport.h
+        cp Mame_Patches/language.h mame/src/lib/util/language.h
 
     - name: Compile MAME sd132 (AVX2)
       if: steps.cache-mame.outputs.cache-hit != 'true'

@@ -53,19 +53,13 @@
 #include "drivenum.h"
 #include "diimage.h"
 
+#include <iomanip>
 #include <fstream>
 
-// Global lock to prevent multiple MAME instances from running in the same process
-static std::atomic<bool> globalMameLock { false };
-
-// --- AU Highlander Instance Manager ---
-static std::mutex instanceMutex;
-static EnsoniqSD1AudioProcessor* activeMameProcessor = nullptr;
-
 // MAME Versioning stubs required by the linker
-extern const char bare_build_version[] = "0.286";
+extern const char bare_build_version[] = "0.287";
 extern const char bare_vcs_revision[] = "";
-extern const char build_version[] = "0.286";
+extern const char build_version[] = "0.287";
 
 const char * emulator_info::get_appname() { return "mame"; }
 const char * emulator_info::get_appname_lower() { return "mame"; }
@@ -129,7 +123,7 @@ void EnsoniqSD1AudioProcessor::pushAudioFromMame(const int16_t* pcmBuffer, int n
         
     uint64_t currentWritePos = totalWritten.load(std::memory_order_relaxed);
         
-        if (needAnchorSync.load(std::memory_order_acquire) && mameMachine != nullptr) {
+    if (needAnchorSync.load(std::memory_order_acquire) && mameMachine != nullptr) {
             anchorMameTime.store(mameMachine->time().as_double(), std::memory_order_relaxed);
             anchorDawSample.store(currentWritePos, std::memory_order_relaxed);
             needAnchorSync.store(false, std::memory_order_release);
@@ -153,6 +147,13 @@ void EnsoniqSD1AudioProcessor::pushAudioFromMame(const int16_t* pcmBuffer, int n
     }
     
     totalWritten.store(currentWritePos, std::memory_order_release);
+    
+    if (needAnchorSync.load(std::memory_order_acquire) && mameMachine != nullptr) {
+        anchorMameTime.store(mameMachine->time().as_double(), std::memory_order_relaxed);
+        anchorDawSample.store(currentWritePos, std::memory_order_relaxed);
+        needAnchorSync.store(false, std::memory_order_release);
+    }
+
 }
     
 // ==============================================================================
@@ -354,29 +355,37 @@ public:
                     }
                 }
         
-        // --- FLOPPY MOUNTING ---
-        if (processor->requestFloppyLoad.exchange(false, std::memory_order_acquire)) {
-            std::lock_guard<std::mutex> lock(processor->mediaMutex);
-            
-            for (device_image_interface &image : image_interface_enumerator(mame_machine->root_device())) {
-                if (image.brief_instance_name() == "flop" || image.brief_instance_name() == "floppydisk") {
-                    image.load(processor->pendingFloppyPath);
-                    break;
+                // --- FLOPPY MOUNTING ---
+                if (processor->requestFloppyLoad.exchange(false, std::memory_order_acquire)) {
+                    std::lock_guard<std::mutex> lock(processor->mediaMutex);
+                    
+                    for (device_image_interface &image : image_interface_enumerator(mame_machine->root_device())) {
+                        if (image.brief_instance_name() == "flop" || image.brief_instance_name() == "floppydisk") {
+                            if (processor->pendingFloppyPath.empty()) {
+                                image.unload(); // EJECT!
+                            } else {
+                                image.load(processor->pendingFloppyPath);
+                            }
+                            break;
+                        }
+                    }
                 }
-            }
-        }
 
-        // --- CARTRIDGE MOUNTING ---
-        if (processor->requestCartLoad.exchange(false, std::memory_order_acquire)) {
-            std::lock_guard<std::mutex> lock(processor->mediaMutex);
-            
-            for (device_image_interface &image : image_interface_enumerator(mame_machine->root_device())) {
-                if (image.brief_instance_name() == "cart" || image.brief_instance_name() == "cartridge") {
-                    image.load(processor->pendingCartPath);
-                    break;
+                // --- CARTRIDGE MOUNTING ---
+                if (processor->requestCartLoad.exchange(false, std::memory_order_acquire)) {
+                    std::lock_guard<std::mutex> lock(processor->mediaMutex);
+                    
+                    for (device_image_interface &image : image_interface_enumerator(mame_machine->root_device())) {
+                        if (image.brief_instance_name() == "cart" || image.brief_instance_name() == "cartridge") {
+                            if (processor->pendingCartPath.empty()) {
+                                image.unload(); // EJECT!
+                            } else {
+                                image.load(processor->pendingCartPath);
+                            }
+                            break;
+                        }
+                    }
                 }
-            }
-        }
         
                 // ==============================================================================
                 // --- ASYNCHRONOUS RAM INJECTION & WARM BOOT ---
@@ -436,7 +445,7 @@ public:
                                       (prim->bounds.x1 - prim->bounds.x0) < 64.0f &&
                                       (prim->bounds.y1 - prim->bounds.y0) < 64.0f);
                 
-                if (isMouseCursor) continue; // Kihagyjuk a Hash-ből! A kép stabil marad.
+                if (isMouseCursor) continue; 
 
                 auto mix = [&currentHash](const void* data, size_t len) {
                     const uint8_t* p = static_cast<const uint8_t*>(data);
@@ -769,6 +778,12 @@ juce::AudioProcessorValueTreeState::ParameterLayout EnsoniqSD1AudioProcessor::cr
 
 void EnsoniqSD1AudioProcessor::parameterChanged(const juce::String& parameterID, float newValue)
 {
+    
+        // --- SYS-EX HARDWARE LOCKOUT ---
+        if (isTransmittingSysEx.load(std::memory_order_acquire)) {
+            return; // Completely ignore DAW automation during SysEx transfer
+        }
+        
     // --- 1. SETUP ---
     if (parameterID == "buffer_size") {
                 auto* choiceParam = dynamic_cast<juce::AudioParameterChoice*>(apvts.getParameter("buffer_size"));
@@ -799,7 +814,7 @@ void EnsoniqSD1AudioProcessor::parameterChanged(const juce::String& parameterID,
             requestGlobalSave.store(true, std::memory_order_release);
         }
     
-    // --- 2. AUTOMATION ---
+        // --- 2. AUTOMATION ---
         else {
             uint64_t targetSample = totalRead.load(std::memory_order_acquire) + mameBufferThreshold.load(std::memory_order_relaxed);
             double sr = hostSampleRate.load(std::memory_order_relaxed);
@@ -879,11 +894,7 @@ EnsoniqSD1AudioProcessor::EnsoniqSD1AudioProcessor()
             buttonParams.push_back(apvts.getRawParameterValue(btn.paramID));
         }
     
-    // --- SINGLE INSTANCE LOCKING ---
-        isMasterInstance = false;
-        isBlockedByAnotherInstance.store(false, std::memory_order_release);
-
-    // Loading global settings at start
+        // Loading global settings at start
         loadGlobalSettings();
     
 #ifdef _WIN32
@@ -898,14 +909,6 @@ EnsoniqSD1AudioProcessor::EnsoniqSD1AudioProcessor()
 
 EnsoniqSD1AudioProcessor::~EnsoniqSD1AudioProcessor()
 {
-    // AU Highlander cleanup
-        {
-            std::lock_guard<std::mutex> lock(instanceMutex);
-            if (activeMameProcessor == this) {
-                activeMameProcessor = nullptr;
-            }
-        }
-        
         // safely shut down MAME engine
         shutdownMame();
 
@@ -918,7 +921,7 @@ EnsoniqSD1AudioProcessor::~EnsoniqSD1AudioProcessor()
 
 void EnsoniqSD1AudioProcessor::shutdownMame()
 {
-    if (isMasterInstance) {
+
         isMameRunning.store(false, std::memory_order_release);
                 
         mameThrottleEvent.signal();
@@ -928,13 +931,7 @@ void EnsoniqSD1AudioProcessor::shutdownMame()
             mameThread.join();
         }
        
-        isMasterInstance = false;
         mameHasStarted.store(false, std::memory_order_release);
-        isBlockedByAnotherInstance.store(true, std::memory_order_release);
-        
-        // No lock for VST3
-        globalMameLock.store(false);
-    }
 }
 
 //==============================================================================
@@ -1002,84 +999,30 @@ void EnsoniqSD1AudioProcessor::changeProgramName (int index, const juce::String&
 void EnsoniqSD1AudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
 
-    // SINGLE INSTANCE LOCK (Format-specific handling)
+    // AU anchor reset
+#if JucePlugin_Build_AU
+    auAnchorSet.store(false, std::memory_order_release);
+#endif
+        
+    juce::File docsDir = juce::File::getSpecialLocation(juce::File::userDocumentsDirectory);
+    juce::File ensoniqDir = docsDir.getChildFile("EnsoniqSD1");
+    if (!ensoniqDir.exists()) ensoniqDir.createDirectory();
 
-        if (!isMasterInstance) {
-            bool acquired = false;
-
-            if (wrapperType == juce::AudioProcessor::wrapperType_AudioUnit) {
-                            // AU Branch: Forced takeover (Highlander)
-                            std::lock_guard<std::mutex> lock(instanceMutex);
-                            
-                            if (activeMameProcessor != this) {
-                                if (activeMameProcessor != nullptr) {
-                                    // NEW: Asynchronous shutdown instead of blocking join()
-                                    auto* old = activeMameProcessor;
-                                    old->isMameRunning.store(false, std::memory_order_release);
-                                    old->mameThrottleEvent.signal();
-                                    old->mameStateEvent.signal();
-                                    
-                                    // Poll with a fast timeout to keep the Logic audio thread alive
-                                    int waited = 0;
-                                    while (old->mameHasStarted.load() && waited < 100) {
-                                        std::this_thread::sleep_for(std::chrono::milliseconds(10));
-                                        waited++;
-                                    }
-                                    
-                                    // Join is now practically instantaneous if MAME exited
-                                    if (old->mameThread.joinable()) {
-                                        old->mameThread.join();
-                                    }
-                                }
-                                
-                                // Now we (the new version) are the Masters
-                                activeMameProcessor = this;
-                                acquired = true;
-                            }
-            } else {
-                // VST3 BRANCH: Original blocking (synchronous) wait
-                // VST3 waits properly until the host program terminates the old instance.
-                int retries = 60;
-                while (retries > 0) {
-                    bool expected = false;
-                    if (globalMameLock.compare_exchange_strong(expected, true)) {
-                        acquired = true;
-                        break; // We successfully obtained the lock!
-                    }
-                    std::this_thread::sleep_for(std::chrono::milliseconds(50));
-                    retries--;
-                }
-            }
-
-            // --- CONTINUE IF SUCCESSFUL ---
-            if (acquired) {
-                isMasterInstance = true;
-                isBlockedByAnotherInstance.store(false, std::memory_order_release);
-                
-                juce::File docsDir = juce::File::getSpecialLocation(juce::File::userDocumentsDirectory);
-                juce::File ensoniqDir = docsDir.getChildFile("EnsoniqSD1");
-                if (!ensoniqDir.exists()) ensoniqDir.createDirectory();
-            } else {
-                // If the 3-second wait has elapsed on the VST3 thread
-                isBlockedByAnotherInstance.store(true, std::memory_order_release);
-                return;
-            }
-        }
-    
     hostSampleRate.store(sampleRate);
     
     auto* choiceParam = dynamic_cast<juce::AudioParameterChoice*>(apvts.getParameter("buffer_size"));
         if (choiceParam != nullptr) {
-            int sizes[] = { 256, 512, 1024, 2048, 4096, 8192 };
+            int sizes[] = { 128, 256, 512, 1024, 2048, 4096, 8192 };
             mameBufferThreshold.store(sizes[choiceParam->getIndex()], std::memory_order_relaxed);
         }
 
-    // Report buffer for Latency Compensation (PDC)
+        // Report buffer for Latency Compensation (PDC)
         int currentThreshold = mameBufferThreshold.load(std::memory_order_relaxed);
         int hwLatency = getInternalHardwareLatencySamples();
+        
         setLatencySamples(currentThreshold + hwLatency);
     
-    // Only boot MAME the very first time play is prepared
+        // Only boot MAME the very first time play is prepared
         if (!mameHasStarted.exchange(true)) {
             
                         // --- VST SCANNER PROTECTION ---
@@ -1114,14 +1057,14 @@ void EnsoniqSD1AudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
         }
     }
     
-    // --- Buffer reset & PDC Pre-fill ---
+        // --- Buffer reset & PDC Pre-fill ---
         totalRead.store(0, std::memory_order_release);
         
-    // We shift the MAME write pointer forward by the specified PDC delay!
-    // This ensures that the first 'currentThreshold' samples will be pure silence,
-    // which the DAW's PDC will be able to trim precisely from the beginning of the file.
+        // We shift the MAME write pointer forward by the specified PDC delay!
+        // This ensures that the first 'currentThreshold' samples will be pure silence,
+        // which the DAW's PDC will be able to trim precisely from the beginning of the file.
 
-    // We shift the MAME write pointer forward by the specified PDC delay!
+        // We shift the MAME write pointer forward by the specified PDC delay!
         totalWritten.store(currentThreshold, std::memory_order_release);
         
         // --- Reset interpolator ---
@@ -1129,6 +1072,10 @@ void EnsoniqSD1AudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
             
         midiReadPos.store(0, std::memory_order_release);
         midiWritePos.store(0, std::memory_order_release);
+    
+#if JucePlugin_Build_AU
+    pendingAUMidi.clear();
+#endif
 
         // We clear the entire ring buffer to ensure that the preloaded section is completely silent
         for (int i = 0; i < RING_BUFFER_SIZE; ++i) {
@@ -1143,7 +1090,6 @@ void EnsoniqSD1AudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
                     prepareWasCalled.store(true, std::memory_order_release);
                     maxOfflineBuffer.store(mameBufferThreshold.load(std::memory_order_relaxed), std::memory_order_relaxed);
                 }
-    
 }
 
 void EnsoniqSD1AudioProcessor::releaseResources()
@@ -1213,13 +1159,54 @@ void EnsoniqSD1AudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
         }
     }
     
+        // --- SYS-EX HARDWARE LOCKOUT ---
+        // Destroy all incoming DAW MIDI (notes, CCs, clock) so it doesn't interleave
+        // with and corrupt the internal SysEx byte stream going to the MAME UART.
+        if (isTransmittingSysEx.load(std::memory_order_acquire)) {
+            midiMessages.clear();
+        }
+    
     // --- State and Boot Checks ---
-    if (isBlockedByAnotherInstance.load(std::memory_order_acquire)) return;
     if (sampleRateMismatch.load(std::memory_order_acquire)) return;
     if (!isMameRunningFlag()) return;
     
     int numSamples = buffer.getNumSamples();
     if (numSamples <= 0) return; // Safety check
+    
+        // ========================================================
+        // WARM BOOT PRE-ROLL (LOGIC PRO ONLY - Fixes silent 1st note)
+        // ========================================================
+        if (needsBootPreRoll.exchange(false, std::memory_order_acquire)) {
+            if (wrapperType == juce::AudioProcessor::wrapperType_AudioUnit && mameMachine != nullptr) {
+                
+                // 1. Wait for MAME to consume the RAM injection and reset the virtual CPU
+                int injTimeout = 1000;
+                while (pendingRamInjection.load(std::memory_order_acquire) && injTimeout > 0) {
+                    mameThrottleEvent.signal();
+                    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+                    injTimeout--;
+                }
+
+                // 2. Fast-forward MAME by 2.0 virtual seconds to let the SD-1 OS fully boot!
+                double targetTime = mameMachine->time().as_double() + 2.0;
+                int timeout = 3000;
+                
+                while (mameMachine->time().as_double() < targetTime && timeout > 0) {
+                    uint64_t wPos = totalWritten.load(std::memory_order_relaxed);
+                    if (wPos > totalRead.load(std::memory_order_relaxed)) {
+                        totalRead.store(wPos, std::memory_order_relaxed); // Consume audio silently
+                    }
+                    mameThrottleEvent.signal();
+                    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+                    timeout--;
+                }
+                
+                // 3. Clean slate for the incoming MIDI notes
+                totalRead.store(0, std::memory_order_release);
+                totalWritten.store(mameBufferThreshold.load(std::memory_order_relaxed), std::memory_order_release);
+                needAnchorSync.store(true, std::memory_order_release);
+            }
+        }
     
     uint64_t currentReadPos = totalRead.load(std::memory_order_acquire);
     int threshold = mameBufferThreshold.load(std::memory_order_relaxed);
@@ -1231,40 +1218,41 @@ void EnsoniqSD1AudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
         return;
     }
     
-            // ========================================================
-            // AU SPECIFIC LOGIC PRO SYNC FIX (VST3 completely bypassed)
-            // ========================================================
-            if (wrapperType == juce::AudioProcessor::wrapperType_AudioUnit) {
-                    
-                    bool currentOffline = isNonRealtime();
-                    bool offlineChanged = (currentOffline != lastOfflineState);
-                    lastOfflineState = currentOffline;
-                    
-                    bool freshPrepare = prepareWasCalled.exchange(false, std::memory_order_acq_rel);
-                    
-                    if (offlineChanged && !freshPrepare) {
-                        uint64_t newWritePos = currentReadPos + mameBufferThreshold.load(std::memory_order_relaxed);
-                        totalWritten.store(newWritePos, std::memory_order_release);
-                        
-                        maxOfflineBuffer.store(mameBufferThreshold.load(std::memory_order_relaxed), std::memory_order_relaxed);
-                        
-                        for (int j = 0; j < RING_BUFFER_SIZE; ++j) {
-                            ringBufferL[j] = 0.0f; ringBufferR[j] = 0.0f;
-                            ringBufferAuxL[j] = 0.0f; ringBufferAuxR[j] = 0.0f;
-                        }
-                        
-                        midiReadPos.store(midiWritePos.load(std::memory_order_acquire), std::memory_order_release);
-                    }
-                    
-                    needAnchorSync.store(false, std::memory_order_release);
-                }
+    // ========================================================
+    // AU SPECIFIC LOGIC PRO SYNC FIX (VST3 completely bypassed)
+    // ========================================================
+        
+    if (wrapperType == juce::AudioProcessor::wrapperType_AudioUnit) {
+        
+        bool currentOffline = isNonRealtime();
+        bool offlineChanged = (currentOffline != lastOfflineState);
+        lastOfflineState = currentOffline;
+        bool freshPrepare = prepareWasCalled.exchange(false, std::memory_order_acq_rel);
+
+        // Clear stale queue whenever prepareToPlay just ran OR on fresh start
+        if (freshPrepare || currentReadPos == 0) {
+            pendingAUMidi.clear();
+        }
+
+        // offlineChanged mid-session reset
+        if (offlineChanged && !freshPrepare && currentReadPos > 0) {
+            pendingAUMidi.clear();
+            uint64_t newWritePos = currentReadPos + mameBufferThreshold.load(std::memory_order_relaxed);
+            totalWritten.store(newWritePos, std::memory_order_release);
+            maxOfflineBuffer.store(mameBufferThreshold.load(std::memory_order_relaxed), std::memory_order_relaxed);
+            for (int j = 0; j < RING_BUFFER_SIZE; ++j) {
+                ringBufferL[j] = 0.0f; ringBufferR[j] = 0.0f;
+                ringBufferAuxL[j] = 0.0f; ringBufferAuxR[j] = 0.0f;
+            }
+            midiReadPos.store(midiWritePos.load(std::memory_order_acquire), std::memory_order_release);
+        }
+    }
     
     bool isOffline = isNonRealtime();
-        
+                
                 // ========================================================
-                // 0. WAIT FOR PERFECT ANCHOR (ISOLATED SAFE MODEL)
+                // 0. WAIT FOR PERFECT ANCHOR
                 // ========================================================
-                // --- CRITICAL FIX: UNIFIED SYNC ---
                 
                 if (needAnchorSync.load(std::memory_order_acquire)) {
                     mameThrottleEvent.signal(); // Wake up MAME!
@@ -1298,18 +1286,182 @@ void EnsoniqSD1AudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
                     // EMERGENCY FALLBACK (REALTIME ONLY):
                     if (needAnchorSync.load(std::memory_order_acquire)) {
                         if (!isNonRealtime() && mameMachine != nullptr) {
+#if JucePlugin_Build_AU
+        uint64_t anchorSample = totalWritten.load(std::memory_order_acquire);
+        double capturedMameTime = mameMachine->time().as_double();
+        anchorDawSample.store(anchorSample, std::memory_order_relaxed);
+        anchorMameTime.store(capturedMameTime, std::memory_order_relaxed);
+#else
                             anchorMameTime.store(mameMachine->time().as_double(), std::memory_order_relaxed);
                             anchorDawSample.store(totalWritten.load(std::memory_order_acquire), std::memory_order_relaxed);
+                    #endif
                             needAnchorSync.store(false, std::memory_order_release);
-                        }
-                        else {
-                            return; // Ensure offline bounce does not proceed without a perfect anchor
                         }
                     }
                 }
 
-                double t_anchor = anchorMameTime.load(std::memory_order_relaxed);
-                uint64_t s_anchor = anchorDawSample.load(std::memory_order_relaxed);
+        bool isPlaying = false;
+        if (auto* ph = getPlayHead()) {
+            if (auto pos = ph->getPosition()) {
+                isPlaying = pos->getIsPlaying();
+            }
+        }
+        
+        // --- DETECT LOGIC TRANSPORT & BOUNCE START ---
+        static bool lastIsPlaying = false;
+        bool justStartedPlaying = (isPlaying && !lastIsPlaying);
+        lastIsPlaying = isPlaying;
+        
+        // Self-contained offline tracker to fix the scope issue
+        static bool localLastOffline = false;
+        bool isBounceStart = (isOffline && !localLastOffline);
+        localLastOffline = isOffline;
+
+        // Trigger the Logic Chase filter on block 0, transport start, or bounce start
+        bool isLogicChaseDump = (currentReadPos == 0) || justStartedPlaying || isBounceStart;
+        
+        double t_anchor = anchorMameTime.load(std::memory_order_relaxed);
+        uint64_t s_anchor = anchorDawSample.load(std::memory_order_relaxed);
+        
+    // -------------------------------
+    // AU MIDI dispatch
+    // -------------------------------
+
+    if (wrapperType == juce::AudioProcessor::wrapperType_AudioUnit)
+    {
+        bool mameHasAudio = totalWritten.load(std::memory_order_acquire) > static_cast<uint64_t>(threshold);
+
+        static double lastAuMidiTime = 0.0;
+        static uint64_t captureReadPos = 0;
+        
+        double currentMameTime = (mameMachine != nullptr) ? mameMachine->time().as_double() : 0.0;
+
+        // Anchor the clock to NOW so we don't accidentally stagger into the past
+        if (isLogicChaseDump) {
+            lastAuMidiTime = currentMameTime;
+        }
+
+        if (needAnchorSync.load(std::memory_order_acquire) || !mameHasAudio)
+        {
+            if (pendingAUMidi.empty()) {
+                captureReadPos = currentReadPos;
+            }
+
+            for (const auto metadata : midiMessages) {
+                auto msg = metadata.getMessage();
+                
+                if (isLogicChaseDump) {
+                    bool keep = false;
+                    // AGGRESSIVE CHASE FILTER: Drops ALL CCs on block 0!
+                    // Keeps the UART buffer 100% clear for the initial Note On.
+                    if (msg.isNoteOn() || msg.isNoteOff() || msg.isPitchWheel() || msg.isAftertouch() || msg.isChannelPressure()) {
+                        keep = true;
+                    }
+                    if (!keep) continue;
+                }
+                
+                int absoluteOffset = metadata.samplePosition + static_cast<int>(currentReadPos - captureReadPos);
+                pendingAUMidi.push_back({msg, absoluteOffset});
+            }
+            mameThrottleEvent.signal();
+        }
+        else
+        {
+            // 1. Flush pending
+            if (!pendingAUMidi.empty()) {
+                for (auto& pending : pendingAUMidi) {
+                    auto msg = pending.first;
+                    
+                    uint64_t absoluteDawSample = captureReadPos + pending.second;
+                    uint64_t targetSample = absoluteDawSample + threshold;
+                    
+                    double targetMameTime = t_anchor + static_cast<double>(
+                        static_cast<int64_t>(targetSample) - static_cast<int64_t>(s_anchor)) / sr;
+
+                    const uint8_t* rawData = msg.getRawData();
+                    for (int i = 0; i < msg.getRawDataSize(); ++i) {
+                        
+                        // FIX: Prevent 0-cycle UART Overrun!
+                        // If queued events calculate to the past, clamp them to the present so the virtual CPU can read them.
+                        if (targetMameTime < currentMameTime) targetMameTime = currentMameTime;
+                        
+                        if (targetMameTime < lastAuMidiTime + 0.00032) {
+                            targetMameTime = lastAuMidiTime + 0.00032;
+                        }
+                        pushMidiByte(rawData[i], targetMameTime);
+                        lastAuMidiTime = targetMameTime;
+                    }
+                }
+                pendingAUMidi.clear();
+            }
+
+            // 2. Process current block
+            for (const auto metadata : midiMessages) {
+                auto msg = metadata.getMessage();
+                int eventOffset = metadata.samplePosition;
+                
+                if (isLogicChaseDump) {
+                    bool keep = false;
+                    if (msg.isNoteOn() || msg.isNoteOff() || msg.isPitchWheel() || msg.isAftertouch() || msg.isChannelPressure()) {
+                        keep = true;
+                    }
+                    if (!keep) continue;
+                }
+
+                double targetMameTime;
+
+                if (!isPlaying && !isOffline) {
+                    targetMameTime = currentMameTime + static_cast<double>(eventOffset) / sr;
+                } else {
+                    uint64_t targetSample = currentReadPos + eventOffset + threshold;
+                    targetMameTime = t_anchor + static_cast<double>(
+                        static_cast<int64_t>(targetSample) - static_cast<int64_t>(s_anchor)) / sr;
+                }
+
+                const uint8_t* rawData = msg.getRawData();
+                for (int i = 0; i < msg.getRawDataSize(); ++i) {
+                    
+                    // FIX: Prevent 0-cycle UART Overrun!
+                    if (targetMameTime < currentMameTime) targetMameTime = currentMameTime;
+                    
+                    if (targetMameTime < lastAuMidiTime + 0.00032) {
+                        targetMameTime = lastAuMidiTime + 0.00032;
+                    }
+                    pushMidiByte(rawData[i], targetMameTime);
+                    lastAuMidiTime = targetMameTime;
+                }
+            }
+        }
+    }
+        else
+        {
+            // ========================================================
+            // VST3 STANDARD MIDI DISPATCH
+            // ========================================================
+            for (const auto metadata : midiMessages) {
+                auto msg = metadata.getMessage();
+                int eventOffset = metadata.samplePosition;
+                double targetMameTime;
+
+                if (!isPlaying && !isOffline) {
+                    // Spontaneous live MIDI
+                    double currentMameTime = (mameMachine != nullptr) ?
+                        mameMachine->time().as_double() : 0.0;
+                    targetMameTime = currentMameTime + static_cast<double>(eventOffset) / sr;
+                } else {
+                    // Standard VST3 Math
+                    uint64_t targetSample = currentReadPos + eventOffset + threshold;
+                    targetMameTime = t_anchor + static_cast<double>(
+                        static_cast<int64_t>(targetSample) -
+                        static_cast<int64_t>(s_anchor)) / sr;
+                }
+
+                const uint8_t* rawData = msg.getRawData();
+                for (int i = 0; i < msg.getRawDataSize(); ++i) {
+                    pushMidiByte(rawData[i], targetMameTime);
+                }
+            }
+        }
     
         // ========================================================
         // 1. TIMESTAMPED MIDI INJECTION
@@ -1340,76 +1492,7 @@ void EnsoniqSD1AudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
                     panicDelaySamples.store(currentPanicDelay, std::memory_order_release);
                 }
             }
-    
-        bool isPlaying = false;
-        if (auto* ph = getPlayHead()) {
-            if (auto pos = ph->getPosition()) {
-                isPlaying = pos->getIsPlaying();
-            }
-        }
-                                                
-                // --- AU ASYNCHRONOUS PENDING QUEUE (NO WAIT LOOP REQUIRED) ---
-                // If the AU is running and the perfect MAME thread anchor is not yet ready,
-                // we do NOT block the Logic thread (which breaks PDC), and we do NOT read
-                // MAME's time asynchronously (which causes jitter). We simply queue the event
-                // and process it in the next block when the perfect anchor is established.
-                static std::vector<std::pair<juce::MidiMessage, int>> pendingAUMidi;
-                
-                if (wrapperType == juce::AudioProcessor::wrapperType_AudioUnit && needAnchorSync.load(std::memory_order_acquire)) {
-                    // Anchor is not ready yet. Queue the messages with their absolute target sample positions.
-                    for (const auto metadata : midiMessages) {
-                        int eventOffset = metadata.samplePosition;
-                        uint64_t targetSample = currentReadPos + eventOffset + threshold;
-                        pendingAUMidi.push_back({metadata.getMessage(), targetSample});
-                    }
-                    mameThrottleEvent.signal(); // Tell MAME to hurry up and set the anchor!
-                }
-                else {
-                    // Anchor IS ready! First, process any pending AU messages from the queue.
-                    if (wrapperType == juce::AudioProcessor::wrapperType_AudioUnit && !pendingAUMidi.empty()) {
-                        for (auto& pending : pendingAUMidi) {
-                            double targetMameTime = t_anchor + static_cast<double>(static_cast<int64_t>(pending.second) - static_cast<int64_t>(s_anchor)) / sr;
-                            
-                            const uint8_t* rawData = pending.first.getRawData();
-                            for (int i = 0; i < pending.first.getRawDataSize(); ++i) {
-                                pushMidiByte(rawData[i], targetMameTime);
-                            }
-                        }
-                        pendingAUMidi.clear();
-                    }
-
-                    // Process standard incoming MIDI messages for this block using perfect math.
-                    for (const auto metadata : midiMessages) {
-                        int eventOffset = metadata.samplePosition;
-                        double targetMameTime;
-
-                        if (wrapperType == juce::AudioProcessor::wrapperType_AudioUnit && !isPlaying && !isOffline) {
-                            
-                            // --- AU PIANO ROLL FIX ---
-                            double currentMameTime = 0.0;
-                            if (mameMachine != nullptr) {
-                                currentMameTime = mameMachine->time().as_double();
-                            }
-                            targetMameTime = currentMameTime + (static_cast<double>(eventOffset) / sr);
-                            
-                        } else {
-                            
-                            // --- UNIFIED VST3 & AU MATH (PERFECT ZERO-DRIFT) ---
-                            // Now that the anchor is strictly established by the MAME thread, we use the
-                            // exact same zero-drift calculation as VST3! No blocking, no jitter.
-                            uint64_t targetSample = currentReadPos + eventOffset + threshold;
-                            targetMameTime = t_anchor + static_cast<double>(static_cast<int64_t>(targetSample) - static_cast<int64_t>(s_anchor)) / sr;
-                            
-                        }
-                        
-                        auto msg = metadata.getMessage();
-                        const uint8_t* rawData = msg.getRawData();
-                        for (int i = 0; i < msg.getRawDataSize(); ++i) {
-                            pushMidiByte(rawData[i], targetMameTime);
-                        }
-                    }
-                }
-        
+                                                        
     // ========================================================
     // 2. AUDIO OUT & RING BUFFER CONSUMPTION
     // ========================================================
@@ -1499,12 +1582,12 @@ void EnsoniqSD1AudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
             }
         }
     
-            // ========================================================
-            // AU BOUNCE "NO-READ-AHEAD" GATE
-            // ========================================================
-            if (wrapperType == juce::AudioProcessor::wrapperType_AudioUnit && isNonRealtime()) {
-                maxOfflineBuffer.store(mameBufferThreshold.load(std::memory_order_relaxed), std::memory_order_relaxed);
-            }
+                // ========================================================
+                // AU BOUNCE "NO-READ-AHEAD" GATE (Logic Pro specifically isolated)
+                // ========================================================
+                if (wrapperType == juce::AudioProcessor::wrapperType_AudioUnit && isNonRealtime()) {
+                    maxOfflineBuffer.store(mameBufferThreshold.load(std::memory_order_relaxed), std::memory_order_relaxed);
+                }
     
     }
 
@@ -1665,25 +1748,65 @@ void EnsoniqSD1AudioProcessor::setStateInformation (const void* data, int sizeIn
         // =================================================================
         juce::String savedVersion = xmlState->getStringAttribute("plugin_version", "0.9.7");
         
-        // --- 3. APPLY MEDIA PATHS AND TRIGGER MOUNTING ---
-        // For legacy 0.9.7 projects, these attributes won't exist in the XML (and aren't in the .sta either).
-        // They will safely default to empty strings. For 0.9.8+ projects, they will load perfectly.
-        {
-            std::lock_guard<std::mutex> lock(mediaMutex);
-            pendingFloppyPath = xmlState->getStringAttribute("floppy_path", "").toStdString();
-            pendingCartPath = xmlState->getStringAttribute("cart_path", "").toStdString();
-            
-            if (xmlState->getBoolAttribute("is_floppy_loaded", false)) {
-                requestFloppyLoad.store(true, std::memory_order_release);
-                isFloppyLoaded.store(true, std::memory_order_release);
-                loadedMediaName = juce::File(pendingFloppyPath).getFileName();
-            }
-            if (xmlState->getBoolAttribute("is_cart_loaded", false)) {
-                requestCartLoad.store(true, std::memory_order_release);
-                isCartLoaded.store(true, std::memory_order_release);
-                loadedMediaName = juce::File(pendingCartPath).getFileName();
-            }
-        }
+                // --- 3. APPLY MEDIA PATHS AND TRIGGER MOUNTING ---
+                // Legacy 0.9.7 projects won't have these XML attributes. They default to empty strings.
+                // For 0.9.8+, we restore the paths and strictly verify physical file existence on the disk.
+                {
+                    std::lock_guard<std::mutex> lock(mediaMutex);
+                    juce::String savedFloppy = xmlState->getStringAttribute("floppy_path", "");
+                    juce::String savedCart = xmlState->getStringAttribute("cart_path", "");
+                    
+                    bool floppyWasLoaded = xmlState->getBoolAttribute("is_floppy_loaded", false);
+                    bool cartWasLoaded = xmlState->getBoolAttribute("is_cart_loaded", false);
+
+                    // VERIFY FLOPPY EXISTENCE
+                    if (floppyWasLoaded) {
+                        if (juce::File(savedFloppy).existsAsFile()) {
+                #ifdef _WIN32
+                            pendingFloppyPath = savedFloppy.toUTF8().getAddress();
+                #else
+                            pendingFloppyPath = savedFloppy.toStdString();
+                #endif
+                            requestFloppyLoad.store(true, std::memory_order_release);
+                            isFloppyLoaded.store(true, std::memory_order_release);
+                            loadedFloppyName = juce::File(savedFloppy).getFileName();
+                        } else {
+                            pendingFloppyPath = "";
+                            requestFloppyLoad.store(false, std::memory_order_release);
+                            isFloppyLoaded.store(true, std::memory_order_release);
+                            loadedFloppyName = "Missing file!";
+                        }
+                    } else {
+                        pendingFloppyPath = "";
+                        requestFloppyLoad.store(false, std::memory_order_release);
+                        isFloppyLoaded.store(false, std::memory_order_release);
+                        loadedFloppyName = "";
+                    }
+
+                    // VERIFY CARTRIDGE EXISTENCE
+                    if (cartWasLoaded) {
+                        if (juce::File(savedCart).existsAsFile()) {
+                #ifdef _WIN32
+                            pendingCartPath = savedCart.toUTF8().getAddress();
+                #else
+                            pendingCartPath = savedCart.toStdString();
+                #endif
+                            requestCartLoad.store(true, std::memory_order_release);
+                            isCartLoaded.store(true, std::memory_order_release);
+                            loadedCartName = juce::File(savedCart).getFileName();
+                        } else {
+                            pendingCartPath = "";
+                            requestCartLoad.store(false, std::memory_order_release);
+                            isCartLoaded.store(true, std::memory_order_release);
+                            loadedCartName = "Missing file!";
+                        }
+                    } else {
+                        pendingCartPath = "";
+                        requestCartLoad.store(false, std::memory_order_release);
+                        isCartLoaded.store(false, std::memory_order_release);
+                        loadedCartName = "";
+                    }
+                }
 
                 // --- 4. RAM INJECTION BRANCHING ---
                 if (savedVersion == "0.9.7" && xmlState->hasAttribute("mame_state")) {
@@ -1693,6 +1816,7 @@ void EnsoniqSD1AudioProcessor::setStateInformation (const void* data, int sizeIn
                     // LEGACY LOAD (v0.9.7)
                     if (extractLegacyMameState(b64String, pendingOsram, pendingSeqRam)) {
                         pendingRamInjection.store(true, std::memory_order_release);
+                        needsBootPreRoll.store(true, std::memory_order_release);
                     }
                 }
                 else if (xmlState->hasAttribute("ram_osram")) {
@@ -1701,6 +1825,7 @@ void EnsoniqSD1AudioProcessor::setStateInformation (const void* data, int sizeIn
                     pendingOsram.fromBase64Encoding(xmlState->getStringAttribute("ram_osram"));
                     pendingSeqRam.fromBase64Encoding(xmlState->getStringAttribute("ram_seqram"));
                     pendingRamInjection.store(true, std::memory_order_release);
+                    needsBootPreRoll.store(true, std::memory_order_release);
                 }
 
                 requestMameLoad.store(false, std::memory_order_release);
@@ -1771,6 +1896,24 @@ const std::size_t driver_list::s_driver_count = 11;
 bool EnsoniqSD1AudioProcessor::runSelfCheck()
 {
     juce::StringArray errors;
+    
+        // --- UNSUPPORTED AU HOST WARNING CHECK ---
+        // Whitelist DAWs that correctly support the Logic AU synchronization path.
+        // For other hosts (like FL Studio), we flag to advise the VST3 version.
+        if (wrapperType == juce::AudioProcessor::wrapperType_AudioUnit) {
+            juce::PluginHostType host;
+            juce::String hostPath = host.getHostPath().toLowerCase();
+            if (!host.isLogic() &&
+                !host.isGarageBand() &&
+                !host.isAbletonLive() &&
+                !host.isReaper() &&
+                !host.isStudioOne() &&
+                !hostPath.contains("fender") &&
+                !hostPath.contains("studio pro")) {
+                
+                isUnsupportedAUHost.store(true, std::memory_order_release);
+            }
+        }
     
     // --- 1. DOCUMENTS FOLDER WRITE ACCESS (For settings.xml) ---
     juce::File docsDir = juce::File::getSpecialLocation(juce::File::userDocumentsDirectory);
@@ -2006,6 +2149,27 @@ void EnsoniqSD1AudioProcessor::runMameEngine()
         args.push_back("-rompath");
         args.push_back(safePath);
                      
+        // --- 2.5 INITIAL MEDIA MOUNTING (COLD BOOT) ---
+        // At DAW project load, MAME is booted from scratch. We must pass the media via
+        // command line so the SD-1 OS detects them correctly during hardware initialization!
+        {
+            std::lock_guard<std::mutex> lock(mediaMutex);
+            if (isFloppyLoaded.load() && !pendingFloppyPath.empty()) {
+                args.push_back("-flop");
+                args.push_back(pendingFloppyPath);
+                
+                // Clear the dynamic load flag so VstOsdInterface doesn't try to double-load it
+                requestFloppyLoad.store(false, std::memory_order_release);
+            }
+            if (isCartLoaded.load() && !pendingCartPath.empty()) {
+                args.push_back("-cart");
+                args.push_back(pendingCartPath);
+                
+                // Clear the dynamic load flag so VstOsdInterface doesn't try to double-load it
+                requestCartLoad.store(false, std::memory_order_release);
+            }
+        }
+    
     // --- 3. PLUGINS PATH CONFIGURATION ---
     #ifdef _WIN32
         // Extraction and verification is now securely handled in runSelfCheck() beforehand

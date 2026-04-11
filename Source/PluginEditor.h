@@ -37,6 +37,10 @@ public:
 
 private:
     EnsoniqSD1AudioProcessor& audioProcessor;
+    
+    // --- SAVE MACRO ---
+    juce::TextButton saveBadge;
+    juce::Label savePromptLabel;
         
     // --- ROM HANDLING ---
         juce::TextButton locateRomButton { "Locate sd132.zip" };
@@ -53,7 +57,7 @@ private:
 
     // --- SETTINGS PANEL GUI COMPONENTS ---
     juce::TextButton settingsButton { "Settings / About" };
-    juce::GroupComponent settingsGroup { "settings_group", "Ensoniq(R) SD-1/32 Settings v0.9.8 2741" };
+    juce::GroupComponent settingsGroup { "settings_group", "Ensoniq(R) SD-1/32 Settings v0.9.9 2892" };
     
     juce::Label bufferLabel { "buffer_label", "MAME(R) Engine buffer:" };
     juce::ComboBox bufferCombo;

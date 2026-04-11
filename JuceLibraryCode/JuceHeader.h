@@ -45,7 +45,7 @@ namespace ProjectInfo
 {
     const char* const  projectName    = "Ensoniq SD-1";
     const char* const  companyName    = "EnsoniqMAME";
-    const char* const  versionString  = "0.9.8";
-    const int          versionNumber  = 0x908;
+    const char* const  versionString  = "0.9.9";
+    const int          versionNumber  = 0x909;
 }
 #endif

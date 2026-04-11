@@ -1,6 +1,6 @@
-# Build Instructions for Ensoniq SD-1 32-Voice VST
+# Build Instructions for Ensoniq SD-1 32-Voice VST3/AU
 
-This project embeds a headless MAME emulation engine inside a JUCE VST3 plugin container to perfectly recreate the Ensoniq SD-1 synthesizer.
+This project embeds a headless MAME emulation engine inside a JUCE VST3/AU plugin container to perfectly recreate the Ensoniq SD-1 synthesizer.
 
 Because MAME is not natively designed to be run as a shared library inside a DAW, building this project requires patching the MAME source code, building it, and extracting the generated archive files to link them to the JUCE project.
 
@@ -16,7 +16,7 @@ Because MAME is not natively designed to be run as a shared library inside a DAW
 
 ## Step 1: Patching the MAME Source
 
-We had to make specific modifications to the MAME core to expose certain internal states and adapt the Ensoniq sound chip for VST audio streaming.
+We had to make specific modifications to the MAME core to expose certain internal states and adapt the Ensoniq sound chip for VST/AU audio streaming and remove singletons. Thanks to [kbaccki](https://github.com/kbaccki) for investigating the singletons.
 
 1. Download or clone the vanilla MAME source code.
 
@@ -24,13 +24,75 @@ We had to make specific modifications to the MAME core to expose certain interna
 
 3. Copy and replace the following files in your MAME source tree:
 
-   - ui.cpp -> Overwrite in /src/frontend/mame/ui/ui.cpp
-
    - esq5505.cpp -> Overwrite in src/mame/ensoniq/esq5505.cpp
 
    - sd132.lay -> Overwrite in /src/mame/layout/sd132.lay
 
    - esq16_dsk.cpp -> Overwrite in /src/lib/formats/esq16_dsk.cpp
+
+   - main.h -> Overwrite in /src/emu/main.h
+
+   - render.cpp -> Overwrite in /src/emu/render.cpp
+
+   - emufwd.h -> Overwrite in /src/emu/emufwd.h
+
+   - machine.h -> Overwrite in /src/emu/machine.h
+
+   - video.cpp -> Overwrite in /src/emu/video.cpp
+
+   - emu.h -> Overwrite in /src/emu/emu.h
+
+   - sound.cpp -> Overwrite in /src/emu/sound.cpp
+
+   - machine.cpp -> Overwrite in /src/emu/machine.cpp
+
+   - rendlay.cpp -> Overwrite in /src/emu/rendlay.cpp
+
+   - debugcpu.cpp -> Overwrite in /src/emu/debug/debugcpu.cpp
+
+   - cheat.cpp -> Overwrite in /src/frontend/mame/cheat.cpp
+
+   - clifront.cpp -> Overwrite in /src/frontend/mame/clifront.cpp
+
+   - luaengine.cpp -> Overwrite in /src/frontend/mame/luaengine.cpp
+
+   - luaengine.h -> Overwrite in /src/frontend/mame/luaengine.h
+
+   - luaengine_render.cpp -> Overwrite in /src/frontend/mame/luaengine_render.cpp
+
+   - mame.cpp -> Overwrite in /src/frontend/mame/mame.cpp
+
+   - mame.h -> Overwrite in /src/frontend/mame/mame.h
+
+   - ui.cpp -> Overwrite in /src/frontend/mame/ui/ui.cpp
+
+   - pluginopt.cpp -> Overwrite in /src/frontend/mame/ui/pluginopt.cpp
+
+   - selgame.cpp -> Overwrite in /src/frontend/mame/ui/selgame.cpp
+
+   - mainmenu.cpp -> Overwrite in /src/frontend/mame/ui/mainmenu.cpp
+
+   - utils.cpp -> Overwrite in /src/frontend/mame/ui/utils.cpp
+
+   - datmenu.cpp -> Overwrite in /src/frontend/mame/ui/datmenu.cpp
+
+   - devopt.cpp -> Overwrite in /src/frontend/mame/ui/devopt.cpp
+
+   - viewgfx.cpp -> Overwrite in /src/frontend/mame/ui/viewgfx.cpp
+
+   - cheatopt.cpp -> Overwrite in /src/frontend/mame/ui/cheatopt.cpp
+
+   - selmenu.cpp -> Overwrite in /src/frontend/mame/ui/selmenu.cpp
+
+   - selsoft.cpp -> Overwrite in /src/frontend/mame/ui/selsoft.cpp
+
+   - miscmenu.cpp -> Overwrite in /src/frontend/mame/ui/miscmenu.cpp
+
+   - info.cpp -> Overwrite in /src/frontend/mame/ui/info.cpp
+
+   - simpleselgame.cpp -> Overwrite in /src/frontend/mame/ui/simpleselgame.cpp
+
+   - main.cpp -> Overwrite in /src/zexall/main.cpp
 
    - required for macOS C++17 only: ioport.h -> Overwrite in /src/emu/ioport.h 
 
@@ -58,14 +120,17 @@ Instead of building a standalone static library, we build the standard MAME exec
      
      - Open this in Visual Studio: sd132.vcxproj and follow the steps:
 
-     - Set to Release the target
+     - Retargeting: Upgrade to the current Visual Studio tools by Retarget all v143 to v145 then apply
+
+     - Set to solution configuration target to Release
      
-     - Retargeting: Upgrade to the current Visual Studio tools by selecting the Project menu or right-click the solution, and then selecting "Retarget solution" v143 to v145
-     - NTDDI_VERSION conflict: In Property manager select all properties, right click - Properties, C/C++, Command line - Additional options a put this after the last "different options" ``` /U_WIN32_WINNT /UNTDDI_VERSION /D_WIN32_WINNT=0x0A00 /DNTDDI_VERSION=0x0A000000``` There is a space before the /U!
+     - Select all in Property manager, then right click and select properties:
 
-     - Set "Treat warnings as errors" to "No" in Configuration Properties -> C/C++->General
+     - NTDDI_VERSION conflict: Configuration Properties -> C/C++ -> Command line -> and put this after the last "different options": ``` /U_WIN32_WINNT /UNTDDI_VERSION /D_WIN32_WINNT=0x0A00 /DNTDDI_VERSION=0x0A000000``` There is a space before the /U!
 
-     - After this you can check the output files here: [MAME_SOURCE_DIR]\build\vs2022\bin\x64\Release
+     - Set "Treat warnings as errors" to "No" in Configuration Properties -> C/C++ -> General
+
+     - Build solution in Solution explorer. After this you can check the output files here: [MAME_SOURCE_DIR]\build\vs2022\bin\x64\Release
 
 3. You got the generated .a and .o (mac) .lib (win) files (such as liboptional.a/lib, libmame_mame.a/lib, libemu.a/lib, etc.) which contain the compiled engine.
 
@@ -91,7 +156,7 @@ To ensure flawless real-time audio performance and zero dropouts on Windows, the
 
 - Select the Release configuration under the Visual Studio 2026 exporter.
 
-- Set Optimisation to Maximise speed (/O2).
+- Set Optimisation to Maximise speed (/O2). (check again in VS)
 
 - Set Link Time Optimisation (LTO) to Enabled (Triggers /GL Whole Program Optimization).
 
@@ -101,13 +166,15 @@ To ensure flawless real-time audio performance and zero dropouts on Windows, the
 
 - Inline Function Expansion: Any Suitable (/Ob2) (in VS)
 
-## Step 4: Building the VST3
+## Step 4: Building
 
 **macOS (Xcode)**
 
-- In Xcode, select the Ensoniq SD-1 - VST3 target.
+- In Xcode, select the Ensoniq SD-1 - VST3 or AU target
 
-- Build the project (Cmd + B).
+- Build the project (Cmd + B). The compiled .vst3 file will be located in /Library/Audio/Plug-Ins/VST3 and the AU in /Library/Audio/Plug-Ins/Components.
+
+- AU is only for LOGIC/GARAGEBAND ONLY! Please note that the AU plugin is ONLY for Logic and GarageBand! Any other DAW must use the VST3 version! Tested on Logic 11.
 
 ### A Note on macOS Sandboxing & Post-Build Scripts
 If you check the Projucer settings, you will see a custom Post-Build Script.
@@ -115,9 +182,9 @@ Because macOS Sequoia and strict DAW sandboxing block dynamic external library l
 
 - Creates a Frameworks folder inside the generated .vst3 bundle.
 
-- Copies the required SDL2.framework and SDL3.framework into the VST3.
+- Copies the required SDL2.framework and SDL3.framework into the VST3/AU.
 
-- Applies an Ad-Hoc codesign to both the frameworks and the final VST3 plugin.
+- Applies an Ad-Hoc codesign to both the frameworks and the final VST3/AU plugin.
 
 - The project uses double @rpath linker flags (-Wl,-rpath,/Library/Frameworks -Wl,-rpath,@loader_path/../Frameworks) so it works seamlessly both on the developer's machine and the end-user's machine.
 

@@ -4,8 +4,8 @@
               addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1" bundleIdentifier="com.sojusrecords.EnsoniqSD1"
               companyWebsite="www.sojusrecords.com" companyCopyright="Open Source"
               companyName="EnsoniqMAME" pluginCharacteristicsValue="pluginIsSynth,pluginWantsMidiIn"
-              pluginFormats="buildAU,buildStandalone,buildVST3" version="0.9.8"
-              pluginName="Ensoniq SD-1" pluginDesc="Ensoniq SD-1 MAME Emu VST"
+              pluginFormats="buildAU,buildStandalone,buildVST3" version="0.9.9"
+              pluginName="Ensoniq SD-1" pluginDesc="Ensoniq SD-1 MAME Emu VST/AU"
               pluginManufacturer="EnsoniqMAME" pluginManufacturerCode="Esma"
               pluginCode="SD1A" pluginAUExportPrefix="EnsoniqSD1AU" companyEmail="sjs@sojusrecords.com"
               pluginAUMainType="'aumu'" cppLanguageStandard="17">
