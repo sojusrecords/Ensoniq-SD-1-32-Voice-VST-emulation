@@ -296,6 +296,12 @@ public:
     virtual void update(bool skip_redraw) override {
         if (mame_machine == nullptr) return;
         
+            // Set the flag on the very first frame update.
+            // This confirms that MAME device clocks are initialized and safe for time calculations.
+            if (!processor->mameIsFullyBooted.load(std::memory_order_relaxed)) {
+                processor->mameIsFullyBooted.store(true, std::memory_order_release);
+            }
+        
         if (!processor->isMameRunningFlag()) {
                 mame_machine->schedule_exit();
                 return;
@@ -1145,6 +1151,17 @@ void EnsoniqSD1AudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
 {
     juce::ScopedNoDenormals noDenormals;
     
+      int numSamples = buffer.getNumSamples();
+      if (numSamples <= 0) return; // Safety check
+        
+        // CRITICAL SAFETY GATE:
+        // Logic Pro (AU) often calls processBlock before MAME's background thread is ready.
+        // If we call mameMachine->time().as_double() before clocks are set, it triggers SIGFPE (divide by zero).
+        if (!mameIsFullyBooted.load(std::memory_order_acquire)) {
+            buffer.clear(); // Output silence until the engine is stable
+            return;
+        }
+    
     // 1. Get the ACTUAL number of channels provided by the host in this specific callback
     int numChannels = buffer.getNumChannels();
     int totalNumInputChannels = getTotalNumInputChannels();
@@ -1155,7 +1172,7 @@ void EnsoniqSD1AudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
     for (int i = totalNumInputChannels; i < numChannels; ++i) {
         auto* channelData = buffer.getWritePointer(i);
         if (channelData != nullptr) {
-            juce::FloatVectorOperations::clear(channelData, buffer.getNumSamples());
+            juce::FloatVectorOperations::clear(channelData, numSamples);
         }
     }
     
@@ -1169,10 +1186,7 @@ void EnsoniqSD1AudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
     // --- State and Boot Checks ---
     if (sampleRateMismatch.load(std::memory_order_acquire)) return;
     if (!isMameRunningFlag()) return;
-    
-    int numSamples = buffer.getNumSamples();
-    if (numSamples <= 0) return; // Safety check
-    
+        
         // ========================================================
         // WARM BOOT PRE-ROLL (LOGIC PRO ONLY - Fixes silent 1st note)
         // ========================================================
@@ -1248,10 +1262,37 @@ void EnsoniqSD1AudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
         }
     }
     
+    // =====================================================================
+    // DETECT TRANSPORT
+    // =====================================================================
+    
+    bool isPlaying = false;
+    if (auto* ph = getPlayHead()) {
+        if (auto pos = ph->getPosition()) {
+            isPlaying = pos->getIsPlaying();
+        }
+    }
+    
+    // --- DETECT LOGIC TRANSPORT & BOUNCE START ---
+    bool justStartedPlaying = (isPlaying && !lastIsPlaying);
+    lastIsPlaying = isPlaying;
+    
+    // Self-contained offline tracker to fix the scope issue
     bool isOffline = isNonRealtime();
+    bool isBounceStart = (isOffline && !localLastOffline);
+    localLastOffline = isOffline;
+
+    // =====================================================================
+    // AU CLOCK DRIFT
+    // =====================================================================
+    if (wrapperType == juce::AudioProcessor::wrapperType_AudioUnit) {
+        if (justStartedPlaying || isBounceStart) {
+            needAnchorSync.store(true, std::memory_order_release);
+        }
+    }
                 
                 // ========================================================
-                // 0. WAIT FOR PERFECT ANCHOR
+                // WAIT FOR PERFECT ANCHOR
                 // ========================================================
                 
                 if (needAnchorSync.load(std::memory_order_acquire)) {
@@ -1299,29 +1340,13 @@ void EnsoniqSD1AudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
                         }
                     }
                 }
-
-        bool isPlaying = false;
-        if (auto* ph = getPlayHead()) {
-            if (auto pos = ph->getPosition()) {
-                isPlaying = pos->getIsPlaying();
-            }
-        }
         
-        // --- DETECT LOGIC TRANSPORT & BOUNCE START ---
-        static bool lastIsPlaying = false;
-        bool justStartedPlaying = (isPlaying && !lastIsPlaying);
-        lastIsPlaying = isPlaying;
-        
-        // Self-contained offline tracker to fix the scope issue
-        static bool localLastOffline = false;
-        bool isBounceStart = (isOffline && !localLastOffline);
-        localLastOffline = isOffline;
-
-        // Trigger the Logic Chase filter on block 0, transport start, or bounce start
-        bool isLogicChaseDump = (currentReadPos == 0) || justStartedPlaying || isBounceStart;
-        
+        // FRESH ANCHOR
         double t_anchor = anchorMameTime.load(std::memory_order_relaxed);
         uint64_t s_anchor = anchorDawSample.load(std::memory_order_relaxed);
+    
+    // Trigger the Logic Chase filter on block 0, transport start, or bounce start
+    bool isLogicChaseDump = (currentReadPos == 0) || justStartedPlaying || isBounceStart;
         
     // -------------------------------
     // AU MIDI dispatch
@@ -1330,9 +1355,6 @@ void EnsoniqSD1AudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
     if (wrapperType == juce::AudioProcessor::wrapperType_AudioUnit)
     {
         bool mameHasAudio = totalWritten.load(std::memory_order_acquire) > static_cast<uint64_t>(threshold);
-
-        static double lastAuMidiTime = 0.0;
-        static uint64_t captureReadPos = 0;
         
         double currentMameTime = (mameMachine != nullptr) ? mameMachine->time().as_double() : 0.0;
 

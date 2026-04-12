@@ -42,6 +42,9 @@ class EnsoniqSD1AudioProcessor : public juce::AudioProcessor,
 {
 public:
     
+    // New atomic flag to signal that the MAME engine is fully initialized and clocks are valid
+        std::atomic<bool> mameIsFullyBooted{ false };
+    
     // --- SELF CHECK ---
         std::atomic<bool> isSelfCheckFailed{ false };
         juce::String selfCheckErrorMsg { "" };
@@ -333,6 +336,13 @@ public:
     
 private:
 
+        // Member variables to replace the problematic 'static' variables in processBlock.
+        // This ensures each plugin instance has its own independent state.
+        bool lastIsPlaying = false;
+        bool localLastOffline = false;
+        double lastAuMidiTime = 0.0;
+        uint64_t captureReadPos = 0;
+    
     bool extractLegacyMameState(const juce::String& base64State, juce::MemoryBlock& outOsram, juce::MemoryBlock& outSeqram);
     std::thread mameThread;
     std::atomic<bool> isMameRunning{ false };
