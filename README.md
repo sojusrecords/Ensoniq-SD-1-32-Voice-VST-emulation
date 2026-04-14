@@ -106,16 +106,16 @@ Everything. Check the original manual here: [SD-1 Manual at Polynominal](https:/
 - IMPORTANT - ROM Files Required!<br/>
   Due to copyright reasons, the required Ensoniq ROM files are NOT included.
 
-  * We've removed the strict ROM verification. Now it's up to MAME to accept your files; we only check for their presence, and it doesn't matter whether they're organized into a folder within the zip file or not. If your ROM has been good so far, it will continue to be good. At startup, it checks for the presence of sd132.zip; if it doesn't find it, you can set the exact path using a button. We also check to see if all 10 files are present, and you can rescan the zip file without reloading the plugin. The plugin performs a self-check at every startup, which checks the following: whether it has write permissions to the temp folder and the EnsoniqSD1 folder, checks the Lua plugins, and verifies if the MAME engine failed to start for any reason.
+  * We've removed the strict ROM verification. Now it's up to MAME to accept your files; we only check for their presence, and it doesn't matter whether they're organized into a folder within the zip file or not. If your ROM has been good so far, it will continue to be good. At startup, it checks for the presence of **sd132.zip**; if it doesn't find it, you can set the exact path using a button. We also check to see if all 10 files are present, and you can rescan the zip file without reloading the plugin. The plugin performs a self-check at every startup, which checks the following: whether it has write permissions to the temp folder and the EnsoniqSD1 folder, checks the Lua plugins, and verifies if the MAME engine failed to start for any reason.
 
   To make the plugin work:
-  * Create a folder named EnsoniqSD1 in your user's Documents folder:
+  * Create a folder named **EnsoniqSD1** in your user's Documents folder:
 
-    - Win C:\Users\yourusername\Documents
+    - Win **C:\Users\yourusername\Documents**
 
-    - macOS /yourusername/Documents
+    - macOS **/yourusername/Documents**
 
-    - Linux /Documents
+    - Linux **/Documents**
 
   * Obtain the Ensoniq SD-1/32 ```sd132``` AND Ensoniq LCD ```2x40_vfx``` ROM files and place these files in that folder AND zip them to sd132.zip.<br/>
 
@@ -130,7 +130,7 @@ Everything. Check the original manual here: [SD-1 Manual at Polynominal](https:/
     - ```u37.bin```<br/>
     - ```u38.bin```<br/>
 
-  * The final structure of sd132.zip in your Documents/EnsoniqSD1 folder looks like this:<br/>
+  * The final structure of **sd132.zip** in your Documents/EnsoniqSD1 folder looks like this:<br/>
     ![sd132.zip](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/blob/main/roms.png)<br/>
   
   - Optional: If you want to run the internal sequencer, you need the original disk image:
@@ -145,7 +145,9 @@ Everything. Check the original manual here: [SD-1 Manual at Polynominal](https:/
 
 - Your sequencer is blacklisting the plugin: if the plugin scanner provides error message or a log file then send it to us.
 
-- Reset global settings: go to Documents/EnsoniqSD1 and delete the file "settings.xml" and delete temp files
+- If the plugin is loaded but there’s only ```Load Floppy/Cartridge/SYX``` and ```Settings``` buttons and blank window: the internal MAME engine is not loaded. Check if your OS/PC/MAC is capable to run it. Whitelist plugin in your anti-virus.
+
+- Reset global settings: go to Documents/EnsoniqSD1 and delete the file ```settings.xml``` and delete temp files
 
 - Report problems at [GitHub issues](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/issues)
 
@@ -157,7 +159,7 @@ Loading SYS-EX files works exactly like the original 1990 hardware, simulating a
 
 Step-by-step:
 
-  - **IMPORTANT** Enable SYS-EX on the Synth: On the SD-1 front panel, press System/MIDI CONTROL button TWICE, and set SYS-EX to ON.
+  - **IMPORTANT** Enable SYS-EX on the Synth: On the SD-1 front panel, press System/MIDI CONTROL button TWICE, and set ```SYS-EX``` to ```ON```.
 
   - Go to a safe screen: Press the Sounds or Presets button to return to the main playing screen.
 
