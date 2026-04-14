@@ -117,7 +117,7 @@ Everything. Check the original manual here: [SD-1 Manual at Polynominal](https:/
 
     - Linux /Documents
 
-  * Obtain the Ensoniq SD-1/32 ```sd132``` variant AND Ensoniq ```2x40 VFD ROM``` files and place these files in that folder AND zip them to sd132.zip.<br/>
+  * Obtain the Ensoniq SD-1/32 ```sd132``` AND Ensoniq LCD ```2x40_vfx``` ROM files and place these files in that folder AND zip them to sd132.zip.<br/>
 
     - ```esqvfd_font_vfx.bin```<br/>
     - ```sd1_32_402_hi.bin```<br/>
