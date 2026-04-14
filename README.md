@@ -63,15 +63,24 @@ Everything. Check the original manual here: [SD-1 Manual at Polynominal](https:/
 
 - Mac binaries require one of the following methods to run due to Apple's security policies:
 
-  - Manual authorization: The user must go to System Settings > Privacy & Security and, after the DAW has attempted to load the plugin, click the "Open Anyway" button.
-
-  - or
-
-  - Removing quarantine (via Terminal): Run the following command on the plugin bundle:
+  - **all macOS versions BEFORE Tahoe**:
+    - **Manual authorization** - The user must go to System Settings > Privacy & Security and, after the DAW has attempted to load the plugin, click the "Open Anyway" button.
+    - **Better method to remove quarantine in terminal.** Open a terminal window and run the following command on the plugin bundle:
+    - **for VST3**:
     ```sudo xattr -rd com.apple.quarantine /Library/Audio/Plug-Ins/VST3/EnsoniqSD1.vst3```
+    - **for AU**:
     ```sudo xattr -rd com.apple.quarantine /Library/Audio/Plug-Ins/Components/EnsoniqSD1.component```
-
   - Get Sentinel if you stuck with authorization: https://github.com/alienator88/Sentinel
+  - **macOS versions Tahoe and later**:
+    - Remove quarantine and codesign the plugin. Open a terminal window and run the following command on the plugin bundle:
+    - install Xcode Command Line Tools if needed:
+      - ```xcode-select --install```
+    - **for VST3**:
+      - ```sudo xattr -rd com.apple.quarantine /Library/Audio/Plug-Ins/VST3/EnsoniqSD1.vst3```
+      - ```sudo codesign --force --deep --sign - /Library/Audio/Plug-Ins/VST3/EnsoniqSD1.vst3```
+    - **for AU**:
+      - ```sudo xattr -rd com.apple.quarantine /Library/Audio/Plug-Ins/Components/EnsoniqSD1.component```
+      - ```sudo codesign --force --deep --sign - /Library/Audio/Plug-Ins/Components/EnsoniqSD1.component```
 
 # Requirements
 - Please note that this is a cycle-accurate hardware-level emulation of the synthesizer, so it places **heavy demands on the CPU!** Set the buffer setting to higher if buffer underrun occurs. Examples for buffer settings: 2011 Sandy Bridge (AVX1) 2 core i5-2415m: 4096, 2013 Haswell (AVX2) 4 core i7-4770: 2048, 2018 Coffee Lake 6 core i7-8700: 256, 2020 Apple ARM M1 Pro 6P/2E: 128.
@@ -132,11 +141,6 @@ Everything. Check the original manual here: [SD-1 Manual at Polynominal](https:/
 
 - We've removed the strict ROM verification. Now it's up to MAME to accept your files; we only check for their presence, and it doesn't matter whether they're organized into a folder within the zip file or not. If your ROM has been good so far, it will continue to be good. At startup, it checks for the presence of sd132.zip; if it doesn't find it, you can set the exact path using a button. We also check to see if all 10 files are present, and you can rescan the zip file without reloading the plugin.
 
-- On macOS: if 'sudo xattr -rd...' fails, try codesign the plugin:
-  - Open a terminal window, install Xcode Command Line Tools if needed: ```xcode-select --install```
-  - ```sudo codesign -f -s /Library/Audio/Plug-Ins/VST3/EnsoniqSD1.vst3``` or ```sudo codesign -f -s /Library/Audio/Plug-Ins/Components/EnsoniqSD1.component```
-  - Get Sentinel if you stuck with authorization: https://github.com/alienator88/Sentinel
-
 - Whitelist the plugin in your antivirus app. The plugin is writing some data to temp folder (e.g. nvram and osram files, lua plugins) and to your Documents/EnsoniqSD1 folder (e.g. settings.xml)
 
 - Your sequencer is blacklisting the plugin: if the plugin scanner provides error message or a log file then send it to us.
@@ -187,7 +191,7 @@ Step-by-step:
 <details>
   <summary>How do I load Floppy Disk Images (.img, .hfe, .dsk, .eda)?</summary>
 
-   - Attach the disk image using the "Load Floppy/Cart/SYX" button. Press Storage, then select DISK. Press LOAD. The display will show the Disk Load page with the File Type selected. Move the data entry slider or push up/down buttons to select your file.
+   - Attach the disk image using the "Load Floppy/Cart/SYX" button. Press Storage, then select DISK. Press LOAD. The display will show the Disk Load page with the File Type selected. Move the data entry slider or push up/down buttons to select your file. You can convert SYS-EX data to [disk images with this tool](https://github.com/joemcmahon/sd1diskutil).
 
 </details>
 
@@ -196,7 +200,7 @@ Step-by-step:
 
    - Here you can find an [SD-1 formatted empty hfe disk image (1.44MB).](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/blob/main/SD-1-EMPTY-DISK.hfe)
 
-   - Attach the disk image using the "Load Floppy/Cart/SYX" button. Press Storage, then select DISK. Press SAVE. The display will show the Disk SAVE page with the File Type selected. Move the data entry slider or push up/down buttons to select save type. Press *YES*.
+   - Attach the disk image using the "Load Floppy/Cart/SYX" button. Press Storage, then select DISK. Press SAVE. The display will show the Disk SAVE page with the File Type selected. Move the data entry slider or push up/down buttons to select save type. Press *YES*. You can convert SYS-EX data to [disk images with this tool](https://github.com/joemcmahon/sd1diskutil).
 
 </details>
 
