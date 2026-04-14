@@ -67,9 +67,9 @@ Everything. Check the original manual here: [SD-1 Manual at Polynominal](https:/
     - **Manual authorization** - The user must go to System Settings > Privacy & Security and, after the DAW has attempted to load the plugin, click the "Open Anyway" button.
     - **Better method to remove quarantine in terminal.** Open a terminal window and run the following command on the plugin bundle:
     - **for VST3**:
-    ```sudo xattr -rd com.apple.quarantine /Library/Audio/Plug-Ins/VST3/EnsoniqSD1.vst3```
+      - ```sudo xattr -rd com.apple.quarantine /Library/Audio/Plug-Ins/VST3/EnsoniqSD1.vst3```
     - **for AU**:
-    ```sudo xattr -rd com.apple.quarantine /Library/Audio/Plug-Ins/Components/EnsoniqSD1.component```
+      - ```sudo xattr -rd com.apple.quarantine /Library/Audio/Plug-Ins/Components/EnsoniqSD1.component```
     - Get Sentinel if you stuck with authorization: https://github.com/alienator88/Sentinel
   - **macOS versions Tahoe and later**:
     - Remove quarantine and codesign the plugin. Open a terminal window and run the following command on the plugin bundle:
@@ -95,7 +95,7 @@ Everything. Check the original manual here: [SD-1 Manual at Polynominal](https:/
   - Tested and working:
     - macOS VST3: Ableton Live 12, Bitwig Studio 6, Cubase 15, Fender Studio Pro 8, FL Studio 2025, Reaper 7 etc.
 
-    - macOS AU: **SELECTED DAWS ONLY! Please note that the AU plugin is ONLY for Logic, GarageBand, MainStage, Ableton Live, Fender Studio Pro (Studio One) and Reaper. Any other DAW must use the VST3 version!** Tested on Logic 11, Fender Studio Pro 8, Reaper 7, Ableton Live 12.
+    - macOS AU: **SELECTED DAWS ONLY! Please note that the AU plugin is ONLY for Logic, GarageBand, MainStage, Ableton Live, Fender Studio Pro (Studio One) and Reaper. Any other DAW must use the VST3 version!** Tested on Logic 11 and 12, Fender Studio Pro 8, Reaper 7, Ableton Live 12.
 
     - Windows: Ableton Live 12, Bitwig Studio 6, Cubase 15, FL Studio 2025, Reaper 7, Cantabile, Reason 12.5 etc.
 
