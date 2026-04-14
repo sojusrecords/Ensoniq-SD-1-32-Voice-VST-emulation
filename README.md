@@ -120,7 +120,7 @@ Everything. Check the original manual here: [SD-1 Manual at Polynominal](https:/
 
     - Linux **/Documents**
 
-  * Obtain the Ensoniq SD-1/32  ```sd132```  AND Ensoniq LCD  ```2x40_vfx```  ROM files and place these files in that folder AND zip them to sd132.zip.<br/>
+  * Obtain the Ensoniq SD-1/32  ```sd132```  AND Ensoniq LCD  ```2x40_vfx```  ROM files and place these files in that folder AND zip them to ```sd132.zip```.<br/>
 
     - ```esqvfd_font_vfx.bin```<br/>
     - ```sd1_32_402_hi.bin```<br/>
@@ -221,7 +221,7 @@ Step-by-step:
 
    - Attach the disk image using ```Load Floppy/Cartridge/SYX```. Press ```STORAGE```, then select ```DISK```. Press ```LOAD```. The display will show the Disk Load page with the ```File Type``` selected. Move the data entry slider or push up/down buttons all the way up to select ```TYPE=SEQUENCER OS```.
 
-    - Now load the sequencer with pushing the ```SEQ``` button.
+   - Now load the sequencer with pushing the ```SEQ``` button.
 
 </details>
 
