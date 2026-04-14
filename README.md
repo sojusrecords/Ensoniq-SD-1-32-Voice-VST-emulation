@@ -104,7 +104,7 @@ Everything. Check the original manual here: [SD-1 Manual at Polynominal](https:/
   - If it's not working check [Troubleshooting](#Troubleshooting).
 
 - IMPORTANT - ROM Files Required!<br/>
-  Due to copyright reasons, the required Ensoniq ROM files are NOT included.
+  Due to copyright reasons, the required Ensoniq ROM files are **NOT included**.
 
   * We've removed the strict ROM verification. Now it's up to MAME to accept your files; we only check for their presence, and it doesn't matter whether they're organized into a folder within the zip file or not. If your ROM has been good so far, it will continue to be good. At startup, it checks for the presence of sd132.zip; if it doesn't find it, you can set the exact path using a button. We also check to see if all 10 files are present, and you can rescan the zip file without reloading the plugin. The plugin performs a self-check at every startup, which checks the following: whether it has write permissions to the temp folder and the EnsoniqSD1 folder, checks the Lua plugins, and verifies if the MAME engine failed to start for any reason.
 
@@ -117,7 +117,7 @@ Everything. Check the original manual here: [SD-1 Manual at Polynominal](https:/
 
     - Linux **/Documents**
 
-  * Obtain the Ensoniq SD-1/32 ```**sd132**``` AND Ensoniq LCD ```**2x40_vfx**``` ROM files and place these files in that folder AND zip them to sd132.zip.<br/>
+  * Obtain the Ensoniq SD-1/32  ```sd132```  AND Ensoniq LCD  ```2x40_vfx```  ROM files and place these files in that folder AND zip them to sd132.zip.<br/>
 
     - ```esqvfd_font_vfx.bin```<br/>
     - ```sd1_32_402_hi.bin```<br/>
