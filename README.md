@@ -20,9 +20,9 @@ We are Sojus Records, one of the longest-running netlabels still active. We are 
 
   - [Win x64 VST3 oldskool AVX1 for pre-Haswell machines](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v0.9.9/EnsoniqSD1-v.0.9.9-winVST3-AVX1.7z)
 
-  - [macOS Universal Binary VST3 macOS 11 or newer](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v0.9.9/EnsoniqSD1-v.0.9.9-macVST3.7z)
+  - [macOS Universal Binary VST3 macOS 11 or newer](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v0.9.9/EnsoniqSD1-v.0.9.9-macVST3.7z) [Read the this section for more info!](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation#Known-limitations)
 
-  - [macOS Universal Binary AU SELECTED DAWS ONLY macOS 11 or newer](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v0.9.9/EnsoniqSD1-v.0.9.9-macAU.7z)
+  - [macOS Universal Binary AU SELECTED DAWS ONLY macOS 11 or newer](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v0.9.9/EnsoniqSD1-v.0.9.9-macAU.7z) [Read the this section for more info!](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation#Known-limitations)
 
   - [Linux VST3 AVX2](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v0.9.9/EnsoniqSD1-v.0.9.9-LINUX-AVX2.7z)
 
@@ -70,7 +70,7 @@ Everything. Check the original manual here: [SD-1 Manual at Polynominal](https:/
     ```sudo xattr -rd com.apple.quarantine /Library/Audio/Plug-Ins/VST3/EnsoniqSD1.vst3```
     - **for AU**:
     ```sudo xattr -rd com.apple.quarantine /Library/Audio/Plug-Ins/Components/EnsoniqSD1.component```
-  - Get Sentinel if you stuck with authorization: https://github.com/alienator88/Sentinel
+    - Get Sentinel if you stuck with authorization: https://github.com/alienator88/Sentinel
   - **macOS versions Tahoe and later**:
     - Remove quarantine and codesign the plugin. Open a terminal window and run the following command on the plugin bundle:
     - install Xcode Command Line Tools if needed:
