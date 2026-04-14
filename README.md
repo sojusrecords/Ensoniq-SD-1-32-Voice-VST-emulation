@@ -65,14 +65,14 @@ Everything. Check the original manual here: [SD-1 Manual at Polynominal](https:/
 
   - **all macOS versions BEFORE Tahoe**:
     - **Manual authorization** - The user must go to System Settings > Privacy & Security and, after the DAW has attempted to load the plugin, click the "Open Anyway" button.
-    - **Better method to remove quarantine in terminal.** Open a terminal window and run the following command on the plugin bundle:
+    - **Better method to remove quarantine in terminal.** Open a terminal window and run the following commands on the plugin bundle:
     - **for VST3**:
       - ```sudo xattr -rd com.apple.quarantine /Library/Audio/Plug-Ins/VST3/EnsoniqSD1.vst3```
     - **for AU**:
       - ```sudo xattr -rd com.apple.quarantine /Library/Audio/Plug-Ins/Components/EnsoniqSD1.component```
     - Get Sentinel if you stuck with authorization: https://github.com/alienator88/Sentinel
   - **macOS versions Tahoe and later**:
-    - Remove quarantine and codesign the plugin. Open a terminal window and run the following command on the plugin bundle:
+    - Remove quarantine and codesign the plugin. Open a terminal window and run the following commands on the plugin bundle:
     - install Xcode Command Line Tools if needed:
       - ```xcode-select --install```
     - **for VST3**:
