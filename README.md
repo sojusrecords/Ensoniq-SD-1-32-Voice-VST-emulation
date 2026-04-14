@@ -16,13 +16,16 @@ Like the VFX-SD, the SD-1 has a professional quality on-board sequencer making i
 We are Sojus Records, one of the longest-running netlabels still active. We are musicians, not programmers, but we love old synths and emulations. We decided to build a fully featured VST3/AU version of the MAME-emulated Ensoniq SD-1/32, which has never been emulated before. Thanks to the recent AI coding revolution, we have successfully built it. Finally a good use of vibe coding! This proof-of-concept is an important step for both musicians and coders. We are looking forward to bringing other MAME synths to life in the future!
 
 # Download 
+
+**IMPORTANT - ROM Files Required!** [Read this section for more info!](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation#requirements)
+
   - [Win x64 VST3 W10+](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v0.9.9/EnsoniqSD1-v.0.9.9-winVST3.7z)
 
   - [Win x64 VST3 oldskool AVX1 for pre-Haswell machines](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v0.9.9/EnsoniqSD1-v.0.9.9-winVST3-AVX1.7z)
 
-  - [macOS Universal Binary VST3 macOS 11 or newer](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v0.9.9/EnsoniqSD1-v.0.9.9-macVST3.7z) [Read the this section for more info!](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation#Known-limitations)
+  - [macOS Universal Binary VST3 macOS 11 or newer](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v0.9.9/EnsoniqSD1-v.0.9.9-macVST3.7z) [Read this section for more info!](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation#known-limitations)
 
-  - [macOS Universal Binary AU SELECTED DAWS ONLY macOS 11 or newer](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v0.9.9/EnsoniqSD1-v.0.9.9-macAU.7z) [Read the this section for more info!](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation#Known-limitations)
+  - [macOS Universal Binary AU SELECTED DAWS ONLY macOS 11 or newer](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v0.9.9/EnsoniqSD1-v.0.9.9-macAU.7z) [Read this section for more info!](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation#known-limitations)
 
   - [Linux VST3 AVX2](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v0.9.9/EnsoniqSD1-v.0.9.9-LINUX-AVX2.7z)
 
