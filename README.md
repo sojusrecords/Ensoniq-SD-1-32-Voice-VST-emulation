@@ -106,7 +106,7 @@ Everything. Check the original manual here: [SD-1 Manual at Polynominal](https:/
 - IMPORTANT - ROM Files Required!<br/>
   Due to copyright reasons, the required Ensoniq ROM files are NOT included.
 
-  * We've removed the strict ROM verification. Now it's up to MAME to accept your files; we only check for their presence, and it doesn't matter whether they're organized into a folder within the zip file or not. If your ROM has been good so far, it will continue to be good. At startup, it checks for the presence of **sd132.zip**; if it doesn't find it, you can set the exact path using a button. We also check to see if all 10 files are present, and you can rescan the zip file without reloading the plugin. The plugin performs a self-check at every startup, which checks the following: whether it has write permissions to the temp folder and the EnsoniqSD1 folder, checks the Lua plugins, and verifies if the MAME engine failed to start for any reason.
+  * We've removed the strict ROM verification. Now it's up to MAME to accept your files; we only check for their presence, and it doesn't matter whether they're organized into a folder within the zip file or not. If your ROM has been good so far, it will continue to be good. At startup, it checks for the presence of sd132.zip; if it doesn't find it, you can set the exact path using a button. We also check to see if all 10 files are present, and you can rescan the zip file without reloading the plugin. The plugin performs a self-check at every startup, which checks the following: whether it has write permissions to the temp folder and the EnsoniqSD1 folder, checks the Lua plugins, and verifies if the MAME engine failed to start for any reason.
 
   To make the plugin work:
   * Create a folder named **EnsoniqSD1** in your user's Documents folder:
@@ -117,7 +117,7 @@ Everything. Check the original manual here: [SD-1 Manual at Polynominal](https:/
 
     - Linux **/Documents**
 
-  * Obtain the Ensoniq SD-1/32 ```sd132``` AND Ensoniq LCD ```2x40_vfx``` ROM files and place these files in that folder AND zip them to sd132.zip.<br/>
+  * Obtain the Ensoniq SD-1/32 ```**sd132**``` AND Ensoniq LCD ```**2x40_vfx**``` ROM files and place these files in that folder AND zip them to sd132.zip.<br/>
 
     - ```esqvfd_font_vfx.bin```<br/>
     - ```sd1_32_402_hi.bin```<br/>
@@ -159,13 +159,13 @@ Loading SYS-EX files works exactly like the original 1990 hardware, simulating a
 
 Step-by-step:
 
-  - **IMPORTANT** Enable SYS-EX on the Synth: On the SD-1 front panel, press System/MIDI CONTROL button TWICE, and set ```SYS-EX``` to ```ON```.
+  - **IMPORTANT** Enable SYS-EX on the Synth: On the SD-1 front panel, press ```System/MIDI CONTROL``` button TWICE, and set ```SYS-EX``` to ```ON```.
 
-  - Go to a safe screen: Press the Sounds or Presets button to return to the main playing screen.
+  - Go to a safe screen: Press the ```Sounds``` or ```Presets``` button to return to the main playing screen.
 
-  - Load the file: Click the Load Media button on the plugin interface and select your .syx file. A standard 64KB bank takes about 12 to 15 seconds to transfer. This is an authentic hardware limitation (the maximum speed of a physical MIDI cable).
+  - Load the file: Click the ```Load Floppy/Cartridge/SYX``` button on the plugin interface and select your .syx file. A standard 64KB bank takes about 12 to 15 seconds to transfer. This is an authentic hardware limitation (the maximum speed of a physical MIDI cable).
 
-  - You will see a "Transmitting SYS-EX Data..." overlay on the screen. Once the overlay disappears, the synth will instantly update its RAM, and your presets will be ready to play!
+  - You will see a ```Transmitting SYS-EX Data...``` overlay on the screen. Once the overlay disappears, the synth will instantly update its RAM, and your presets will be ready to play!
 
   - You can also save the presets to a disk image. Here you can find an [SD-1 formatted empty hfe disk image (1.44MB).](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/blob/main/SD-1-EMPTY-DISK.hfe) Thanks to Headroom for it.
 </details>
@@ -173,9 +173,9 @@ Step-by-step:
 <details>
   <summary>How can I save my presets?</summary>
 
-  - Saving on the real hardware requires holding down PRESETS button and pressing a BANK button.
+  - Saving on the real hardware requires holding down PRESETS button and pressing a BANK (0-9) button.
 
-  - We added a macro button (SAVE PRESET) so users without a MIDI controller can also save presets.
+  - We added a macro button ```SAVE PRESET``` so users without a MIDI controller can also save presets.
 
   - You can also assign the buttons to a physical or virtual MIDI controller. With this workaround you can save the preset as you can hold down any buttons simultaneous.
 
@@ -193,7 +193,7 @@ Step-by-step:
 <details>
   <summary>How do I load Floppy Disk Images (.img, .hfe, .dsk, .eda)?</summary>
 
-   - Attach the disk image using the "Load Floppy/Cart/SYX" button. Press Storage, then select DISK. Press LOAD. The display will show the Disk Load page with the File Type selected. Move the data entry slider or push up/down buttons to select your file. You can convert SYS-EX data to [disk images with this tool](https://github.com/joemcmahon/sd1diskutil).
+   - Attach the disk image using the ```Load Floppy/Cartridge/SYX``` button. Press STORAGE, then select ```DISK```. Press ```LOAD```. The display will show the Disk Load page with the ```File Type``` selected. Move the data entry slider or push up/down buttons to select your file. You can convert SYS-EX data to [disk images with this tool](https://github.com/joemcmahon/sd1diskutil).
 
 </details>
 
@@ -202,21 +202,21 @@ Step-by-step:
 
    - Here you can find an [SD-1 formatted empty hfe disk image (1.44MB).](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/blob/main/SD-1-EMPTY-DISK.hfe)
 
-   - Attach the disk image using the "Load Floppy/Cart/SYX" button. Press Storage, then select DISK. Press SAVE. The display will show the Disk SAVE page with the File Type selected. Move the data entry slider or push up/down buttons to select save type. Press *YES*. You can convert SYS-EX data to [disk images with this tool](https://github.com/joemcmahon/sd1diskutil).
+   - Attach the disk image using the ```Load Floppy/Cartridge/SYX``` button. Press STORAGE, then select ```DISK```. Press ```SAVE```. The display will show the Disk SAVE page with the ```File Type``` selected. Move the data entry slider or push up/down buttons to select save type. Press ```*YES*```. You can convert SYS-EX data to [disk images with this tool](https://github.com/joemcmahon/sd1diskutil).
 
 </details>
 
 <details>
   <summary>How can I load/save my Cartridges (.eeprom, .rom, .cart, .sc32)?</summary>
 
-   - Attach the cartridge image using the "Load Floppy/Cart/SYX" button. Press Storage, then select CARTRIDGE. Choose PROGRAMS/PRESETS/BOTH. Choose Internal-to-Cartridge (SAVE) or Cartridge-to-Internal (LOAD).
+   - Attach the cartridge image using the ```Load Floppy/Cartridge/SYX``` button. Press STORAGE, then select ```CARTRIDGE```. Choose ```PROGRAMS/PRESETS/BOTH```. Choose ```Internal-to-Cartridge``` (SAVE) or ```Cartridge-to-Internal``` (LOAD).
 
 </details>
 
 <details>
   <summary>How can I load and use the internal Sequencer?</summary>
 
-    - How to load: Attach the disk image using "Load Floppy/Cart/SYX". Press Storage, then select DISK. Press LOAD. The display will show the Disk Load page with the File Type selected. Move the data entry slider or push up/down buttons all the way up to select TYPE=SEQUENCER OS.
+   - Attach the disk image using ```Load Floppy/Cartridge/SYX```. Press STORAGE, then select ```DISK```. Press ```LOAD```. The display will show the Disk Load page with the ```File Type``` selected. Move the data entry slider or push up/down buttons all the way up to select ```TYPE=SEQUENCER OS```.
 
     - Now load the sequencer with pushing the SEQ button.
 
