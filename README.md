@@ -148,7 +148,7 @@ Everything. Check the original manual here: [SD-1 Manual at Polynominal](https:/
 
 - Your sequencer is blacklisting the plugin: if the plugin scanner provides error message or a log file then send it to us.
 
-- If the plugin is loaded but there’s only ```Load Floppy/Cartridge/SYX``` and ```Settings``` buttons and blank window: the internal MAME engine is not loaded. Check if your OS/PC/MAC is capable to run it. Whitelist plugin in your anti-virus.
+- If the plugin is loaded but there’s only ```Load Floppy/Cart/SYX``` and ```Settings``` buttons and blank window: the internal MAME engine is not loaded. Check if your OS/PC/MAC is capable to run it. Whitelist plugin in your anti-virus.
 
 - Reset global settings: go to Documents/EnsoniqSD1 and delete the file ```settings.xml``` and delete temp files
 
@@ -166,7 +166,7 @@ Step-by-step:
 
   - Go to a safe screen: Press the ```Sounds``` or ```Presets``` button to return to the main playing screen.
 
-  - Load the file: Click the ```Load Floppy/Cartridge/SYX``` button on the plugin interface and select your .syx file. A standard 64KB bank takes about 12 to 15 seconds to transfer. This is an authentic hardware limitation (the maximum speed of a physical MIDI cable).
+  - Load the file: Click the ```Load Floppy/Cart/SYX``` button on the plugin interface and select your .syx file. A standard 64KB bank takes about 12 to 15 seconds to transfer. This is an authentic hardware limitation (the maximum speed of a physical MIDI cable).
 
   - You will see a ```Transmitting SYS-EX Data...``` overlay on the screen. Once the overlay disappears, the synth will instantly update its RAM, and your presets will be ready to play!
 
@@ -196,7 +196,7 @@ Step-by-step:
 <details>
   <summary>How do I load Floppy Disk Images (.img, .hfe, .dsk, .eda)?</summary>
 
-   - Attach the disk image using the ```Load Floppy/Cartridge/SYX``` button. Press ```STORAGE```, then select ```DISK```. Press ```LOAD```. The display will show the Disk Load page with the ```File Type``` selected. Move the data entry slider or push up/down buttons to select your file. You can convert SYS-EX data to [disk images with this tool](https://github.com/joemcmahon/sd1diskutil).
+   - Attach the disk image using the ```Load Floppy/Cart/SYX``` button. Press ```STORAGE```, then select ```DISK```. Press ```LOAD```. The display will show the Disk Load page with the ```File Type``` selected. Move the data entry slider or push up/down buttons to select your file. You can convert SYS-EX data to [disk images with this tool](https://github.com/joemcmahon/sd1diskutil).
 
 </details>
 
@@ -205,21 +205,21 @@ Step-by-step:
 
    - Here you can find an [SD-1 formatted empty hfe disk image (1.44MB).](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/blob/main/SD-1-EMPTY-DISK.hfe)
 
-   - Attach the disk image using the ```Load Floppy/Cartridge/SYX``` button. Press ```STORAGE```, then select ```DISK```. Press ```SAVE```. The display will show the Disk SAVE page with the ```File Type``` selected. Move the data entry slider or push up/down buttons to select save type. Press ```*YES*```. You can convert SYS-EX data to [disk images with this tool](https://github.com/joemcmahon/sd1diskutil).
+   - Attach the disk image using the ```Load Floppy/Cart/SYX``` button. Press ```STORAGE```, then select ```DISK```. Press ```SAVE```. The display will show the Disk SAVE page with the ```File Type``` selected. Move the data entry slider or push up/down buttons to select save type. Press ```*YES*```. You can convert SYS-EX data to [disk images with this tool](https://github.com/joemcmahon/sd1diskutil).
 
 </details>
 
 <details>
   <summary>How can I load/save my Cartridges (.eeprom, .rom, .cart, .sc32)?</summary>
 
-   - Attach the cartridge image using the ```Load Floppy/Cartridge/SYX``` button. Press ```STORAGE```, then select ```CARTRIDGE```. Choose ```PROGRAMS/PRESETS/BOTH```. Choose ```Internal-to-Cartridge``` (SAVE) or ```Cartridge-to-Internal``` (LOAD).
+   - Attach the cartridge image using the ```Load Floppy/Cart/SYX``` button. Press ```STORAGE```, then select ```CARTRIDGE```. Choose ```PROGRAMS/PRESETS/BOTH```. Choose ```Internal-to-Cartridge``` (SAVE) or ```Cartridge-to-Internal``` (LOAD).
 
 </details>
 
 <details>
   <summary>How can I load and use the internal Sequencer?</summary>
 
-   - Attach the disk image using ```Load Floppy/Cartridge/SYX```. Press ```STORAGE```, then select ```DISK```. Press ```LOAD```. The display will show the Disk Load page with the ```File Type``` selected. Move the data entry slider or push up/down buttons all the way up to select ```TYPE=SEQUENCER OS```.
+   - Attach the disk image using ```Load Floppy/Cart/SYX```. Press ```STORAGE```, then select ```DISK```. Press ```LOAD```. The display will show the Disk Load page with the ```File Type``` selected. Move the data entry slider or push up/down buttons all the way up to select ```TYPE=SEQUENCER OS```.
 
    - Now load the sequencer with pushing the ```SEQ``` button.
 

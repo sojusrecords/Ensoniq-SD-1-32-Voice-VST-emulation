@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="Oippeb" name="Ensoniq SD-1" projectType="audioplug" useAppConfig="0"
               addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1" bundleIdentifier="com.sojusrecords.EnsoniqSD1"
-              companyWebsite="www.sojusrecords.com" companyCopyright="Open Source"
+              companyWebsite="www.sojusrecords.com" companyCopyright="Open Source GPLv2/3"
               companyName="EnsoniqMAME" pluginCharacteristicsValue="pluginIsSynth,pluginWantsMidiIn"
               pluginFormats="buildAU,buildStandalone,buildVST3" version="0.9.9"
               pluginName="Ensoniq SD-1" pluginDesc="Ensoniq SD-1 MAME Emu VST/AU"
@@ -64,7 +64,7 @@
                extraCustomFrameworks="CoreAudio&#10;CoreVideo&#10;CoreMedia&#10;AudioToolbox&#10;AudioUnit&#10;Carbon&#10;ForceFeedback&#10;IOKit&#10;Cocoa&#10;OpenGL&#10;SDL2&#10;SDL3"
                frameworkSearchPaths="/Library/Frameworks" buildNumber="2026.03"
                customXcodeResourceFolders="/Users/csabibab/Documents/MameVfxDev/mame/plugins"
-               xcodeValidArchs="arm64,x86_64" extraLinkerFlags="-Wl,-rpath,/Library/Frameworks -Wl,-rpath,@loader_path/../Frameworks -framework SDL2 -framework SDL3"
+               xcodeValidArchs="arm64,x86_64" extraLinkerFlags="-Wl,-rpath,@loader_path/../Frameworks -Wl,-rpath,/Library/Frameworks -framework SDL2 -framework SDL3"
                postbuildCommand="# The copy operation only runs if the VST3, App, or AU is actually being built (not the Shared Code)&#10;if [[ &quot;$FULL_PRODUCT_NAME&quot; == *.vst3 ]] || [[ &quot;$FULL_PRODUCT_NAME&quot; == *.app ]] || [[ &quot;$FULL_PRODUCT_NAME&quot; == *.component ]]; then&#10;&#10;    echo &quot;Let's package the SDL Frameworks here: $FULL_PRODUCT_NAME&quot;&#10;    FRAMEWORKS_DIR=&quot;$TARGET_BUILD_DIR/$FULL_PRODUCT_NAME/Contents/Frameworks&quot;&#10;    &#10;    # 1. Create the Frameworks directory inside the bundle&#10;    mkdir -p &quot;$FRAMEWORKS_DIR&quot;&#10;&#10;    # 2. Copy SDL3 and SDL2 as well&#10;    cp -R &quot;/Library/Frameworks/SDL3.framework&quot; &quot;$FRAMEWORKS_DIR/&quot;&#10;    if [ -d &quot;/Library/Frameworks/SDL2.framework&quot; ]; then&#10;        cp -R &quot;/Library/Frameworks/SDL2.framework&quot; &quot;$FRAMEWORKS_DIR/&quot;&#10;    fi&#10;&#10;    # 3. Apply the Ad-Hoc signature to the embedded frameworks&#10;    codesign -f -s - &quot;$FRAMEWORKS_DIR/SDL3.framework&quot;&#10;    if [ -d &quot;$FRAMEWORKS_DIR/SDL2.framework&quot; ]; then&#10;        codesign -f -s - &quot;$FRAMEWORKS_DIR/SDL2.framework&quot;&#10;    fi&#10;&#10;    # 4. Re-sign the ENTIRE bundle!&#10;    codesign -f -s - &quot;$TARGET_BUILD_DIR/$FULL_PRODUCT_NAME&quot;&#10;&#10;fi"
                smallIcon="fhfkAt" bigIcon="fhfkAt" extraDefs="_LIBCPP_AVAILABILITY_HAS_INIT_PRIMARY_EXCEPTION=0">
       <CONFIGURATIONS>
