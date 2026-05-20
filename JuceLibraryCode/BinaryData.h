@@ -29,32 +29,8 @@ namespace BinaryData
     extern const char*   labels_full_png;
     const int            labels_full_pngSize = 18978;
 
-    extern const char*   legscsi_o;
-    const int            legscsi_oSize = 35816;
-
-    extern const char*   f16_to_extF80_o;
-    const int            f16_to_extF80_oSize = 9120;
-
-    extern const char*   f16_to_f32_o;
-    const int            f16_to_f32_oSize = 9104;
-
-    extern const char*   f16_to_f64_o;
-    const int            f16_to_f64_oSize = 9112;
-
-    extern const char*   f16_to_f128_o;
-    const int            f16_to_f128_oSize = 9120;
-
-    extern const char*   terminal_o;
-    const int            terminal_oSize = 89584;
-
-    extern const char*   mcf5206e_o;
-    const int            mcf5206e_oSize = 582416;
-
-    extern const char*   mfmhd_o;
-    const int            mfmhd_oSize = 250952;
-
     // Number of elements in the namedResourceList and originalFileNames arrays.
-    const int namedResourceListSize = 15;
+    const int namedResourceListSize = 7;
 
     // Points to the start of a list of resource names.
     extern const char* namedResourceList[];

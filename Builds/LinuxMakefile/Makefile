@@ -71,7 +71,7 @@ OBJECTS_VST3 := \
   $(JUCE_OBJDIR)/include_juce_audio_plugin_client_VST3_dd633589.o \
 
 OBJECTS_SHARED_CODE := \
-  $(JUCE_OBJDIR)/PresetBrowserComponent_4c14d26c.o \
+  $(JUCE_OBJDIR)/PresetBrowserComponent_f9afa53d.o \
   $(JUCE_OBJDIR)/PluginProcessor_a059e380.o \
   $(JUCE_OBJDIR)/PluginEditor_94d4fb09.o \
   $(JUCE_OBJDIR)/BinaryData_ce4232d4.o \
@@ -147,7 +147,7 @@ $(JUCE_OBJDIR)/include_juce_audio_plugin_client_VST3_dd633589.o: ../../JuceLibra
 	@echo "Compiling include_juce_audio_plugin_client_VST3.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_VST3) $(JUCE_CFLAGS_VST3) -o "$@" -c "$<"
 
-$(JUCE_OBJDIR)/PresetBrowserComponent_4c14d26c.o: ../../../EnsoniqSD1/Source/PresetBrowserComponent.cpp
+$(JUCE_OBJDIR)/PresetBrowserComponent_f9afa53d.o: ../../Source/PresetBrowserComponent.cpp
 	-$(V_AT)mkdir -p $(@D)
 	@echo "Compiling PresetBrowserComponent.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_SHARED_CODE) $(JUCE_CFLAGS_SHARED_CODE) -o "$@" -c "$<"

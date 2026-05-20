@@ -22,11 +22,11 @@
       <FILE id="UmoBTy" name="labels_full.png" compile="0" resource="1" file="Source/labels_full.png"/>
     </GROUP>
     <GROUP id="{3F88782C-AB7D-82EE-F4B6-16FDEB0AE012}" name="Source">
-      <FILE id="DpV3ag" name="PresetBrowserComponent.cpp" compile="1" resource="0"
-            file="../EnsoniqSD1/Source/PresetBrowserComponent.cpp"/>
-      <FILE id="iyQzCj" name="PresetBrowserComponent.h" compile="0" resource="0"
-            file="../EnsoniqSD1/Source/PresetBrowserComponent.h"/>
-      <FILE id="gFEbIY" name="sd1disk.h" compile="0" resource="0" file="../EnsoniqSD1/Source/sd1disk.h"/>
+      <FILE id="FT895t" name="PresetBrowserComponent.cpp" compile="1" resource="0"
+            file="Source/PresetBrowserComponent.cpp"/>
+      <FILE id="B63XbU" name="PresetBrowserComponent.h" compile="0" resource="0"
+            file="Source/PresetBrowserComponent.h"/>
+      <FILE id="FpJD5r" name="sd1disk.h" compile="0" resource="0" file="Source/sd1disk.h"/>
       <FILE id="IWhokv" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>
       <FILE id="YhSlmb" name="PluginProcessor.h" compile="0" resource="0"
