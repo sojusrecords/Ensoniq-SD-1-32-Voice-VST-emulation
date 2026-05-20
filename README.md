@@ -296,9 +296,9 @@ Because the MAME emulator runs asynchronously on its own background thread, we n
 
 - [SoHu (PRC)](https://www.sohu.com/a/1000002551_455142)
 
-- [AudioPluginsForFree)](https://www.audiopluginsforfree.com/ensoniq-sd-1-vst/)
+- [AudioPluginsForFree](https://www.audiopluginsforfree.com/ensoniq-sd-1-vst/)
 
-- [SoundShock)]https://soundshockaudio.com/ensoniq-sd-1-32-vst-emulation/)
+- [SoundShock](https://soundshockaudio.com/ensoniq-sd-1-32-vst-emulation/)
 
 # License and credits
 
