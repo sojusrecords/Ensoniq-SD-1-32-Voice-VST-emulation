@@ -133,9 +133,9 @@ jobs:
         git clone --depth 1 --branch mame0287 \
           https://github.com/mamedev/mame.git mame
 
-    - name: Clone JUCE 8.0.12
+    - name: Clone JUCE 8.0.13
       run: |
-        git clone --depth 1 --branch 8.0.12 \
+        git clone --depth 1 --branch 8.0.13 \
           https://github.com/juce-framework/JUCE.git juce
 
     - name: Apply MAME patches
@@ -204,7 +204,8 @@ jobs:
         sed -i 's/useGlobalPath="1"/useGlobalPath="0"/g' EnsoniqSD1-LINUX.jucer
         sed -i 's|<MODULEPATH id="\([^"]*\)" path="[^"]*"/>|<MODULEPATH id="\1" path="juce/modules"/>|g' EnsoniqSD1-LINUX.jucer
         sed -i 's/pluginFormats="[^"]*"/pluginFormats="buildVST3"/' EnsoniqSD1-LINUX.jucer
-        sed -i 's/SDL2"/SDL2\&#10;GL\&#10;asound\&#10;pulse\&#10;SDL3_ttf\&#10;ocore_sdl3"/' EnsoniqSD1-LINUX.jucer
+        # JAVÍTOTT SED: Az sd1disk mögé fűzzük be a Linuxos könyvtárakat!
+        sed -i 's/sd1disk"/sd1disk\&#10;GL\&#10;asound\&#10;pulse\&#10;SDL3_ttf\&#10;ocore_sdl3"/' EnsoniqSD1-LINUX.jucer
 
     - name: Regenerate JuceLibraryCode via Projucer
       run: |
@@ -289,9 +290,9 @@ jobs:
         git clone --depth 1 --branch mame0287 \
           https://github.com/mamedev/mame.git mame
 
-    - name: Clone JUCE 8.0.12
+    - name: Clone JUCE 8.0.13
       run: |
-        git clone --depth 1 --branch 8.0.12 \
+        git clone --depth 1 --branch 8.0.13 \
           https://github.com/juce-framework/JUCE.git juce
 
     - name: Apply MAME patches
@@ -360,7 +361,8 @@ jobs:
         sed -i 's/useGlobalPath="1"/useGlobalPath="0"/g' EnsoniqSD1-LINUX.jucer
         sed -i 's|<MODULEPATH id="\([^"]*\)" path="[^"]*"/>|<MODULEPATH id="\1" path="juce/modules"/>|g' EnsoniqSD1-LINUX.jucer
         sed -i 's/pluginFormats="[^"]*"/pluginFormats="buildVST3"/' EnsoniqSD1-LINUX.jucer
-        sed -i 's/SDL2"/SDL2\&#10;GL\&#10;asound\&#10;pulse\&#10;SDL3_ttf\&#10;ocore_sdl3"/' EnsoniqSD1-LINUX.jucer
+        # JAVÍTOTT SED: Az sd1disk mögé fűzzük be a Linuxos könyvtárakat!
+        sed -i 's/sd1disk"/sd1disk\&#10;GL\&#10;asound\&#10;pulse\&#10;SDL3_ttf\&#10;ocore_sdl3"/' EnsoniqSD1-LINUX.jucer
 
     - name: Regenerate JuceLibraryCode via Projucer
       run: |
