@@ -12,7 +12,7 @@
 #include "PluginEditor.h"
 #include "sd1disk.h"
 #include "vfxcart.h"
-#include "machine/x28c020.h"
+#include "machine/eeprompar.h"
 
 static juce::String decodeEnsoniqNameFromBuf(const char* nameBuf) {
     juce::String progName = "";
