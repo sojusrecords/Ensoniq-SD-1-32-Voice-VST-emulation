@@ -12,7 +12,9 @@
 #include "PluginEditor.h"
 #include "sd1disk.h"
 #include "vfxcart.h"
+#define protected public
 #include "machine/eeprompar.h"
+#undef protected
 
 static juce::String decodeEnsoniqNameFromBuf(const char* nameBuf) {
     juce::String progName = "";
@@ -285,9 +287,10 @@ PresetBrowserComponent::PresetBrowserComponent(EnsoniqSD1AudioProcessor& p)
                     auto* eeprom = audioProcessor.mameMachine->root_device().subdevice<eeprom_parallel_base_device>("cart:eeprom");
                     if (eeprom) {
                         std::vector<uint8_t> storage(0x8000);
-                        for (int i = 0; i < 0x8000; i++) {
-                            storage[i] = eeprom->read(i);
-                        }
+                        uint8_t* rawData = eeprom->m_data.get();
+                        if (rawData != nullptr) {
+                            std::memcpy(storage.data(), rawData, 0x8000);
+                    }
                         for (int i = 0; i < selectionCount; ++i) {
                             juce::MemoryBlock b(530, true);
                             b.copyFrom(&storage[selectedRows[i] * 530], 0, 530);
@@ -2065,8 +2068,9 @@ void PresetBrowserComponent::updateContentList(const juce::String& categoryName)
                 auto* eeprom = audioProcessor.mameMachine->root_device().subdevice<eeprom_parallel_base_device>("cart:eeprom");
                 if (eeprom != nullptr) {
                     std::vector<uint8_t> storage(0x8000);
-                    for (int i = 0; i < 0x8000; i++) {
-                        storage[i] = eeprom->read(i);
+                    uint8_t* rawData = eeprom->m_data.get();
+                    if (rawData != nullptr) {
+                        std::memcpy(storage.data(), rawData, 0x8000);
                     }
                     
                     // Validate cartridge signature at 0x7FFE-0x7FFF
