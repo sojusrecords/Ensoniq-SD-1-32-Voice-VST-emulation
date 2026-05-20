@@ -282,7 +282,7 @@ PresetBrowserComponent::PresetBrowserComponent(EnsoniqSD1AudioProcessor& p)
                     }
                 }
                 else if (isCart) {
-                    auto* eeprom = audioProcessor.mameMachine->root_device().subdevice<x28c256_device>("cart:eeprom");
+                    auto* eeprom = audioProcessor.mameMachine->root_device().subdevice<eeprom_parallel_base_device>("cart:eeprom");
                     if (eeprom) {
                         auto& storage = eeprom->data();
                         for (int i = 0; i < selectionCount; ++i) {
@@ -2059,7 +2059,7 @@ void PresetBrowserComponent::updateContentList(const juce::String& categoryName)
                                 exportSysExButton.setEnabled(false);
                                 importBankButton.setEnabled(false);
             } else {
-                auto* eeprom = audioProcessor.mameMachine->root_device().subdevice<x28c256_device>("cart:eeprom");
+                auto* eeprom = audioProcessor.mameMachine->root_device().subdevice<eeprom_parallel_base_device>("cart:eeprom");
                 if (eeprom != nullptr) {
                     auto& storage = eeprom->data();
                     
