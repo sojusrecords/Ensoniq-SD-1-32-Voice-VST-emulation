@@ -10,6 +10,9 @@
 
 #pragma once
 
+// Uncomment to enable the debug rack panel (file manager + rack visible simultaneously)
+//#define SD1_DEBUG_RACK_PANEL
+
 // ==============================================================================
 // MANDATORY MAME MACROS - MUST BE DEFINED BEFORE ANY MAME INCLUDES!
 // These ensure compatibility with the MAME core data types and architectures.
@@ -42,6 +45,26 @@ class EnsoniqSD1AudioProcessor : public juce::AudioProcessor,
 {
 public:
     
+    // --- VFD DISPLAY & LED HARDWARE STATES ---
+        static constexpr int VFD_SIZE = 80; // 2 rows x 40 characters
+        
+        // Stores the raw 14-segment bitmask for each character
+        std::atomic<uint16_t> vfdSegments[VFD_SIZE];
+        
+        // Stores the 32-bit integer where each bit represents a specific panel LED
+        std::atomic<uint32_t> ledStateMask{ 0 };
+
+        // MAME callback function triggered whenever a hardware output changes
+        static void mameOutputNotifier(const char *outname, s32 value, void *param);
+        
+        // API for the Editor / File Manager to read the hardware state safely
+        juce::String getHardwareVfdText();
+        bool isHardwareLedOn(int ledBitIndex);
+
+        // Dynamic dictionary to translate hardware bitmasks back to text
+        std::unordered_map<uint16_t, char> segmentToAscii;
+        void buildVfdDictionary();
+    
     // New atomic flag to signal that the MAME engine is fully initialized and clocks are valid
         std::atomic<bool> mameIsFullyBooted{ false };
     
@@ -52,11 +75,42 @@ public:
     
     // --- ROM MANAGEMENT ---
         juce::String customRomPath { "" };
+        
+        // --- FOLDER BOOKMARKS (max 10, persisted in settings.xml) ---
+        juce::StringArray bookmarkFolders;
+        
+        // --- FILE MANAGER STATE (survives Editor destroy/recreate) ---
+        struct FileManagerState {
+            bool visible = false;
+            juce::String category;          // "INT (RAM)", "ROM0", "BOOKMARK:/path", etc.
+            juce::String openedFilePath;    // full path of opened file (if external)
+            bool viewingDiskBank = false;
+            juce::String openedDiskBankName;
+            int selectedRow = -1;           // contentList row (fallback only)
+            int bankSelectedRow = -1;       // bankContentList row (fallback only)
+            juce::String selectedName;      // actual item name in contentList (primary restore key)
+            juce::String bankSelectedName;  // actual item name in bankContentList (primary restore key)
+            int scrollPosition = 0;         // contentList top row
+            int bankScrollPosition = 0;     // bankContentList top row
+            juce::String activeBookmark;    // bookmark path active at save time (for song state)
+            int viewBeforeBrowser = 0;      // panel view index to restore when closing file manager
+            int fmWindowWidth = 1200;       // Dedicated width for File Manager
+            int fmWindowHeight = 925;       // Dedicated height for File Manager
+        };
+        FileManagerState fileManagerState;
+        std::atomic<bool> stateJustLoaded{ false };  // prevents Editor destructor from overwriting song state
+        std::atomic<bool> isWarmBoot{ false }; // NEW INSTANCE OR LOAD STATE
+        std::atomic<bool> requestFileManagerUIRefresh{ false }; // Notifies GUI to update File Manager after state load
+        std::atomic<bool> showWelcomeMessage{ false };  // Flag for first-launch UX message
         void checkRomAndBootMame();
     
     // --- GLOBAL SETTINGS ---
         std::atomic<bool> requestGlobalSave{ false };
         void loadGlobalSettings();
+    
+    // --- COMPARE STATE MANAGEMENT ---
+    void forceCompareOff();
+    std::atomic<double> scheduledCompareResetTime{ -1.0 };
 
     // --- MAME STATE MANAGEMENT ---
     // Used to safely orchestrate loading/saving states between the UI and the MAME thread
@@ -74,7 +128,6 @@ public:
     std::string pendingFloppyPath;
     std::string pendingCartPath;
     std::mutex mediaMutex;
-    std::atomic<bool> isTransmittingSysEx{ false };
     
     // --- MEDIA STATE TRACKING ---
         std::atomic<bool> isFloppyLoaded{ false };
@@ -92,6 +145,7 @@ public:
     juce::WaitableEvent mameThrottleEvent{ false };
     bool isMameRunningFlag() const { return isMameRunning.load(); }
     std::atomic<bool> isRomMissing{ false };
+
     
     // Flag to indicate if the zip file exists but contains invalid/missing ROMs
     std::atomic<bool> isRomInvalid{ false };
@@ -102,6 +156,8 @@ public:
     
     // Flag to indicate if the plugin is running as an AU in an unsupported host (e.g., FL Studio, Ableton)
     std::atomic<bool> isUnsupportedAUHost{ false };
+    bool isMaschineHost = false;  // Set once in prepareToPlay, read-only in processBlock
+    bool maschineInFastRender = false; // True once WAV RENDER FIX confirms fast render; resets on stop
     
     uint64_t getTotalRead() const { return totalRead.load(std::memory_order_acquire); }
     uint64_t getTotalWritten() const { return totalWritten.load(std::memory_order_acquire); }
@@ -114,102 +170,101 @@ public:
     void prepareToPlay(double sampleRate, int samplesPerBlock) override;
     void releaseResources() override;
     
-    // --- VST AUTOMATIZATION ---
-        struct SD1ButtonDef {
-            juce::String paramID;
-            juce::String paramName;
-            const char* ioportTag;
-            uint32_t ioportMask;
-        };
+            // FULL SD-1 HARDWARE MATRIX DEFINITION
+            struct SD1ButtonDef {
+                juce::String paramID;
+                juce::String paramName;
+                const char* ioportTag;
+                uint32_t ioportMask;
+            };
 
-        // FULL SD-1 LIST
-        const std::vector<SD1ButtonDef> sd1Buttons = {
-            // --- MASTER / MODE ---
-            { "btn_cartbankset", "Cart/BankSet", ":buttons_32", 0x00100000 },
-            { "btn_sounds",      "Sounds",       ":buttons_32", 0x00200000 },
-            { "btn_presets",     "Presets",      ":buttons_32", 0x00400000 },
-            { "btn_seq_mode",    "Seq (Mode)",   ":buttons_32", 0x00080000 },
+            const std::vector<SD1ButtonDef> sd1Buttons = {
+                // --- MASTER / MODE ---
+                { "btn_cartbankset", "Cart/BankSet", ":panel:buttons_32", 0x00100000 },
+                { "btn_sounds",      "Sounds",       ":panel:buttons_32", 0x00200000 },
+                { "btn_presets",     "Presets",      ":panel:buttons_32", 0x00400000 },
+                { "btn_seq_mode",    "Seq (Mode)",   ":panel:buttons_32", 0x00080000 },
 
-            // --- SOFT BUTTONS ---
-            { "btn_soft_tl", "Soft Top-Left",   ":buttons_32", 0x04000000 },
-            { "btn_soft_tc", "Soft Top-Center", ":buttons_32", 0x00000400 },
-            { "btn_soft_tr", "Soft Top-Right",  ":buttons_32", 0x00000800 },
-            { "btn_soft_bl", "Soft Bot-Left",   ":buttons_32", 0x00040000 },
-            { "btn_soft_bm", "Soft Bot-Middle", ":buttons_32", 0x00001000 },
-            { "btn_soft_br", "Soft Bot-Right",  ":buttons_32", 0x00002000 },
+                // --- SOFT BUTTONS (DISPLAY) ---
+                { "btn_soft_tl", "Soft Top-Left",   ":panel:buttons_32", 0x04000000 },
+                { "btn_soft_tc", "Soft Top-Center", ":panel:buttons_32", 0x00000400 },
+                { "btn_soft_tr", "Soft Top-Right",  ":panel:buttons_32", 0x00000800 },
+                { "btn_soft_bl", "Soft Bot-Left",   ":panel:buttons_32", 0x00040000 },
+                { "btn_soft_bm", "Soft Bot-Middle", ":panel:buttons_32", 0x00001000 },
+                { "btn_soft_br", "Soft Bot-Right",  ":panel:buttons_32", 0x00002000 },
 
-            // --- BANK / NUMBER BUTTONS ---
-            { "btn_bank0", "Bank 0", ":buttons_32", 0x00800000 },
-            { "btn_bank1", "Bank 1", ":buttons_32", 0x01000000 },
-            { "btn_bank2", "Bank 2", ":buttons_32", 0x02000000 },
-            { "btn_bank3", "Bank 3", ":buttons_32", 0x00004000 },
-            { "btn_bank4", "Bank 4", ":buttons_32", 0x00008000 },
-            { "btn_bank5", "Bank 5", ":buttons_32", 0x00010000 },
-            { "btn_bank6", "Bank 6", ":buttons_32", 0x00020000 },
-            { "btn_bank7", "Bank 7", ":buttons_32", 0x00000008 },
-            { "btn_bank8", "Bank 8", ":buttons_32", 0x00000004 },
-            { "btn_bank9", "Bank 9", ":buttons_0",  0x02000000 },
+                // --- BANK / NUMBER BUTTONS ---
+                { "btn_bank0", "Bank 0", ":panel:buttons_32", 0x00800000 },
+                { "btn_bank1", "Bank 1", ":panel:buttons_32", 0x01000000 },
+                { "btn_bank2", "Bank 2", ":panel:buttons_32", 0x02000000 },
+                { "btn_bank3", "Bank 3", ":panel:buttons_32", 0x00004000 },
+                { "btn_bank4", "Bank 4", ":panel:buttons_32", 0x00008000 },
+                { "btn_bank5", "Bank 5", ":panel:buttons_32", 0x00010000 },
+                { "btn_bank6", "Bank 6", ":panel:buttons_32", 0x00020000 },
+                { "btn_bank7", "Bank 7", ":panel:buttons_32", 0x00000008 },
+                { "btn_bank8", "Bank 8", ":panel:buttons_32", 0x00000004 },
+                { "btn_bank9", "Bank 9", ":panel:buttons_0",  0x02000000 },
 
-            // --- DATA ENTRY ---
-            { "btn_up",   "Up (Inc)",   ":buttons_32", 0x40000000 },
-            { "btn_down", "Down (Dec)", ":buttons_32", 0x80000000 },
+                // --- DATA ENTRY ---
+                { "btn_up",   "Up (Inc)",   ":panel:buttons_32", 0x40000000 },
+                { "btn_down", "Down (Dec)", ":panel:buttons_32", 0x80000000 },
 
-            // --- PROGRAMMING / SAVE ---
-            { "btn_replace", "Replace Program", ":buttons_0", 0x20000000 },
-            { "btn_select",  "Select Voice",    ":buttons_0", 0x00000020 },
-            { "btn_copy",    "Copy",            ":buttons_0", 0x00000200 },
-            { "btn_write",   "Write",           ":buttons_0", 0x00000008 },
-            { "btn_compare", "Compare",         ":buttons_0", 0x00000100 },
+                // --- PROGRAMMING / SAVE ---
+                { "btn_replace", "Replace Program", ":panel:buttons_0", 0x20000000 },
+                { "btn_select",  "Select Voice",    ":panel:buttons_0", 0x00000020 },
+                { "btn_copy",    "Copy",            ":panel:buttons_0", 0x00000200 },
+                { "btn_write",   "Write",           ":panel:buttons_0", 0x00000008 },
+                { "btn_compare", "Compare",         ":panel:buttons_0", 0x00000100 },
 
-            // --- PATCH / SYSTEM / MIDI / EFFECTS ---
-            { "btn_patch_menu", "Patch Select", ":buttons_0", 0x04000000 },
-            { "btn_midi",       "MIDI",         ":buttons_0", 0x08000000 },
-            { "btn_effects1",   "Effects",      ":buttons_0", 0x10000000 },
+                // --- PATCH / SYSTEM / MIDI / EFFECTS ---
+                { "btn_patch_menu", "Patch Select", ":panel:buttons_0", 0x04000000 },
+                { "btn_midi",       "MIDI",         ":panel:buttons_0", 0x08000000 },
+                { "btn_effects1",   "Effects",      ":panel:buttons_0", 0x10000000 },
 
-            // --- KEY / ZONE ---
-            { "btn_key_zone", "Key Zone", ":buttons_32", 0x00000080 },
-            { "btn_transpose","Transpose",":buttons_32", 0x00000100 },
-            { "btn_release",  "Release",  ":buttons_32", 0x00000200 },
-            { "btn_volume",   "Volume",   ":buttons_32", 0x00000010 },
-            { "btn_pan",      "Pan",      ":buttons_32", 0x00000020 },
-            { "btn_timbre",   "Timbre",   ":buttons_32", 0x00000040 },
+                // --- KEY / ZONE ---
+                { "btn_key_zone", "Key Zone", ":panel:buttons_32", 0x00000080 },
+                { "btn_transpose","Transpose",":panel:buttons_32", 0x00000100 },
+                { "btn_release",  "Release",  ":panel:buttons_32", 0x00000200 },
+                { "btn_volume",   "Volume",   ":panel:buttons_32", 0x00000010 },
+                { "btn_pan",      "Pan",      ":panel:buttons_32", 0x00000020 },
+                { "btn_timbre",   "Timbre",   ":panel:buttons_32", 0x00000040 },
 
-            // --- SYNTH PARAMETERS ---
-            { "btn_wave",      "Wave",            ":buttons_0", 0x00000010 },
-            { "btn_mod_mixer", "Mod Mixer",       ":buttons_0", 0x00000040 },
-            { "btn_prog_ctrl", "Program Control", ":buttons_0", 0x00000004 },
-            { "btn_effects2",  "Effects (Synth)", ":buttons_0", 0x00000080 },
-            { "btn_pitch",     "Pitch",           ":buttons_0", 0x00000800 },
-            { "btn_pitch_mod", "Pitch Mod",       ":buttons_0", 0x00002000 },
-            { "btn_filters",   "Filters",         ":buttons_0", 0x00008000 },
-            { "btn_output",    "Output",          ":buttons_0", 0x00020000 },
-            { "btn_lfo",       "LFO",             ":buttons_0", 0x00000400 },
-            { "btn_env1",      "Env 1",           ":buttons_0", 0x00001000 },
-            { "btn_env2",      "Env 2",           ":buttons_0", 0x00004000 },
-            { "btn_env3",      "Env 3",           ":buttons_0", 0x00010000 },
+                // --- SYNTH PARAMETERS ---
+                { "btn_wave",      "Wave",            ":panel:buttons_0", 0x00000010 },
+                { "btn_mod_mixer", "Mod Mixer",       ":panel:buttons_0", 0x00000040 },
+                { "btn_prog_ctrl", "Program Control", ":panel:buttons_0", 0x00000004 },
+                { "btn_effects2",  "Effects (Synth)", ":panel:buttons_0", 0x00000080 },
+                { "btn_pitch",     "Pitch",           ":panel:buttons_0", 0x00000800 },
+                { "btn_pitch_mod", "Pitch Mod",       ":panel:buttons_0", 0x00002000 },
+                { "btn_filters",   "Filters",         ":panel:buttons_0", 0x00008000 },
+                { "btn_output",    "Output",          ":panel:buttons_0", 0x00020000 },
+                { "btn_lfo",       "LFO",             ":panel:buttons_0", 0x00000400 },
+                { "btn_env1",      "Env 1",           ":panel:buttons_0", 0x00001000 },
+                { "btn_env2",      "Env 2",           ":panel:buttons_0", 0x00004000 },
+                { "btn_env3",      "Env 3",           ":panel:buttons_0", 0x00010000 },
 
-            // --- INTERNAL SEQUENCER TRANSPORT & TRACKS ---
-            { "btn_track_1_6",  "Tracks 1-6",  ":buttons_0",  0x40000000 },
-            { "btn_track_7_12", "Tracks 7-12", ":buttons_0",  0x80000000 },
-            { "btn_record",     "Record",      ":buttons_0",  0x00080000 },
-            { "btn_stop_cont",  "Stop/Cont",   ":buttons_0",  0x00400000 },
-            { "btn_play",       "Play",        ":buttons_0",  0x00800000 },
-            { "btn_click",      "Click",       ":buttons_32", 0x00000001 },
-            { "btn_seq_ctrl",   "Seq Control", ":buttons_0",  0x00040000 },
-            { "btn_locate",     "Locate",      ":buttons_32", 0x00000002 },
+                // --- INTERNAL SEQUENCER TRANSPORT & TRACKS ---
+                { "btn_track_1_6",  "Tracks 1-6",  ":panel:buttons_0", 0x40000000 },
+                { "btn_track_7_12", "Tracks 7-12", ":panel:buttons_0", 0x80000000 },
+                { "btn_record",     "Record",      ":panel:buttons_0", 0x00080000 },
+                { "btn_stop_cont",  "Stop/Cont",   ":panel:buttons_0", 0x00400000 },
+                { "btn_play",       "Play",        ":panel:buttons_0", 0x00800000 },
+                { "btn_click",      "Click",       ":panel:buttons_32",0x00000001 },
+                { "btn_seq_ctrl",   "Seq Control", ":panel:buttons_0", 0x00040000 },
+                { "btn_locate",     "Locate",      ":panel:buttons_32",0x00000002 },
 
-            // --- PERFORMANCE / SYSTEM ---
-            { "btn_song",       "Song",         ":buttons_32", 0x10000000 },
-            { "btn_seq_track",  "Seq (Track)",  ":buttons_32", 0x08000000 },
-            { "btn_track",      "Track",        ":buttons_32", 0x20000000 },
-            { "btn_master",     "Master",       ":buttons_0",  0x00100000 },
-            { "btn_storage",    "Storage",      ":buttons_0",  0x00200000 },
-            { "btn_midi_ctrl",  "MIDI Control", ":buttons_0",  0x01000000 },
-
-            // --- PATCH SELECT ---
-            { "btn_patch_sel_r", "Patch Select Right", ":patch_select", 0x2 },
-            { "btn_patch_sel_l", "Patch Select Left",  ":patch_select", 0x1 }
-        };
+                // --- PERFORMANCE / SYSTEM ---
+                { "btn_song",       "Song",         ":panel:buttons_32", 0x10000000 },
+                { "btn_seq_track",  "Seq (Track)",  ":panel:buttons_32", 0x08000000 },
+                { "btn_track",      "Track",        ":panel:buttons_32", 0x20000000 },
+                { "btn_master",     "Master",       ":panel:buttons_0",  0x00100000 },
+                { "btn_storage",    "Storage",      ":panel:buttons_0",  0x00200000 },
+                { "btn_midi_ctrl",  "MIDI Control", ":panel:buttons_0",  0x01000000 },
+                
+                // --- PATCH SELECT (WHEELS) ---
+                { "btn_patch_sel_l",  "Patch Select Left",  ":panel:patch_select", 0x1 },
+                { "btn_patch_sel_r",  "Patch Select Right", ":panel:patch_select", 0x2 }
+            };
 
         std::vector<std::atomic<float>*> buttonParams;
 
@@ -245,8 +300,12 @@ public:
     // Core function to boot the headless MAME environment
     void runMameEngine();
     
-    // Verifies the contents of the sd132.zip
-    bool verifyRomFiles(const juce::File& zipFile);
+    // Verifies the unzipped ROM files in the sd132 directory
+    bool verifyRomFiles();
+    // Extracts only the required .bin files from a user-provided zip
+    bool extractRomsFromZip(const juce::File& zipFile);
+    // Copies the required .bin files from a user-provided directory
+    bool copyRomsFromFolder(const juce::File& sourceDir);
     // Stores the list of missing ROM files to be displayed on the UI
     juce::String missingFilesList;
 
@@ -257,8 +316,21 @@ public:
     // MIDI INPUT HANDLING (JUCE -> MAME)
     // ========================================================
     void pushMidiByte(uint8_t data, double targetMameTime);
+    void clearMidiBuffer();
     bool pollMidiData();
     int readMidiByte();
+    
+    // --- MIDI OUTPUT (from SD-1 DUART TX → JUCE MIDI out) ---
+    static constexpr int MIDI_OUT_BUFFER_SIZE = 16384;
+    uint8_t midiOutBuffer[MIDI_OUT_BUFFER_SIZE];
+    std::atomic<int> midiOutWritePos{ 0 };
+    std::atomic<int> midiOutReadPos{ 0 };
+    void pushMidiOutByte(uint8_t data);
+    
+    // MIDI output message assembler state
+    std::vector<uint8_t> midiOutMsg;
+    uint8_t midiOutRunningStatus = 0;
+    bool midiOutInSysEx = false;
 
     // Pointer to the running MAME engine instance
     running_machine* mameMachine = nullptr;
@@ -290,11 +362,21 @@ public:
         juce::MemoryBlock pendingSeqRam;
         std::atomic<bool> pendingRamInjection{ false };
     
+        // --- BANK INJECTION (60-program bank → osram, no CPU reset) ---
+        juce::MemoryBlock pendingBankData;          // interleaved 31800 bytes
+        std::atomic<bool> pendingBankInjection{ false };
+        
+        // --- STATE LOAD COMPARE RESET ---
+        /*std::atomic<bool> needsCompareReset{ false };*/
+        
+        // --- MIDI INPUT SUPPRESS (during Write Single Preset) ---
+        std::atomic<bool> suppressMidiInput{ false };
+        
+        // --- MIDI OPERATION CANCEL (set by onClose to abort pending timers) ---
+        std::atomic<bool> midiOpCancelled{ false };
+    
         // AU COLD BOOT HACK
         std::atomic<bool> needsBootPreRoll { false };
-
-        // SysEx loading
-        void loadSysExFile(const juce::File& syxFile);
     
         // --- DYNAMIC PANEL LAYOUT SELECTION ---
         // 0 = Compact, 1 = Full, 2 = Panel, 3 = Tablet
@@ -331,7 +413,7 @@ public:
     
     // --- MACRO STATE ---
     std::atomic<bool> isSaveMacroActive{ false };
-
+    
     void shutdownMame();
     
 private:
@@ -391,6 +473,8 @@ private:
     
     bool lastOfflineState = false;
     int64_t lastPlayheadPos = 0;
+    
+    juce::String instanceTempDir; // Unique sandbox directory for this plugin instance
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(EnsoniqSD1AudioProcessor)
 };

@@ -98,6 +98,8 @@ We had to make specific modifications to the MAME core to expose certain interna
 
    - required for macOS C++17 only: language.h -> Overwrite in /src/lib/util/language.h
 
+   - Note: there are some modified MAME files: sd132.lay and rendlay.cpp be sure to copy the new files.
+
 ## Step 2: Compiling MAME and Extracting Archives
 
 Instead of building a standalone static library, we build the standard MAME executable and extract the generated object archives (.a/.o/lib files) created during the build process.
@@ -150,6 +152,10 @@ Instead of building a standalone static library, we build the standard MAME exec
 
    - Ensure all the required MAME .a/.o/lib files are listed in your External Libraries to Link section.
 
+   - Theres are some new files: sd1disk.a and sd1disk.lib. 
+   
+   - Save the project and click "Open in IDE".
+
 ## Windows-Specific Optimizations (Visual Studio 2026)
 
 To ensure flawless real-time audio performance and zero dropouts on Windows, the Visual Studio 2026 exporter must be configured precisely:
@@ -161,8 +167,6 @@ To ensure flawless real-time audio performance and zero dropouts on Windows, the
 - Set Link Time Optimisation (LTO) to Enabled (Triggers /GL Whole Program Optimization).
 
 - In the Extra Compiler Flags field, add: /Oi /Ot (Enables intrinsic functions and heavily favors fast code execution).
-
-- Save the project and click "Open in IDE".
 
 - Inline Function Expansion: Any Suitable (/Ob2) (in VS)
 

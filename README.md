@@ -4,6 +4,9 @@ MAME®-based VST3/AU cycle-accurate emulation of the Ensoniq® SD-1 32-Voice syn
 ![Screenshot of Ensoniq SD-1 VST](https://github.com/kukoricajoe/Ensoniq-SD-1-32-voices-VST-emulation/blob/main/sd-1.png)
 Ensoniq SD-1 with Compact panel in FL Studio
 
+![Screenshot of Ensoniq SD-1 VST](https://github.com/kukoricajoe/Ensoniq-SD-1-32-voices-VST-emulation/blob/main/filemanager.png)
+Ensoniq SD-1 Preset/File Manager
+
 # Ensoniq SD-1
 The SD-1 (1990) comes from a long line of Ensoniq's evolving Transwave® wavetable digital synthesizers. It began with Ensoniq's earliest synthesizer, the ESQ-1. That led to the SQ-80, then the VFX and VFX-SD (the latter featuring an on-board sequencer) and then to the SD-1 (and it eventually led to the Fizmo). The SD-1 allows for additive synthesis using waveform modulation, a sort of wavetable synthesis. This puts it into a unique class of digital synthesizers along with the PPG Wave series and Waldorf Microwave series.
 
@@ -17,24 +20,41 @@ We are Sojus Records, one of the longest-running netlabels still active. We are 
 
 # Download 
 
-**IMPORTANT - ROM Files Required!** [Read this section for more info!](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation#requirements)
+**IMPORTANT - ROM Files Required!** [Read this section for more info!](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation#rom-installation)
 
-  - [Win x64 VST3 W10+](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v0.9.9/EnsoniqSD1-v.0.9.9-winVST3.7z)
+  - [Win x64 VST3 W10+](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v1.0.0/EnsoniqSD1-v.1.0.0-winVST3.7z)
 
-  - [Win x64 VST3 oldskool AVX1 for pre-Haswell machines](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v0.9.9/EnsoniqSD1-v.0.9.9-winVST3-AVX1.7z)
+  - [Win x64 VST3 oldskool AVX1 for pre-Haswell machines](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v1.0.0/EnsoniqSD1-v.1.0.0-winVST3-AVX1.7z)
 
-  - [macOS Universal Binary VST3 macOS 11 or newer](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v0.9.9/EnsoniqSD1-v.0.9.9-macVST3.7z) [Read this section for more info!](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation#known-limitations)
+  - [macOS Universal Binary VST3 macOS 11 or newer](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v1.0.0/EnsoniqSD1-v.1.0.0-macVST3.7z) [Read this section for more info!](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation#known-limitations)
 
-  - [macOS Universal Binary AU SELECTED DAWS ONLY macOS 11 or newer](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v0.9.9/EnsoniqSD1-v.0.9.9-macAU.7z) [Read this section for more info!](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation#known-limitations)
+  - [macOS Universal Binary AU SELECTED DAWS ONLY macOS 11 or newer](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v1.0.0/EnsoniqSD1-v.1.0.0-macAU.7z) [Read this section for more info!](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation#known-limitations)
 
-  - [Linux VST3 AVX2](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v0.9.9/EnsoniqSD1-v.0.9.9-LINUX-AVX2.7z)
+  - [Linux VST3 AVX2](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v1.0.0/EnsoniqSD1-v.1.0.0-LINUX-AVX2.7z)
 
-  - [Linux VST3 Generic for oldskool CPUs](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v0.9.9/EnsoniqSD1-v.0.9.9-LINUX-Generic.7z)
+  - [Linux VST3 Generic for oldskool CPUs](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v1.0.0/EnsoniqSD1-v.1.0.0-LINUX-Generic.7z)
   
 # What's working?
 Everything. Check the original manual here: [SD-1 Manual at Polynominal](https://www.polynominal.com/ensoniq-sd1/ensoniq-sd1-manual.pdf)
 
 # Features:
+- **NEW: Full featured preset and disk manager.**
+  - Browse and play any preset with MIDI keyboard from:
+    - internal: RAM, ROM 0 and 1, attached cartridge
+    - any external folders: supported VFX, VFX-SD, SD1 .SYX files, cartridge files, .HFE/.IMG disk images.
+  - Instant single program, preset and full .SYX bank import.
+  - Export single program and preset .SYX and .SYX banks from INT RAM, attached cartridge, disk images and cartridge files.
+  - There's no need to switch the SYS-EX in menu from now on as it's always enabled at boot.
+  Big thanks to **Joe McMahon** for his awesome [sd1diskutil](https://github.com/joemcmahon/sd1diskutil) tool which is embedded and working under the hood.
+
+- **Simplified ROM handling for easy installation** We completely overhauled how ROM files are handled to make the installation process bulletproof and musician-friendly :)
+
+  - Musican method: Obtain the Ensoniq SD-1/32  ```sd132```  AND Ensoniq LCD  ```2x40_vfx```  ROM files. Start the plugin and it displays a friendly warning screen with a "Locate ROMs..." button. It opens a multi-select file browser where users can pick .zip files, loose .bin files or just open a folder with the files The plugin handles the extraction and copying transparently. [Read the ROM Installation for more info!](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation#rom-installation)
+
+- **Reworked MIDI automation** This time really :) Every panel button can be automated and assign to virtual or physical MIDI controller. [Read the FAQ for more info!](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation#faq)
+
+- **NEW: Full MIDI out**
+
 - **NEW: Removed instance blocking** You can load as many instances of a plugin as you want in your DAW! Thanks to [kbaccki](https://github.com/kbaccki) for investigating the singletons.
 
 - **NEW: macOS AU first public build for SELECTED DAWS ONLY!** Please note that the AU plugin is ONLY for Logic, GarageBand, MainStage, Ableton Live, Fender Studio Pro (Studio One) and Reaper. Any other DAW must use the VST3 version! Tested on Logic 11, Fender Studio Pro 8, Reaper 7, Ableton Live 12.
@@ -43,13 +63,7 @@ Everything. Check the original manual here: [SD-1 Manual at Polynominal](https:/
 
 - Windows 10+ 64 bit VST3 AVX1/AVX2, Mac Intel+ARM Universal Binary VST3 and AU, Linux VST3 Generic/AVX2
 
-- VFX, VFX-SD, SD1 .SYX SYS-EX file import. [Read the FAQ for more info!](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation#faq)
-
-- FULL DAW automation (All keys, sliders and buttons.) [Read the FAQ for more info!](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation#faq)
-
-- Global settings saving 
-
-- VST3/AU state saving
+- Global settings saving, VST3/AU state saving
 
 - 4 different panel layouts with resizable GUI and VFD display
 
@@ -60,7 +74,7 @@ Everything. Check the original manual here: [SD-1 Manual at Polynominal](https:/
 - Can load and save all compatible VFX/VFX-SD/SD1-24/SD1-32 disk images (.img, .hfe, .dsk, .eda) and cartridges (.eeprom, .rom, .cart, .sc32) [Read the FAQ for more info!](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation#faq)
 
 # Known limitations
-- DAW automation is not visible on GUI and you can NOT directly select buttons or sliders from the GUI to assign them to a controller.
+- DAW automation is not visible on GUI and you can NOT directly select buttons or sliders from the GUI to assign them to a controller (yet)
 
 - No floppy drive sound :D
 
@@ -96,7 +110,7 @@ Everything. Check the original manual here: [SD-1 Manual at Polynominal](https:/
 
 - A VST3 compatible DAW. The AU build is for selected DAWs only! If it's not working, come back later :)
   - Tested and working:
-    - macOS VST3: Ableton Live 12, Bitwig Studio 6, Cubase 15, Fender Studio Pro 8, FL Studio 2025, Reaper 7 etc.
+    - macOS VST3: Ableton Live 12, Bitwig Studio 6, Cubase 15, Fender Studio Pro 8, FL Studio 2025, Reaper 7, Maschine 3 etc.
 
     - macOS AU: **SELECTED DAWS ONLY! Please note that the AU plugin is ONLY for Logic, GarageBand, MainStage, Ableton Live, Fender Studio Pro (Studio One) and Reaper. Any other DAW must use the VST3 version!** Tested on Logic 11 and 12, Fender Studio Pro 8, Reaper 7, Ableton Live 12.
 
@@ -106,21 +120,22 @@ Everything. Check the original manual here: [SD-1 Manual at Polynominal](https:/
 
   - If it's not working check [Troubleshooting](#Troubleshooting).
 
-- IMPORTANT - ROM Files Required!<br/>
+# ROM Installation<br/>
   Due to copyright reasons, the required Ensoniq ROM files are **NOT included**.
 
-  * We've removed the strict ROM verification. Now it's up to MAME to accept your files; we only check for their presence, and it doesn't matter whether they're organized into a folder within the zip file or not. If your ROM has been good so far, it will continue to be good. At startup, it checks for the presence of sd132.zip; if it doesn't find it, you can set the exact path using a button. We also check to see if all 10 files are present, and you can rescan the zip file without reloading the plugin. The plugin performs a self-check at every startup, which checks the following: whether it has write permissions to the temp folder and the EnsoniqSD1 folder, checks the Lua plugins, and verifies if the MAME engine failed to start for any reason.
+  - We completely overhauled how ROM files are handled to make the installation process bulletproof and musician-friendly :)
 
-  To make the plugin work:
-  * Create a folder named **EnsoniqSD1** in your user's Documents folder:
+  * Musican method: Obtain the Ensoniq SD-1/32  ```sd132```  AND Ensoniq LCD  ```2x40_vfx```  ROM files. Start the plugin and it displays a friendly warning screen with a "Locate ROMs..." button. It opens a multi-select file browser where users can pick .zip files, loose .bin files or just open a folder with the files The plugin handles the extraction and copying transparently.
 
-    - Win **C:\Users\yourusername\Documents**
+  * Hardcore method: Create a folder named EnsoniqSD1 and another folder inside named ROMs in your user's Documents folder:
 
-    - macOS **/yourusername/Documents**
+    - Win **C:\Users\yourusername\Documents** » **C:\Users\yourusername\Documents\EnsoniqSD1\ROMs**
 
-    - Linux **/Documents**
+    - macOS **/yourusername/Documents** » **/yourusername/Documents/EnsoniqSD1/ROMs**
 
-  * Obtain the Ensoniq SD-1/32  ```sd132```  AND Ensoniq LCD  ```2x40_vfx```  ROM files and place these files in that folder AND zip them to ```sd132.zip```.<br/>
+    - Linux **/Documents** » **/Documents/EnsoniqSD1/ROMs**
+
+    * Obtain the Ensoniq SD-1/32  ```sd132```  AND Ensoniq LCD  ```2x40_vfx```  ROM files and place these files in that ROMs folder (zipped or unzipped):<br/>
 
     - ```esqvfd_font_vfx.bin```<br/>
     - ```sd1_32_402_hi.bin```<br/>
@@ -132,9 +147,6 @@ Everything. Check the original manual here: [SD-1 Manual at Polynominal](https:/
     - ```u36.bin```<br/>
     - ```u37.bin```<br/>
     - ```u38.bin```<br/>
-
-  * The final structure of **sd132.zip** in your Documents/EnsoniqSD1 folder looks like this:<br/>
-    ![sd132.zip](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/blob/main/roms.png)<br/>
   
   - Optional: If you want to run the internal sequencer, you need the original disk image:
     - Ensoniq SD1 Sequencer OS v410 (SD-1 800K type) [Read the FAQ for more info!](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation#faq)
@@ -142,13 +154,11 @@ Everything. Check the original manual here: [SD-1 Manual at Polynominal](https:/
 # Troubleshooting
 - The plugin performs a self-check at every startup, which checks the following: whether it has write permissions to the temp folder and the EnsoniqSD1 folder, checks the Lua plugins, and verifies if the MAME engine failed to start for any reason. It will notify you if it finds any errors.
 
-- We've removed the strict ROM verification. Now it's up to MAME to accept your files; we only check for their presence, and it doesn't matter whether they're organized into a folder within the zip file or not. If your ROM has been good so far, it will continue to be good. At startup, it checks for the presence of sd132.zip; if it doesn't find it, you can set the exact path using a button. We also check to see if all 10 files are present, and you can rescan the zip file without reloading the plugin.
-
 - Whitelist the plugin in your antivirus app. The plugin is writing some data to temp folder (e.g. nvram and osram files, lua plugins) and to your Documents/EnsoniqSD1 folder (e.g. settings.xml)
 
 - Your sequencer is blacklisting the plugin: if the plugin scanner provides error message or a log file then send it to us.
 
-- If the plugin is loaded but there’s only ```Load Floppy/Cart/SYX``` and ```Settings``` buttons and blank window: the internal MAME engine is not loaded. Check if your OS/PC/MAC is capable to run it. Whitelist plugin in your anti-virus.
+- If the plugin is loaded but there’s only ```Preset/File Manager``` and ```Settings/About``` buttons and blank window: the internal MAME engine is not loaded. Check if your OS/PC/MAC is capable to run it. Whitelist plugin in your anti-virus.
 
 - Reset global settings: go to Documents/EnsoniqSD1 and delete the file ```settings.xml``` and delete temp files
 
@@ -156,25 +166,45 @@ Everything. Check the original manual here: [SD-1 Manual at Polynominal](https:/
 
 # FAQ
 <details>
-  <summary>How do I load my old SYS-EX (.syx) preset banks?</summary>
+  <summary>How do I use the file manager?</summary>
 
-Loading SYS-EX files works exactly like the original 1990 hardware, simulating a physical MIDI cable connection at a 31250 baud rate.
+Open ```Preset/File Manager``` and select what you want to play:
 
-Step-by-step:
+  - internal sources (INT RAM, ROM0, ROM1, CARTRIDGE)
 
-  - **IMPORTANT** Enable SYS-EX on the Synth: On the SD-1 front panel, press ```System/MIDI CONTROL``` button TWICE, and set ```SYS-EX``` to ```ON```.
+  - external sources: single program/preset .SYX files, .SYX bank files, sequencer files
 
-  - Go to a safe screen: Press the ```Sounds``` or ```Presets``` button to return to the main playing screen.
+  - floppy disk images (.IMG, .HFE, .DSK, .EDA)
 
-  - Load the file: Click the ```Load Floppy/Cart/SYX``` button on the plugin interface and select your .syx file. A standard 64KB bank takes about 12 to 15 seconds to transfer. This is an authentic hardware limitation (the maximum speed of a physical MIDI cable).
+  - cartridge files (.EEPROM, .ROM, .CART, .SC32).
 
-  - You will see a ```Transmitting SYS-EX Data...``` overlay on the screen. Once the overlay disappears, the synth will instantly update its RAM, and your presets will be ready to play!
+  All programs/presets can be played in every location. You can also import and save programs and presets, read below.
 
-  - You can also save the presets to a disk image. Here you can find an [SD-1 formatted empty hfe disk image (1.44MB).](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/blob/main/SD-1-EMPTY-DISK.hfe) Thanks to Headroom for it.
 </details>
 
 <details>
-  <summary>How can I save my presets?</summary>
+  <summary>How do I import SYS-EX (.SYX) files?</summary>
+
+  - Open ```Preset/File Manager``` and browse your folders. You can import single program .SYX with ```Write Single Program``` or program .SYX bank ```Import Full Bank``` in a second.
+You can import all Ensoniq file types: 1/6/30/60 program files and banks, 1/10/20 preset files and banks, 1/30 and 60 sequences. Note for sequences: you must load the sequencer program first, [Read the FAQ for more info!](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation#faq)
+
+  - Note for Preset importing: A Preset is a combination of three Programs and an effects set-up which can be instantly recalled for use in performance. Presets are handy "performance memories" which allow you to create and save sound combinations, splits, layers, patch select variations, etc. When you import a preset the SYS-EX data doesn't contains the INT RAM or CARTRIDGE programs.
+
+</details>
+
+<details>
+  <summary>How do I export SYS-EX (.SYX) files?</summary>
+
+  - Open ```Preset/File Manager``` and select the location first: internal ram or attached cartridge, external disk images or cartridge files. Select one or more programs or presets and press ```EXPORT .SYX``` button. Note: you can only export the same file types. You can export all Ensoniq file types: 1/6/30/60 program files and banks, 1/10/20 preset files and banks, 1/30 and 60 sequences. Please note, that ROM0 and ROM1 programs can NOT exported.
+
+  - Note for Preset exporting: A Preset is a combination of three Programs and an effects set-up which can be instantly recalled for use in performance. Presets are handy "performance memories" which allow you to create and save sound combinations, splits, layers, patch select variations, etc. When you export a preset the SYS-EX data doesn't contains the INT RAM or CARTRIDGE programs.
+
+</details>
+
+<details>
+  <summary>How can I save my Presets (not Programs!) to INT RAM?</summary>
+
+  - A Preset is a combination of three Programs and an effects set-up which can be instantly recalled for use in performance. Presets are handy "performance memories" which allow you to create and save sound combinations, splits, layers, patch select variations, etc.
 
   - Saving on the real hardware requires holding down ```PRESETS``` button and pressing a ```BANK (0-9)``` button.
 
@@ -194,32 +224,36 @@ Step-by-step:
 </details>
 
 <details>
-  <summary>How do I load Floppy Disk Images (.img, .hfe, .dsk, .eda)?</summary>
+  <summary>How do I load Floppy Disk Images (.IMG, .HFE, .DSK, .EDA)?</summary>
 
-   - Attach the disk image using the ```Load Floppy/Cart/SYX``` button. Press ```STORAGE```, then select ```DISK```. Press ```LOAD```. The display will show the Disk Load page with the ```File Type``` selected. Move the data entry slider or push up/down buttons to select your file. You can convert SYS-EX data to [disk images with this tool](https://github.com/joemcmahon/sd1diskutil).
+   - Open ```Preset/File Manager``` and browse your folder. Open the disk image and play the programs/presets with MIDI keyboard instantly. You can import all Ensoniq file types: 1/6/30/60 program files and banks, 1/10/20 preset files and banks, 1/30 and 60 sequences. Note for sequences: you must load the sequencer program first, [Read the FAQ for more info!](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation#faq)
+
+   - Via SD-1: Attach the disk image using the```Preset/File Manager``` button and ```Insert Floppy Image```. Press ```STORAGE```, then select ```DISK```. Press ```LOAD```. The display will show the Disk Load page with the ```File Type``` selected. Move the data entry slider or push up/down buttons to select your file or bank. 
 
 </details>
 
 <details>
-  <summary>How do I save my stuff to Floppy Disk Images (.img, .hfe, .dsk, .eda)?</summary>
+  <summary>How do I save my stuff to Floppy Disk Images (.IMG, .HFE, .DSK, .EDA)?</summary>
 
    - Here you can find an [SD-1 formatted empty hfe disk image (1.44MB).](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/blob/main/SD-1-EMPTY-DISK.hfe)
 
-   - Attach the disk image using the ```Load Floppy/Cart/SYX``` button. Press ```STORAGE```, then select ```DISK```. Press ```SAVE```. The display will show the Disk SAVE page with the ```File Type``` selected. Move the data entry slider or push up/down buttons to select save type. Press ```*YES*```. You can convert SYS-EX data to [disk images with this tool](https://github.com/joemcmahon/sd1diskutil).
+   - Attach the disk image using the ```Preset/File Manager``` button and ```Insert Floppy Image```. Press ```STORAGE```, then select ```DISK```. Press ```SAVE```. The display will show the Disk SAVE page with the ```File Type``` selected. Move the data entry slider or push up/down buttons to select save type. Press ```*YES*```. You can convert SYS-EX data to [disk images with this tool](https://github.com/joemcmahon/sd1diskutil).
 
 </details>
 
 <details>
-  <summary>How can I load/save my Cartridges (.eeprom, .rom, .cart, .sc32)?</summary>
+  <summary>How can I load my Cartridges (.EEPROM, .ROM, .CART, .SC32)?</summary>
 
-   - Attach the cartridge image using the ```Load Floppy/Cart/SYX``` button. Press ```STORAGE```, then select ```CARTRIDGE```. Choose ```PROGRAMS/PRESETS/BOTH```. Choose ```Internal-to-Cartridge``` (SAVE) or ```Cartridge-to-Internal``` (LOAD).
+   - Open ```Preset/File Manager``` and browse your folder. Open the cartridge file and play the programs/presets with MIDI keyboard instantly. You can import all Ensoniq file types: 1/6/30/60 program files and banks, 1/10/20 preset files and banks, 1/30 and 60 sequences. Note for sequences: you must load the sequencer program first, [Read the FAQ for more info!](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation#faq)
+
+   - Via SD-1: attach the cartridge image using the ```Preset/File Manager``` button and ```Insert Cartridge```. Press ```STORAGE```, then select ```CARTRIDGE```. Choose ```PROGRAMS/PRESETS/BOTH```. Choose ```Internal-to-Cartridge``` (SAVE) or ```Cartridge-to-Internal``` (LOAD).
 
 </details>
 
 <details>
   <summary>How can I load and use the internal Sequencer?</summary>
 
-   - Attach the disk image using ```Load Floppy/Cart/SYX```. Press ```STORAGE```, then select ```DISK```. Press ```LOAD```. The display will show the Disk Load page with the ```File Type``` selected. Move the data entry slider or push up/down buttons all the way up to select ```TYPE=SEQUENCER OS```.
+   - Attach the disk image using ```Preset/File Manager```  and ```Insert Floppy Image```. Press ```STORAGE```, then select ```DISK```. Press ```LOAD```. The display will show the Disk Load page with the ```File Type``` selected. Move the data entry slider or push up/down buttons all the way up to select ```TYPE=SEQUENCER OS```.
 
    - Now load the sequencer with pushing the ```SEQ``` button.
 
@@ -235,13 +269,6 @@ Because the MAME emulator runs asynchronously on its own background thread, we n
   - A setting of 128 samples is incredibly fast and highly recommended for live playing.
 
   - The plugin reports its exact hardware latency to your DAW automatically (Plugin Delay Compensation), so during playback and rendering, your tracks will always be perfectly in sync and on the grid!
-
-</details>
-
-<details>
-  <summary>Why there is no fancy preset manager like the ones in Usual Suspects emulations?</summary>
-
-The Usual Suspects are also developing an SD-1 emulation, so it's guaranteed that their work will be far superior to ours. Just wait and see.
 
 </details>
 
@@ -268,6 +295,10 @@ The Usual Suspects are also developing an SD-1 emulation, so it's guaranteed tha
 - [GuitarGeek (F)](https://guitargeek.fr/emulations-de-synthetiseur-executer-des-synthetiseurs-sur-votre-ordinateur/)
 
 - [SoHu (PRC)](https://www.sohu.com/a/1000002551_455142)
+
+- [AudioPluginsForFree)](https://www.audiopluginsforfree.com/ensoniq-sd-1-vst/)
+
+- [SoundShock)]https://soundshockaudio.com/ensoniq-sd-1-32-vst-emulation/)
 
 # License and credits
 
@@ -325,6 +356,9 @@ BSD 3 Clause | Copyright © Michael Zapf
 
 logmacro Emulation license<br/>
 BSD 3 Clause | Copyright © Vas Crabb 
+
+sd1diskutil<br/>
+Copyright [© Joe McMahon](https://github.com/joemcmahon/sd1diskutil) 
 
 and so many others. Thank you for your work!
 

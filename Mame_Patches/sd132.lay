@@ -182,7 +182,7 @@
 
 	<element name="segments" defstate="0">
 		<led14seg>
-			<color red="0.45098" green="1" blue="0.94902" />
+			<color red="1" green="1" blue="1" />
 		</led14seg>
 	</element>
 	<element name="dot" defstate="0">
@@ -190,7 +190,7 @@
 			<color red="0.05882" green="0.12157" blue="0.10196" />
 		</disk>
 		<disk statemask="0x4000" state="0x4000">
-			<color red="0.45098" green="1" blue="0.94902" />
+			<color red="1" green="1" blue="1" />
 		</disk>
 	</element>
 	<element name="underline" defstate="0">
@@ -198,7 +198,7 @@
 			<color red="0.05882" green="0.12157" blue="0.10196" />
 		</rect>
 		<rect state="0x8000" statemask="0x8000">
-			<color red="0.45098" green="1" blue="0.94902" />
+			<color red="1" green="1" blue="1" />
 		</rect>
 	</element>
 	<group name="vfd_cell">

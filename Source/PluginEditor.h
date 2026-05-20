@@ -12,6 +12,7 @@
 
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
+#include "PresetBrowserComponent.h"
 
 //==============================================================================
 
@@ -23,7 +24,6 @@ public:
     ~EnsoniqSD1AudioProcessorEditor() override;
 
     void paint (juce::Graphics&) override;
-    void paintOverChildren(juce::Graphics& g) override;
     void resized() override;
     
     // Timer callback used for polling frame updates and layout changes
@@ -34,30 +34,37 @@ public:
     void mouseUp   (const juce::MouseEvent& e) override;
     void mouseDrag (const juce::MouseEvent& e) override;
     void mouseMove (const juce::MouseEvent& e) override;
+    
+    void saveGlobalSettings();
+    void flushFileManagerState(); // Flushes active browser state to processor before saving
 
 private:
     EnsoniqSD1AudioProcessor& audioProcessor;
     
+    // --- PRESET MANAGER ---
+    PresetBrowserComponent presetBrowser;
+    int lastViewBeforeBrowser = 0;
+    
     // --- SAVE MACRO ---
     juce::TextButton saveBadge;
     juce::Label savePromptLabel;
+    
+    // KILL COMPARE AT LOAD
+    bool startupCompareChecked = false;
         
     // --- ROM HANDLING ---
-        juce::TextButton locateRomButton { "Locate sd132.zip" };
-        juce::TextButton rescanRomButton { "Rescan sd132.zip" };
-        std::unique_ptr<juce::FileChooser> romChooser;
-        void locateRomButtonClicked();
+    juce::TextButton locateRomButton { "Locate sd132.zip" };
+    juce::TextButton rescanRomButton { "Rescan sd132.zip" };
+    std::unique_ptr<juce::FileChooser> romChooser;
+    void locateRomButtonClicked();
     
-    // Global settings
-    void saveGlobalSettings();
-    
-    juce::TextButton loadMediaButton { "Load Floppy/Cart/SYX" };
+    juce::TextButton loadMediaButton { "PRESET/FILE MANAGER" };
     std::unique_ptr<juce::FileChooser> fileChooser;
     void loadMediaButtonClicked();
 
     // --- SETTINGS PANEL GUI COMPONENTS ---
     juce::TextButton settingsButton { "Settings / About" };
-    juce::GroupComponent settingsGroup { "settings_group", "Ensoniq(R) SD-1/32 Settings v0.9.9 2892" };
+    juce::GroupComponent settingsGroup { "settings_group", "Ensoniq(R) SD-1/32 Settings v1.0.0 3223" };
     
     juce::Label bufferLabel { "buffer_label", "MAME(R) Engine buffer:" };
     juce::ComboBox bufferCombo;
@@ -84,9 +91,6 @@ private:
     // --- WINDOW SIZE TRACKING ---
     // Used by the Timer to detect when the MAME internal layout resolution changes
     int lastView = -1;
-    
-    // FOR SYSEX WINDOW
-    bool lastSysExState = false;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EnsoniqSD1AudioProcessorEditor)
 };

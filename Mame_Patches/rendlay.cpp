@@ -2577,7 +2577,7 @@ protected:
 		// sizes for computation
 		int const bmwidth = 250;
 		int const bmheight = 400;
-		int const segwidth = 40;
+		int const segwidth = 47;
 		int const skewwidth = 40;
 
 		// allocate a temporary bitmap for drawing
@@ -2811,7 +2811,7 @@ protected:
 		// sizes for computation
 		int const bmwidth = 250;
 		int const bmheight = 400;
-		int const segwidth = 40;
+		int const segwidth = 47;
 		int const skewwidth = 40;
 
 		// allocate a temporary bitmap for drawing, adding some extra space for the tail

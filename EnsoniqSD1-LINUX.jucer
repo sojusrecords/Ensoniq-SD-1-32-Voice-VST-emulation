@@ -3,8 +3,8 @@
 <JUCERPROJECT id="Oippeb" name="Ensoniq SD-1" projectType="audioplug" useAppConfig="0"
               addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1" bundleIdentifier="com.sojusrecords.EnsoniqSD1"
               companyWebsite="www.sojusrecords.com" companyCopyright="Open Source GPLv2/3"
-              companyName="EnsoniqMAME" pluginCharacteristicsValue="pluginIsSynth,pluginWantsMidiIn"
-              pluginFormats="buildVST3" version="0.9.9" pluginName="Ensoniq SD-1"
+              companyName="EnsoniqMAME" pluginCharacteristicsValue="pluginIsSynth,pluginProducesMidiOut,pluginWantsMidiIn"
+              pluginFormats="buildVST3" version="1.0.0" pluginName="Ensoniq SD-1"
               pluginDesc="Ensoniq SD-1 MAME Emu VST" pluginManufacturer="EnsoniqMAME"
               pluginManufacturerCode="Esma" pluginCode="SD1A" pluginAUExportPrefix="EnsoniqSD1AU"
               companyEmail="sjs@sojusrecords.com" pluginAUMainType="'aumu'"
@@ -22,6 +22,11 @@
       <FILE id="UmoBTy" name="labels_full.png" compile="0" resource="1" file="Source/labels_full.png"/>
     </GROUP>
     <GROUP id="{3F88782C-AB7D-82EE-F4B6-16FDEB0AE012}" name="Source">
+      <FILE id="DpV3ag" name="PresetBrowserComponent.cpp" compile="1" resource="0"
+            file="../EnsoniqSD1/Source/PresetBrowserComponent.cpp"/>
+      <FILE id="iyQzCj" name="PresetBrowserComponent.h" compile="0" resource="0"
+            file="../EnsoniqSD1/Source/PresetBrowserComponent.h"/>
+      <FILE id="gFEbIY" name="sd1disk.h" compile="0" resource="0" file="../EnsoniqSD1/Source/sd1disk.h"/>
       <FILE id="IWhokv" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>
       <FILE id="YhSlmb" name="PluginProcessor.h" compile="0" resource="0"
@@ -52,12 +57,12 @@
   <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_VST3_CAN_REPLACE_VST2="0"
                JUCE_USE_FLAC="0" JUCE_WEB_BROWSER="0"/>
   <EXPORTFORMATS>
-    <LINUX_MAKE targetFolder="Builds/LinuxMakefile" externalLibraries="frontend&#10;emu&#10;mame_sd132&#10;optional&#10;formats&#10;dasm&#10;emu&#10;mame_sd132&#10;optional&#10;formats&#10;dasm&#10;osd_sdl3&#10;qtdbg_sdl3&#10;ocore_sdl3&#10;utils&#10;lua&#10;lualibs&#10;expat&#10;zlib&#10;flac&#10;portaudio&#10;portmidi&#10;jpeg&#10;7z&#10;zstd&#10;utf8proc&#10;sqlite3&#10;asmjit&#10;bgfx&#10;bimg&#10;bx&#10;softfloat&#10;softfloat3&#10;ymfm&#10;wdlfft&#10;linenoise&#10;SDL3&#10;SDL2"
+    <LINUX_MAKE targetFolder="Builds/LinuxMakefile" externalLibraries="frontend&#10;emu&#10;mame_sd132&#10;optional&#10;formats&#10;dasm&#10;emu&#10;mame_sd132&#10;optional&#10;formats&#10;dasm&#10;osd_sdl3&#10;qtdbg_sdl3&#10;ocore_sdl3&#10;utils&#10;lua&#10;lualibs&#10;expat&#10;zlib&#10;flac&#10;portaudio&#10;portmidi&#10;jpeg&#10;7z&#10;zstd&#10;utf8proc&#10;sqlite3&#10;asmjit&#10;bgfx&#10;bimg&#10;bx&#10;softfloat&#10;softfloat3&#10;ymfm&#10;wdlfft&#10;linenoise&#10;SDL3&#10;SDL2&#10;sd1disk"
                 extraLinkerFlags="-Wl,--allow-multiple-definition" smallIcon="fhfkAt"
                 bigIcon="fhfkAt">
       <CONFIGURATIONS>
-        <CONFIGURATION isDebug="0" name="Release" targetName="EnsoniqSD1" headerPath="../../mame/src&#10;../../mame/src/frontend/mame&#10;../../mame/src/emu&#10;../../mame/src/osd&#10;../../mame/src/lib&#10;../../mame/src/lib/util&#10;../../mame/3rdparty&#10;../../mame/3rdparty/bx/include&#10;../../mame/3rdparty/asio/include"
-                       libraryPath="../../mame/build/linux_gcc/bin/x64/Release&#10;../../mame/build/linux_gcc/bin/x64/Release/mame_sd132&#10;../../mame/build/linux_gcc/bin/x64/Release/mame_mame"
+        <CONFIGURATION isDebug="0" name="Release" targetName="EnsoniqSD1" headerPath="../../mame/src&#10;../../mame/src/frontend/mame&#10;../../mame/src/emu&#10;../../mame/src/osd&#10;../../mame/src/lib&#10;../../mame/src/lib/util&#10;../../mame/3rdparty&#10;../../mame/3rdparty/bx/include&#10;../../mame/3rdparty/asio/include&#10;../../Source/&#10;../../mame/src/devices&#10;../../mame/src/devices/machine&#10;../../mame/src/mame/ensoniq"
+                       libraryPath="../../mame/build/linux_gcc/bin/x64/Release&#10;../../mame/build/linux_gcc/bin/x64/Release/mame_sd132&#10;../../mame/build/linux_gcc/bin/x64/Release/mame_mame&#10;../../Source/sd1disklinux"
                        linkTimeOptimisation="0" optimisation="3"/>
       </CONFIGURATIONS>
       <MODULEPATHS>

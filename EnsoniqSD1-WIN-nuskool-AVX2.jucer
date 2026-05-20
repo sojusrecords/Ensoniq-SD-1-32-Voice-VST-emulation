@@ -3,8 +3,8 @@
 <JUCERPROJECT id="Oippeb" name="Ensoniq SD-1" projectType="audioplug" useAppConfig="0"
               addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1" bundleIdentifier="com.sojusrecords.EnsoniqSD1"
               companyWebsite="www.sojusrecords.com" companyCopyright="Open Source GPLv2/3"
-              companyName="EnsoniqMAME" pluginCharacteristicsValue="pluginIsSynth,pluginWantsMidiIn"
-              pluginFormats="buildStandalone,buildVST3" version="0.9.9" pluginName="Ensoniq SD-1"
+              companyName="EnsoniqMAME" pluginCharacteristicsValue="pluginIsSynth,pluginProducesMidiOut,pluginWantsMidiIn"
+              pluginFormats="buildStandalone,buildVST3" version="1.0.0" pluginName="Ensoniq SD-1"
               pluginDesc="Ensoniq SD-1 MAME Emu VST" pluginManufacturer="EnsoniqMAME"
               pluginManufacturerCode="Esma" pluginCode="SD1A" pluginAUExportPrefix="EnsoniqSD1AU"
               pluginAUMainType="'augn'" companyEmail="sjs@sojusrecords.com"
@@ -31,6 +31,11 @@
       <FILE id="fNCSn0" name="PluginEditor.cpp" compile="1" resource="0"
             file="Source/PluginEditor.cpp"/>
       <FILE id="Z6Wmy3" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
+      <FILE id="vvndi9" name="PresetBrowserComponent.cpp" compile="1" resource="0"
+            file="Source/PresetBrowserComponent.cpp"/>
+      <FILE id="QY9g1U" name="PresetBrowserComponent.h" compile="0" resource="0"
+            file="Source/PresetBrowserComponent.h"/>
+      <FILE id="OHpXpa" name="sd1disk.h" compile="0" resource="0" file="Source/sd1disk.h"/>
     </GROUP>
   </MAINGROUP>
   <MODULES>
@@ -54,12 +59,12 @@
   <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_VST3_CAN_REPLACE_VST2="0"
                JUCE_USE_FLAC="0" JUCE_WEB_BROWSER="0"/>
   <EXPORTFORMATS>
-    <VS2026 targetFolder="Builds/VisualStudio2026" externalLibraries="frontend.lib&#10;mame_sd132.lib&#10;emu.lib&#10;ocore_windows.lib&#10;utils.lib&#10;optional.lib&#10;expat.lib&#10;zlib.lib&#10;portmidi.lib&#10;flac.lib&#10;7z.lib&#10;softfloat.lib&#10;softfloat3.lib&#10;utf8proc.lib&#10;jpeg.lib&#10;sqlite3.lib&#10;zstd.lib&#10;formats.lib&#10;dasm.lib&#10;portaudio.lib&#10;lua.lib&#10;lualibs.lib&#10;asmjit.lib&#10;bgfx.lib&#10;bimg.lib&#10;bx.lib&#10;ymfm.lib&#10;wdlfft.lib&#10;linenoise.lib&#10;qtdbg_windows.lib&#10;osd_windows.lib&#10;ws2_32.lib&#10;winmm.lib&#10;dinput8.lib&#10;dxguid.lib&#10;opengl32.lib&#10;dsound.lib&#10;xinput.lib&#10;ws2_32.lib&#10;comctl32.lib&#10;shlwapi.lib"
+    <VS2026 targetFolder="Builds/VisualStudio2026" externalLibraries="frontend.lib&#10;mame_sd132.lib&#10;emu.lib&#10;ocore_windows.lib&#10;utils.lib&#10;optional.lib&#10;expat.lib&#10;zlib.lib&#10;portmidi.lib&#10;flac.lib&#10;7z.lib&#10;softfloat.lib&#10;softfloat3.lib&#10;utf8proc.lib&#10;jpeg.lib&#10;sqlite3.lib&#10;zstd.lib&#10;formats.lib&#10;dasm.lib&#10;portaudio.lib&#10;lua.lib&#10;lualibs.lib&#10;asmjit.lib&#10;bgfx.lib&#10;bimg.lib&#10;bx.lib&#10;ymfm.lib&#10;wdlfft.lib&#10;linenoise.lib&#10;qtdbg_windows.lib&#10;osd_windows.lib&#10;ws2_32.lib&#10;winmm.lib&#10;dinput8.lib&#10;dxguid.lib&#10;opengl32.lib&#10;dsound.lib&#10;xinput.lib&#10;ws2_32.lib&#10;comctl32.lib&#10;shlwapi.lib&#10;sd1disk.lib&#10;ntdll.lib&#10;userenv.lib&#10;ws2_32.lib&#10;bcrypt.lib&#10;advapi32.lib"
             extraDefs="ASIO_STANDALONE=1" extraCompilerFlags="/Ot /Oi /arch:AVX2 /fp:fast /Ob2"
             windowsTargetPlatformVersion="10.0">
       <CONFIGURATIONS>
-        <CONFIGURATION isDebug="0" name="Release" headerPath="C:\mame\src&#10;C:\mame\src\frontend\mame&#10;C:\mame\src\emu&#10;C:\mame\src\osd&#10;C:\mame\src\lib&#10;C:\mame\src\lib\util&#10;C:\mame\src\osd\modules\render&#10;C:\mame\3rdparty&#10;C:\mame\3rdparty\asio\include&#10;C:\mame\3rdparty\zlib"
-                       libraryPath="C:\mame\build\vs2022\bin\x64\Release&#10;C:\mame\build\vs2022\bin\x64\Release\mame_sd132"
+        <CONFIGURATION isDebug="0" name="Release" headerPath="C:\mame\src&#10;C:\mame\src\frontend\mame&#10;C:\mame\src\emu&#10;C:\mame\src\osd&#10;C:\mame\src\lib&#10;C:\mame\src\lib\util&#10;C:\mame\src\osd\modules\render&#10;C:\mame\3rdparty&#10;C:\mame\3rdparty\asio\include&#10;C:\mame\3rdparty\zlib&#10;C:\Users\Unloadable\Documents\EnsoniqSD1\Source&#10;C:\mame\src\devices&#10;C:\mame\src\devices\machine&#10;C:\mame\src\mame\ensoniq"
+                       libraryPath="C:\mame\build\vs2022\bin\x64\Release&#10;C:\mame\build\vs2022\bin\x64\Release\mame_sd132&#10;C:\Users\Unloadable\Documents\EnsoniqSD1\Source&#10;"
                        winWarningLevel="2" warningsAreErrors="0" useRuntimeLibDLL="0"
                        linkTimeOptimisation="1" intrinsicFunctions="1" optimisation="4"
                        targetName="Ensoniq SD-1"/>

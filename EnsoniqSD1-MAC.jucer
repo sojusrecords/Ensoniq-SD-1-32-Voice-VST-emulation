@@ -3,26 +3,32 @@
 <JUCERPROJECT id="Oippeb" name="Ensoniq SD-1" projectType="audioplug" useAppConfig="0"
               addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1" bundleIdentifier="com.sojusrecords.EnsoniqSD1"
               companyWebsite="www.sojusrecords.com" companyCopyright="Open Source GPLv2/3"
-              companyName="EnsoniqMAME" pluginCharacteristicsValue="pluginIsSynth,pluginWantsMidiIn"
-              pluginFormats="buildAU,buildStandalone,buildVST3" version="0.9.9"
-              pluginName="Ensoniq SD-1" pluginDesc="Ensoniq SD-1 MAME Emu VST/AU"
+              companyName="EnsoniqMAME" pluginCharacteristicsValue="pluginIsSynth,pluginProducesMidiOut,pluginWantsMidiIn"
+              pluginFormats="buildAU,buildStandalone,buildVST3" version="1.0.0"
+              pluginName="Ensoniq SD-1" pluginDesc="Ensoniq SD-1 MAME Emu VST3/AU"
               pluginManufacturer="EnsoniqMAME" pluginManufacturerCode="Esma"
               pluginCode="SD1A" pluginAUExportPrefix="EnsoniqSD1AU" companyEmail="sjs@sojusrecords.com"
               pluginAUMainType="'aumu'" cppLanguageStandard="17">
   <MAINGROUP id="OpvzjD" name="Ensoniq SD-1">
-    <GROUP id="{B55D6966-246C-C5C4-DBF6-55CB66D6CDB4}" name="Resources">
-      <FILE id="fhfkAt" name="q.svg" compile="0" resource="1" file="Source/q.svg"/>
-      <FILE id="vH7VVm" name="cart.svg" compile="0" resource="1" file="Source/cart.svg"/>
-      <FILE id="ADy8If" name="floppy.svg" compile="0" resource="1" file="Source/floppy.svg"/>
-      <FILE id="JROKEE" name="labels_tablet.png" compile="0" resource="1"
-            file="Source/labels_tablet.png"/>
-      <FILE id="V7wOZL" name="labels_rack.png" compile="0" resource="1" file="Source/labels_rack.png"/>
-      <FILE id="TcIvwn" name="labels_compact.png" compile="0" resource="1"
-            file="Source/labels_compact.png"/>
-      <FILE id="UmoBTy" name="labels_full.png" compile="0" resource="1" file="Source/labels_full.png"/>
-    </GROUP>
     <GROUP id="{3F88782C-AB7D-82EE-F4B6-16FDEB0AE012}" name="Source">
+      <GROUP id="{B55D6966-246C-C5C4-DBF6-55CB66D6CDB4}" name="Resources">
+        <FILE id="fhfkAt" name="q.svg" compile="0" resource="1" file="Source/q.svg"/>
+        <FILE id="vH7VVm" name="cart.svg" compile="0" resource="1" file="Source/cart.svg"/>
+        <FILE id="ADy8If" name="floppy.svg" compile="0" resource="1" file="Source/floppy.svg"/>
+        <FILE id="JROKEE" name="labels_tablet.png" compile="0" resource="1"
+              file="Source/labels_tablet.png"/>
+        <FILE id="V7wOZL" name="labels_rack.png" compile="0" resource="1" file="Source/labels_rack.png"/>
+        <FILE id="TcIvwn" name="labels_compact.png" compile="0" resource="1"
+              file="Source/labels_compact.png"/>
+        <FILE id="UmoBTy" name="labels_full.png" compile="0" resource="1" file="Source/labels_full.png"/>
+      </GROUP>
+      <FILE id="m1KY1J" name="PresetBrowserComponent.h" compile="0" resource="0"
+            file="Source/PresetBrowserComponent.h"/>
+      <FILE id="CyCuJV" name="PresetBrowserComponent.cpp" compile="1" resource="0"
+            file="Source/PresetBrowserComponent.cpp"/>
       <FILE id="QKKuRX" name="legscsi.o" compile="0" resource="1" file="../../Documents/MameVfxDev/mame/build/osx_clang/obj/x64/Release/src/devices/machine/legscsi.o"/>
+      <FILE id="XiRcFv" name="sd1disk.h" compile="0" resource="0" file="Source/sd1disk.h"
+            xcodeResource="1"/>
       <FILE id="AZ2vWs" name="f16_to_extF80.o" compile="0" resource="1" file="../../Documents/MameVfxDev/mame/build/osx_clang/obj/x64/Release/3rdparty/softfloat3/source/f16_to_extF80.o"/>
       <FILE id="mBqaAh" name="f16_to_f32.o" compile="0" resource="1" file="../../Documents/MameVfxDev/mame/build/osx_clang/obj/x64/Release/3rdparty/softfloat3/source/f16_to_f32.o"/>
       <FILE id="LdrVgA" name="f16_to_f64.o" compile="0" resource="1" file="../../Documents/MameVfxDev/mame/build/osx_clang/obj/x64/Release/3rdparty/softfloat3/source/f16_to_f64.o"/>
@@ -60,16 +66,16 @@
   <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_VST3_CAN_REPLACE_VST2="0"
                JUCE_USE_FLAC="0" JUCE_WEB_BROWSER="0"/>
   <EXPORTFORMATS>
-    <XCODE_MAC targetFolder="Builds/MacOSX" externalLibraries="frontend&#10;emu&#10;mame_mame&#10;optional&#10;formats&#10;dasm&#10;emu&#10;mame_mame&#10;optional&#10;formats&#10;dasm&#10;osd_sdl3&#10;qtdbg_sdl3&#10;ocore_sdl3&#10;utils&#10;lua&#10;lualibs&#10;expat&#10;zlib&#10;flac&#10;portaudio&#10;portmidi&#10;jpeg&#10;7z&#10;zstd&#10;utf8proc&#10;sqlite3&#10;asmjit&#10;bgfx&#10;bimg&#10;bx&#10;softfloat&#10;softfloat3&#10;ymfm&#10;wdlfft&#10;linenoise&#10;utils"
+    <XCODE_MAC targetFolder="Builds/MacOSX" externalLibraries="frontend&#10;emu&#10;mame_mame&#10;optional&#10;formats&#10;dasm&#10;emu&#10;mame_mame&#10;optional&#10;formats&#10;dasm&#10;osd_sdl3&#10;qtdbg_sdl3&#10;ocore_sdl3&#10;utils&#10;lua&#10;lualibs&#10;expat&#10;zlib&#10;flac&#10;portaudio&#10;portmidi&#10;jpeg&#10;7z&#10;zstd&#10;utf8proc&#10;sqlite3&#10;asmjit&#10;bgfx&#10;bimg&#10;bx&#10;softfloat&#10;softfloat3&#10;ymfm&#10;wdlfft&#10;linenoise&#10;utils&#10;sd1disk"
                extraCustomFrameworks="CoreAudio&#10;CoreVideo&#10;CoreMedia&#10;AudioToolbox&#10;AudioUnit&#10;Carbon&#10;ForceFeedback&#10;IOKit&#10;Cocoa&#10;OpenGL&#10;SDL2&#10;SDL3"
-               frameworkSearchPaths="/Library/Frameworks" buildNumber="2026.03"
+               frameworkSearchPaths="/Library/Frameworks" buildNumber="2026.04"
                customXcodeResourceFolders="/Users/csabibab/Documents/MameVfxDev/mame/plugins"
                xcodeValidArchs="arm64,x86_64" extraLinkerFlags="-Wl,-rpath,@loader_path/../Frameworks -Wl,-rpath,/Library/Frameworks -framework SDL2 -framework SDL3"
                postbuildCommand="# The copy operation only runs if the VST3, App, or AU is actually being built (not the Shared Code)&#10;if [[ &quot;$FULL_PRODUCT_NAME&quot; == *.vst3 ]] || [[ &quot;$FULL_PRODUCT_NAME&quot; == *.app ]] || [[ &quot;$FULL_PRODUCT_NAME&quot; == *.component ]]; then&#10;&#10;    echo &quot;Let's package the SDL Frameworks here: $FULL_PRODUCT_NAME&quot;&#10;    FRAMEWORKS_DIR=&quot;$TARGET_BUILD_DIR/$FULL_PRODUCT_NAME/Contents/Frameworks&quot;&#10;    &#10;    # 1. Create the Frameworks directory inside the bundle&#10;    mkdir -p &quot;$FRAMEWORKS_DIR&quot;&#10;&#10;    # 2. Copy SDL3 and SDL2 as well&#10;    cp -R &quot;/Library/Frameworks/SDL3.framework&quot; &quot;$FRAMEWORKS_DIR/&quot;&#10;    if [ -d &quot;/Library/Frameworks/SDL2.framework&quot; ]; then&#10;        cp -R &quot;/Library/Frameworks/SDL2.framework&quot; &quot;$FRAMEWORKS_DIR/&quot;&#10;    fi&#10;&#10;    # 3. Apply the Ad-Hoc signature to the embedded frameworks&#10;    codesign -f -s - &quot;$FRAMEWORKS_DIR/SDL3.framework&quot;&#10;    if [ -d &quot;$FRAMEWORKS_DIR/SDL2.framework&quot; ]; then&#10;        codesign -f -s - &quot;$FRAMEWORKS_DIR/SDL2.framework&quot;&#10;    fi&#10;&#10;    # 4. Re-sign the ENTIRE bundle!&#10;    codesign -f -s - &quot;$TARGET_BUILD_DIR/$FULL_PRODUCT_NAME&quot;&#10;&#10;fi"
                smallIcon="fhfkAt" bigIcon="fhfkAt" extraDefs="_LIBCPP_AVAILABILITY_HAS_INIT_PRIMARY_EXCEPTION=0">
       <CONFIGURATIONS>
-        <CONFIGURATION isDebug="0" name="Release" targetName="EnsoniqSD1" headerPath="/Users/csabibab/Documents/MameVfxDev/mame/src&#10;/Users/csabibab/Documents/MameVfxDev/mame/src/emu&#10;/Users/csabibab/Documents/MameVfxDev/mame/src/osd&#10;/Users/csabibab/Documents/MameVfxDev/mame/src/lib&#10;/Users/csabibab/Documents/MameVfxDev/mame/src/lib/util&#10;/Users/csabibab/Documents/MameVfxDev/mame/src/frontend/mame&#10;/Users/csabibab/Documents/MameVfxDev/mame/3rdparty/bx/include"
-                       libraryPath="/Users/csabibab/Documents/MameVfxDev/mame/build/osx_clang/bin/x64/Release/mame_mame&#10;/Users/csabibab/Documents/MameVfxDev/mame/build/osx_clang/bin/x64/Release&#10;/usr/local/lib"
+        <CONFIGURATION isDebug="0" name="Release" targetName="EnsoniqSD1" headerPath="/Users/csabibab/Documents/MameVfxDev/mame/src&#10;/Users/csabibab/Documents/MameVfxDev/mame/src/emu&#10;/Users/csabibab/Documents/MameVfxDev/mame/src/osd&#10;/Users/csabibab/Documents/MameVfxDev/mame/src/lib&#10;/Users/csabibab/Documents/MameVfxDev/mame/src/lib/util&#10;/Users/csabibab/Documents/MameVfxDev/mame/src/frontend/mame&#10;/Users/csabibab/Documents/MameVfxDev/mame/3rdparty/bx/include&#10;/Users/csabibab/juce/EnsoniqSD1/Source&#10;/Users/csabibab/Documents/mameplayground/src/devices&#10;/Users/csabibab/Documents/mameplayground/src/devices/machine&#10;/Users/csabibab/Documents/mameplayground/src/mame/ensoniq"
+                       libraryPath="/Users/csabibab/Documents/MameVfxDev/mame/build/osx_clang/bin/x64/Release/mame_mame&#10;/Users/csabibab/Documents/MameVfxDev/mame/build/osx_clang/bin/x64/Release&#10;/usr/local/lib&#10;/Users/csabibab/juce/EnsoniqSD1/Source"
                        macOSDeploymentTarget="11.00" osxCompatibility="11.00 SDK" linkTimeOptimisation="0"
                        customXcodeFlags="DEAD_CODE_STRIPPING = NO"/>
       </CONFIGURATIONS>
