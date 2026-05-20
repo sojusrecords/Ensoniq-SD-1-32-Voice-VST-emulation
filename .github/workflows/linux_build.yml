@@ -216,10 +216,9 @@ jobs:
     - name: Compile JUCE VST3 (Generic)
       run: |
         cd Builds/LinuxMakefile
-        make CONFIG=Release \
-             CXXFLAGS="-I${{ env.SDL3_PREFIX }}/include" \
-             LDFLAGS="-L${{ env.SDL3_PREFIX }}/lib -Wl,-rpath,${{ env.SDL3_PREFIX }}/lib -lz -lX11 -lXext" \
-             -j$(nproc)
+        export CXXFLAGS="-I${{ env.SDL3_PREFIX }}/include"
+        export LDFLAGS="-L${{ env.SDL3_PREFIX }}/lib -Wl,-rpath,${{ env.SDL3_PREFIX }}/lib -lz -lX11 -lXext"
+        make CONFIG=Release -j$(nproc)
 
     - name: Inject Lua and SDL3 into VST3 Bundle (Generic)
       run: |
@@ -373,10 +372,9 @@ jobs:
     - name: Compile JUCE VST3 (AVX2)
       run: |
         cd Builds/LinuxMakefile
-        make CONFIG=Release \
-             CXXFLAGS="-mavx2 -I${{ env.SDL3_PREFIX }}/include" \
-             LDFLAGS="-L${{ env.SDL3_PREFIX }}/lib -Wl,-rpath,${{ env.SDL3_PREFIX }}/lib -lz -lX11 -lXext" \
-             -j$(nproc)
+        export CXXFLAGS="-mavx2 -I${{ env.SDL3_PREFIX }}/include"
+        export LDFLAGS="-L${{ env.SDL3_PREFIX }}/lib -Wl,-rpath,${{ env.SDL3_PREFIX }}/lib -lz -lX11 -lXext"
+        make CONFIG=Release -j$(nproc)
 
     - name: Inject Lua and SDL3 into VST3 Bundle (AVX2)
       run: |
