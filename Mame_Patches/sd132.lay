@@ -1415,31 +1415,36 @@
 			function SliderHandler:pointerUpdated(state, type, id, dev, x, y, btn, dn, up, cnt)
 				if dn & 1 ~= 0 then
 					-- It's a button press
-					if self.knob.bounds:includes(x, y) then
-						return {
-							handler = self,
-							dy = y - self.knob.bounds.y0
-						}
+					if state == nil then
+						-- No active drag: start one if clicking on the knob
+						if self.knob.bounds:includes(x, y) then
+							return {
+								handler = self,
+								dy = y - self.knob.bounds.y0
+							}
+						end
+						return nil
 					end
+					-- Active drag already in progress: button re-down while dragging
+					-- (cursor may be outside knob bounds — keep drag alive, fall through to move)
 				else
 					if state == nil then
 						-- not a down event, and not already claimed - not for us to handle.
 						return nil
 					end
-
-					-- not a button down (up is also handled elsewhere), so it must be a move
-					local yy = y - state.dy
-					local fraction = (yy - self.clickarea.bounds.y0) / (self.clickarea.bounds.height - self.knob.bounds.height)
-					local new_value = 1023 * (1 - fraction)
-					if self.invert then
-						new_value = 1023 - new_value
-					end
-					new_value = math.floor(new_value + 0.5)
-					clamped_value = clamp(new_value, 0, 1023)
-					set_field_value(self.field, clamped_value)
-					return state
 				end
-				return nil
+
+				-- Move handling (reached when state ~= nil, regardless of dn)
+				local yy = y - state.dy
+				local fraction = (yy - self.clickarea.bounds.y0) / (self.clickarea.bounds.height - self.knob.bounds.height)
+				local new_value = 1023 * (1 - fraction)
+				if self.invert then
+					new_value = 1023 - new_value
+				end
+				new_value = math.floor(new_value + 0.5)
+				clamped_value = clamp(new_value, 0, 1023)
+				set_field_value(self.field, clamped_value)
+				return state
 			end
 
 			function SliderHandler:releasePointer(id, state)
