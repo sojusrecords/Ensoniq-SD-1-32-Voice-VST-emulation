@@ -1343,22 +1343,34 @@ void PresetBrowserComponent::rebuildTree()
     localNode->addSubItem(downNode);
 
     // Saved folder bookmarks with red X to remove
-    for (int i = 0; i < audioProcessor.bookmarkFolders.size(); ++i) {
-        juce::File folder(audioProcessor.bookmarkFolders[i]);
-        auto* bmNode = new SourceTreeItem(folder.getFileName());
-        bmNode->itemName = "BOOKMARK:" + audioProcessor.bookmarkFolders[i];
-        bmNode->onSelection = onTreeSelect;
-        int bookmarkIndex = i;
-        bmNode->onRemove = [this, bookmarkIndex]() {
-            if (bookmarkIndex < audioProcessor.bookmarkFolders.size()) {
-                audioProcessor.bookmarkFolders.remove(bookmarkIndex);
-                if (auto* editor = dynamic_cast<EnsoniqSD1AudioProcessorEditor*>(getParentComponent()))
-                    editor->saveGlobalSettings();
-                rebuildTree();
+            for (int i = 0; i < audioProcessor.bookmarkFolders.size(); ++i) {
+                juce::File folder(audioProcessor.bookmarkFolders[i]);
+                auto* bmNode = new SourceTreeItem(folder.getFileName());
+                bmNode->itemName = "BOOKMARK:" + audioProcessor.bookmarkFolders[i];
+                bmNode->onSelection = onTreeSelect;
+                int bookmarkIndex = i;
+                
+                bmNode->onRemove = [this, bookmarkIndex]() {
+                    if (bookmarkIndex < audioProcessor.bookmarkFolders.size()) {
+                        audioProcessor.bookmarkFolders.remove(bookmarkIndex);
+                        if (auto* editor = dynamic_cast<EnsoniqSD1AudioProcessorEditor*>(getParentComponent()))
+                            editor->saveGlobalSettings();
+                        
+                        // CRASH FIX
+                        juce::Component::SafePointer<PresetBrowserComponent> safeThis(this);
+                        juce::MessageManager::callAsync([safeThis]() {
+                            if (safeThis != nullptr) {
+                                safeThis->rebuildTree();
+                                // If you were in a deleted folder, return to a safe view
+                                if (safeThis->currentCategory.startsWith("BOOKMARK:")) {
+                                    safeThis->updateContentList("INT (RAM)");
+                                }
+                            }
+                        });
+                    }
+                };
+                localNode->addSubItem(bmNode);
             }
-        };
-        localNode->addSubItem(bmNode);
-    }
 
     // --- Only show the "Add Folder..." button if we haven't reached the 10 bookmark limit ---
         if (audioProcessor.bookmarkFolders.size() < 10) {
