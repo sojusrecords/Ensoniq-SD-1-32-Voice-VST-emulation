@@ -45,7 +45,7 @@ Everything. Check the original manual here: [SD-1 Manual at Polynominal](https:/
   - Instant single program, preset and full .SYX bank import.
   - Export single program and preset .SYX and .SYX banks from INT RAM, attached cartridge, disk images and cartridge files.
   - There's no need to switch the SYS-EX in menu from now on as it's always enabled at boot.
-  Big thanks to **Joe McMahon** for his awesome [sd1diskutil](https://github.com/joemcmahon/sd1diskutil) tool which is embedded and working under the hood.
+  - Big thanks to **Joe McMahon** for his awesome [sd1diskutil](https://github.com/joemcmahon/sd1diskutil) tool which is embedded and working under the hood.
 
 - **Simplified ROM handling for easy installation** We completely overhauled how ROM files are handled to make the installation process bulletproof and musician-friendly :)
 
