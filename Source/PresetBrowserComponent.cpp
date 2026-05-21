@@ -1363,7 +1363,8 @@ void PresetBrowserComponent::rebuildTree()
                                 safeThis->rebuildTree();
                                 // If you were in a deleted folder, return to a safe view
                                 if (safeThis->currentCategory.startsWith("BOOKMARK:")) {
-                                    safeThis->updateContentList("INT (RAM)");
+                                    safeThis->audioProcessor.fileManagerState.category = "Documents/EnsoniqSD1";
+                                    safeThis->restoreStateFromProcessor();
                                 }
                             }
                         });
