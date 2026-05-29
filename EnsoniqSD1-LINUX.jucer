@@ -4,7 +4,7 @@
               addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1" bundleIdentifier="com.sojusrecords.EnsoniqSD1"
               companyWebsite="www.sojusrecords.com" companyCopyright="Open Source GPLv2/3"
               companyName="EnsoniqMAME" pluginCharacteristicsValue="pluginIsSynth,pluginProducesMidiOut,pluginWantsMidiIn"
-              pluginFormats="buildVST3" version="1.0.0" pluginName="Ensoniq SD-1"
+              pluginFormats="buildVST3" version="1.0.1" pluginName="Ensoniq SD-1"
               pluginDesc="Ensoniq SD-1 MAME Emu VST" pluginManufacturer="EnsoniqMAME"
               pluginManufacturerCode="Esma" pluginCode="SD1A" pluginAUExportPrefix="EnsoniqSD1AU"
               companyEmail="sjs@sojusrecords.com" pluginAUMainType="'aumu'"
@@ -22,6 +22,7 @@
       <FILE id="UmoBTy" name="labels_full.png" compile="0" resource="1" file="Source/labels_full.png"/>
     </GROUP>
     <GROUP id="{3F88782C-AB7D-82EE-F4B6-16FDEB0AE012}" name="Source">
+      <FILE id="MV9ogt" name="esqpanel.h" compile="0" resource="0" file="Source/esqpanel.h"/>
       <FILE id="FT895t" name="PresetBrowserComponent.cpp" compile="1" resource="0"
             file="Source/PresetBrowserComponent.cpp"/>
       <FILE id="B63XbU" name="PresetBrowserComponent.h" compile="0" resource="0"

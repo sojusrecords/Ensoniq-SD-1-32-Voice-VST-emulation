@@ -163,7 +163,7 @@ bool esqimg_format::save(util::random_read_write &io, const std::vector<uint32_t
 			// 3. Mapping sectors based on their explicit IDs (0–9)
 			for(size_t id = 0; id < extracted_sectors.size(); id++) {
 				if(id < (size_t)sector_count && extracted_sectors[id].size() >= 512) {
-					// Csak az érvényes, meglévő szektorokat másoljuk be a megfelelő offsetre
+					// We will only copy the valid, existing sectors to the appropriate offset
 					std::memcpy(sectdata + (id * 512), extracted_sectors[id].data(), 512);
 				}
 			}

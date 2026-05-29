@@ -40,6 +40,7 @@
 
 // --- MAME Core Includes ---
 #include "emu.h"
+#include "esqpanel.h"
 #include "frontend/mame/ui/ui.h"
 #include "osd/modules/lib/osdobj_common.h"
 #include "uiinput.h"
@@ -342,6 +343,7 @@ private:
     running_machine* mame_machine = nullptr;
     uint64_t lastFrameHash = 0;
     uint32_t lastMouseButtons = 0;
+    int audioMacroHeldBank = -1;   // audio-thread-only: which bank is electronically held
     
     render_target* main_target = nullptr;
 
@@ -819,14 +821,52 @@ public:
             }
 
                     // ==============================================================================
+                    // --- SAVE PROGRAM MACRO: bank detection + electronic hold (audio thread) ---
+                    // ==============================================================================
+                    if (processor->isSaveMacroActive.load(std::memory_order_relaxed)) {
+                        auto* panel = mame_machine->root_device().subdevice<esqpanel2x40_vfx_device>("panel");
+                        if (panel != nullptr) {
+                            // Bank button codes from esq5505.cpp (set_button / m_pressed_buttons)
+                            static const int bankCodes[] = { 55, 56, 57, 46, 47, 48, 49, 35, 34, 25 };
+                            
+                            // Maintain electronic hold (re-assert every frame; set_button is idempotent)
+                            int wantBank = processor->macroBankToHold.load(std::memory_order_relaxed);
+                            if (wantBank != audioMacroHeldBank) {
+                                if (audioMacroHeldBank >= 0)
+                                    panel->set_button((uint8_t)bankCodes[audioMacroHeldBank], false);
+                                audioMacroHeldBank = wantBank;
+                            }
+                            if (audioMacroHeldBank >= 0)
+                                panel->set_button((uint8_t)bankCodes[audioMacroHeldBank], true);
+                            
+                            // Detect which banks are pressed (mouse clicks + our hold)
+                            int mask = 0;
+                            for (int i = 0; i < 10; ++i)
+                                if (panel->is_button_pressed(bankCodes[i]))
+                                    mask |= (1 << i);
+                            processor->detectedBankMask.store(mask, std::memory_order_release);
+                        }
+                    } else {
+                        audioMacroHeldBank = -1;
+                    }
+
+                    // ==============================================================================
                     // --- 2. VST BUTTON AUTOMATION (Direct Hardware Memory Injection) ---
                     // ==============================================================================
                     // We bypass the mouse completely and directly pull the circuits on the MAME motherboard!
+                    bool macroActive = processor->isSaveMacroActive.load(std::memory_order_relaxed);
                     for (size_t i = 0; i < processor->sd1Buttons.size(); ++i) {
                         
                         // Lock-free read from the DAW's automation lane
                         float val = processor->buttonParams[i]->load(std::memory_order_relaxed);
                         bool isPressed = (val > 0.5f);
+
+                        // During the Save Program macro, don't touch bank buttons (indices 10-19).
+                        // They are controlled by MAME UI (mouse → PORT_CHANGED → set_button) for
+                        // detection, and by our set_button hold above. The APVTS set_value(0) would
+                        // fire PORT_CHANGED(false) and break both.
+                        if (macroActive && i >= 10 && i <= 19 && !isPressed)
+                            continue;
 
                         // PORT CALLING
                         ioport_port* port = mame_machine->root_device().ioport(processor->sd1Buttons[i].ioportTag);
@@ -1012,54 +1052,63 @@ void EnsoniqSD1AudioProcessor::parameterChanged(const juce::String& parameterID,
 
 void EnsoniqSD1AudioProcessor::loadGlobalSettings()
 {
+    juce::InterProcessLock settingsLock("EnsoniqSD1_Settings_Lock");
+    if (!settingsLock.enter(500)) return;  // wait up to 500ms for another instance to finish writing
+
     juce::File docsDir = juce::File::getSpecialLocation(juce::File::userDocumentsDirectory);
     juce::File settingsFile = docsDir.getChildFile("EnsoniqSD1").getChildFile("settings.xml");
 
-    if (settingsFile.existsAsFile()) {
-        if (auto xml = juce::XmlDocument::parse(settingsFile)) {
-            // Read saved attributes from the XML file
-            int bufIdx = xml->getIntAttribute("buffer_size", 2);
-            int viewIdx = xml->getIntAttribute("layout_view", 0);
-            savedWindowWidth = xml->getIntAttribute("window_width", 1200);
-            savedWindowHeight = xml->getIntAttribute("window_height", 900);
-            
-            fileManagerState.fmWindowWidth = xml->getIntAttribute("fm_window_width", 1200);
-            fileManagerState.fmWindowHeight = xml->getIntAttribute("fm_window_height", 925);
-            
-            // Load first-launch UX state
-            showWelcomeMessage.store(!xml->getBoolAttribute("welcome_shown", false), std::memory_order_release);
-
-            // Load custom ROM path if the user has defined one previously
-            customRomPath = xml->getStringAttribute("rom_path", "");
-            
-            // Load folder bookmarks (max 10)
-            bookmarkFolders.clear();
-            for (int i = 0; i < 10; ++i) {
-                juce::String key = "bookmark_" + juce::String(i);
-                juce::String path = xml->getStringAttribute(key, "");
-                if (path.isNotEmpty() && juce::File(path).isDirectory())
-                    bookmarkFolders.add(path);
-            }
-            
-            if (auto* p = apvts.getParameter("buffer_size"))
-                p->setValue(p->convertTo0to1(bufIdx));
+    for (int i = 0; i < 5; ++i) {
+        if (settingsFile.existsAsFile()) {
+            if (auto xml = juce::XmlDocument::parse(settingsFile)) {
                 
-            if (auto* p = apvts.getParameter("layout_view"))
-                p->setValue(p->convertTo0to1(viewIdx));
+                int bufIdx = xml->getIntAttribute("buffer_size", 2);
+                int viewIdx = xml->getIntAttribute("layout_view", 0);
+                savedWindowWidth = xml->getIntAttribute("window_width", 1200);
+                savedWindowHeight = xml->getIntAttribute("window_height", 900);
 
-            // Since the "silent" setValue might not immediately trigger the parameterChanged
-            // callback during the constructor phase, we manually update our critical internal
-            // atomic variables here just to be absolutely safe:
-            int sizes[] = { 128, 256, 512, 1024, 2048, 4096, 8192 };
-            if (bufIdx >= 0 && bufIdx < 6) {
-                mameBufferThreshold.store(sizes[bufIdx], std::memory_order_relaxed);
+                fileManagerState.fmWindowWidth = xml->getIntAttribute("fm_window_width", 1200);
+                fileManagerState.fmWindowHeight = xml->getIntAttribute("fm_window_height", 925);
+
+                showWelcomeMessage.store(!xml->getBoolAttribute("welcome_shown", false), std::memory_order_release);
+                customRomPath = xml->getStringAttribute("rom_path", "");
+
+                lastBrowsedFolder = xml->getStringAttribute("last_browsed_folder");
+                lastMediaFolder   = xml->getStringAttribute("last_media_folder");
+                lastRomFolder     = xml->getStringAttribute("last_rom_folder");
+                myComputerPath    = xml->getStringAttribute("my_computer_path");
+
+                bookmarkFolders.clear();
+                for (int j = 0; j < 10; ++j) {
+                    juce::String key = "bookmark_" + juce::String(j);
+                    juce::String path = xml->getStringAttribute(key, "");
+                    if (path.isNotEmpty())
+                        bookmarkFolders.add(path);
+                }
+
+                if (auto* p = apvts.getParameter("buffer_size"))
+                    p->setValue(p->convertTo0to1(bufIdx));
+
+                if (auto* p = apvts.getParameter("layout_view"))
+                    p->setValue(p->convertTo0to1(viewIdx));
+
+                int sizes[] = { 128, 256, 512, 1024, 2048, 4096, 8192 };
+                if (bufIdx >= 0 && bufIdx < 6) {
+                    mameBufferThreshold.store(sizes[bufIdx], std::memory_order_relaxed);
+                }
+                requestedViewIndex.store(viewIdx, std::memory_order_release);
+                
+                settingsLock.exit();
+                return;
             }
-            requestedViewIndex.store(viewIdx, std::memory_order_release);
-            }
-            } else {
-                // No settings file exists (very first cold boot)
-                showWelcomeMessage.store(true, std::memory_order_release);
-            }
+        } else {
+            showWelcomeMessage.store(true, std::memory_order_release);
+            settingsLock.exit();
+            return; 
+        }
+        juce::Thread::sleep(10);
+    }
+    settingsLock.exit();
 }
 
 EnsoniqSD1AudioProcessor::EnsoniqSD1AudioProcessor()

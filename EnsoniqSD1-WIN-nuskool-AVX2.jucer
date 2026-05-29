@@ -4,7 +4,7 @@
               addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1" bundleIdentifier="com.sojusrecords.EnsoniqSD1"
               companyWebsite="www.sojusrecords.com" companyCopyright="Open Source GPLv2/3"
               companyName="EnsoniqMAME" pluginCharacteristicsValue="pluginIsSynth,pluginProducesMidiOut,pluginWantsMidiIn"
-              pluginFormats="buildStandalone,buildVST3" version="1.0.0" pluginName="Ensoniq SD-1"
+              pluginFormats="buildStandalone,buildVST3" version="1.0.1" pluginName="Ensoniq SD-1"
               pluginDesc="Ensoniq SD-1 MAME Emu VST" pluginManufacturer="EnsoniqMAME"
               pluginManufacturerCode="Esma" pluginCode="SD1A" pluginAUExportPrefix="EnsoniqSD1AU"
               pluginAUMainType="'augn'" companyEmail="sjs@sojusrecords.com"
@@ -24,6 +24,7 @@
             file="Source/mame_plugins.zip"/>
     </GROUP>
     <GROUP id="{3F88782C-AB7D-82EE-F4B6-16FDEB0AE012}" name="Source">
+      <FILE id="lmAwub" name="esqpanel.h" compile="0" resource="0" file="Source/esqpanel.h"/>
       <FILE id="IWhokv" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>
       <FILE id="YhSlmb" name="PluginProcessor.h" compile="0" resource="0"

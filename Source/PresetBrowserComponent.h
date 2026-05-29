@@ -61,33 +61,34 @@ public:
             }
         }
 
-        juce::String getUniqueName() const override { return itemName; }
+    juce::String getUniqueName() const override { return itemName; }
 
-        void itemSelectionChanged(bool isNowSelected) override {
-            if (pendingRemove) { pendingRemove = false; return; }
-            if (isNowSelected && onSelection) onSelection(itemName);
-        }
-        
-        void itemClicked(const juce::MouseEvent& e) override {
-            // Single click anywhere on the category row toggles its open/close state
-            if (category) {
-                setOpen(!isOpen());
+            void itemSelectionChanged(bool isNowSelected) override {
+                if (pendingRemove) { pendingRemove = false; return; }
+                if (isNowSelected && onSelection) onSelection(itemName);
             }
             
-            if (onRemove && e.x > lastPaintWidth - 30) {
-                pendingRemove = true;
-                juce::MessageManager::callAsync([cb = onRemove]() { if (cb) cb(); });
+    void itemClicked(const juce::MouseEvent& e) override {
+                if (category) {
+                    setOpen(!isOpen());
+                }
+                
+                if (onRemove && e.x > lastPaintWidth - 30 && !removeInProgress) {
+                    pendingRemove = true;
+                    removeInProgress = true;
+                    if (onRemove) onRemove(itemName);
+                }
             }
-        }
 
-    juce::String itemName;
-    bool category;
-    std::function<void(juce::String)> onSelection;
-    std::function<void()> onRemove;
+        juce::String itemName;
+        bool category;
+        std::function<void(juce::String)> onSelection;
+        std::function<void(juce::String)> onRemove;
     
 private:
     int lastPaintWidth = 200;
     bool pendingRemove = false;
+    bool removeInProgress = false;
 };
 
 class PresetBrowserComponent : public juce::Component,
@@ -102,6 +103,7 @@ public:
     void paintOverChildren(juce::Graphics& g) override;
     void resized() override;
     void timerCallback() override;
+    void syncSettingsFromDisk();
     
     // SysEx Virtual Button compare toggle — goes through MIDI, properly ordered
     // Replaces the old APVTS button parameter hack
@@ -137,11 +139,16 @@ public:
     // FILE MANAGER EXIT SEQUENCE
     void showClosingProgress(const juce::String& message, double durationMs);
     
+    // Remove bookmark helper
+    bool pendingTreeRebuild = false;
+    bool pendingTreeItemCleanup = false;  // triggers treeHasChanged() after mouseUp to remove drag-held ItemComponents
+    
 private:
     EnsoniqSD1AudioProcessor& audioProcessor;
 
     bool isRestoringUI = false;
     std::unique_ptr<SourceTreeItem> rootItem;
+    juce::OwnedArray<SourceTreeItem> trashBin;
     juce::File currentlyLoadedArchive;
     juce::StringArray currentListItems;
     
@@ -247,5 +254,6 @@ private:
     void paintOverlay(juce::Graphics& g);
 
     std::unique_ptr<juce::Component> clickBlocker;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PresetBrowserComponent)
 };

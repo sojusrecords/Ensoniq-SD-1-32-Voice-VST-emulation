@@ -24,7 +24,9 @@ We had to make specific modifications to the MAME core to expose certain interna
 
 3. Copy and replace the following files in your MAME source tree:
 
-   - esq5505.cpp -> Overwrite in src/mame/ensoniq/esq5505.cpp
+   - esq5505.cpp -> Overwrite in /src/mame/ensoniq/esq5505.cpp
+
+   - esqpanel.h -> Overwrite in /src/mame/ensoniq/esqpanel.h
 
    - sd132.lay -> Overwrite in /src/mame/layout/sd132.lay
 
@@ -152,7 +154,7 @@ Instead of building a standalone static library, we build the standard MAME exec
 
    - Ensure all the required MAME .a/.o/lib files are listed in your External Libraries to Link section.
 
-   - Theres are some new files: sd1disk.a and sd1disk.lib. 
+   - Theres are some new files: sd1disk.a, sd1disk.lib and esqpanel.h
    
    - Save the project and click "Open in IDE".
 

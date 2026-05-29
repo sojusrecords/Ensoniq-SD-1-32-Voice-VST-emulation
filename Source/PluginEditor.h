@@ -48,6 +48,8 @@ private:
     // --- SAVE MACRO ---
     juce::TextButton saveBadge;
     juce::Label savePromptLabel;
+    juce::OwnedArray<juce::TextButton> bankSelectButtons;  // 10 buttons for bank 0-9
+    int saveMacroPhase = 0;  // 0=idle, 1=choose bank, 2=bank held, click SOFT
     
     // KILL COMPARE AT LOAD
     bool startupCompareChecked = false;
@@ -64,7 +66,7 @@ private:
 
     // --- SETTINGS PANEL GUI COMPONENTS ---
     juce::TextButton settingsButton { "Settings / About" };
-    juce::GroupComponent settingsGroup { "settings_group", "Ensoniq(R) SD-1/32 Settings v1.0.0 3241" };
+    juce::GroupComponent settingsGroup { "settings_group", "Ensoniq(R) SD-1/32 Settings v1.0.1 3397" };
     
     juce::Label bufferLabel { "buffer_label", "MAME(R) Engine buffer:" };
     juce::ComboBox bufferCombo;

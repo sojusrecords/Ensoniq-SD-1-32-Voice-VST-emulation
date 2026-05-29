@@ -75,6 +75,12 @@ public:
     
     // --- ROM MANAGEMENT ---
         juce::String customRomPath { "" };
+    
+    // --- Last browsed ---
+    juce::String lastBrowsedFolder;
+    juce::String lastMediaFolder;
+    juce::String lastRomFolder;
+    juce::String myComputerPath;    // Browse Computer current directory
         
         // --- FOLDER BOOKMARKS (max 10, persisted in settings.xml) ---
         juce::StringArray bookmarkFolders;
@@ -413,6 +419,9 @@ public:
     
     // --- MACRO STATE ---
     std::atomic<bool> isSaveMacroActive{ false };
+    int saveMacroHeldBank = -1;                 // GUI-side: currently held bank (0-9), -1 = none
+    std::atomic<int> macroBankToHold{ -1 };      // GUI → audio: bank to electronically hold via set_button
+    std::atomic<int> detectedBankMask{ 0 };       // audio → GUI: bitmask of pressed banks (bit i = bank i)
     
     void shutdownMame();
     

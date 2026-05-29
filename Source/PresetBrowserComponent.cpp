@@ -576,6 +576,8 @@ PresetBrowserComponent::PresetBrowserComponent(EnsoniqSD1AudioProcessor& p)
     
     refreshButton.setColour(juce::TextButton::buttonColourId, juce::Colour(0xff333333));
     refreshButton.onClick = [this] {
+        syncSettingsFromDisk();
+        rebuildTree();
         if (currentCategory.isNotEmpty()) {
             updateContentList(currentCategory);
         }
@@ -1299,6 +1301,7 @@ PresetBrowserComponent::PresetBrowserComponent(EnsoniqSD1AudioProcessor& p)
     contentList.setRowHeight(24);
     contentList.setMultipleSelectionEnabled(true);
     
+    syncSettingsFromDisk();
     rebuildTree();
     
     sourcesTree.setRootItemVisible(false);
@@ -1314,9 +1317,6 @@ PresetBrowserComponent::PresetBrowserComponent(EnsoniqSD1AudioProcessor& p)
 
 void PresetBrowserComponent::rebuildTree()
 {
-    sourcesTree.setRootItem(nullptr);
-    rootItem = std::make_unique<SourceTreeItem>("Root", true);
-    
     auto onTreeSelect = [this](juce::String name) { this->updateContentList(name); };
 
     auto* internalNode = new SourceTreeItem("SD-1 INTERNAL BANKS", true);
@@ -1332,9 +1332,11 @@ void PresetBrowserComponent::rebuildTree()
     auto* cartNode = new SourceTreeItem("CART");
     cartNode->onSelection = onTreeSelect;
     internalNode->addSubItem(cartNode);
-    rootItem->addSubItem(internalNode);
 
     auto* localNode = new SourceTreeItem("LOCAL COMPUTER", true);
+    auto* browseNode = new SourceTreeItem("Browse Computer");
+    browseNode->onSelection = onTreeSelect;
+    localNode->addSubItem(browseNode);
     auto* docsNode = new SourceTreeItem("Documents/EnsoniqSD1");
     docsNode->onSelection = onTreeSelect;
     localNode->addSubItem(docsNode);
@@ -1342,45 +1344,66 @@ void PresetBrowserComponent::rebuildTree()
     downNode->onSelection = onTreeSelect;
     localNode->addSubItem(downNode);
 
-    // Saved folder bookmarks with red X to remove
-            for (int i = 0; i < audioProcessor.bookmarkFolders.size(); ++i) {
-                juce::File folder(audioProcessor.bookmarkFolders[i]);
-                auto* bmNode = new SourceTreeItem(folder.getFileName());
-                bmNode->itemName = "BOOKMARK:" + audioProcessor.bookmarkFolders[i];
-                bmNode->onSelection = onTreeSelect;
-                int bookmarkIndex = i;
+    for (int i = 0; i < audioProcessor.bookmarkFolders.size(); ++i) {
+        juce::File folder(audioProcessor.bookmarkFolders[i]);
+        auto* bmNode = new SourceTreeItem(folder.getFileName());
+        
+        juce::String bookmarkPath = audioProcessor.bookmarkFolders[i];
+        bmNode->itemName = "BOOKMARK:" + bookmarkPath;
+        bmNode->onSelection = onTreeSelect;
+        
+        bmNode->onRemove = [this](juce::String name) {
+            juce::Component::SafePointer<PresetBrowserComponent> safeThis(this);
+            // Delay 150ms so the rebuild runs AFTER mouseUp is processed.
+            // This ensures isMouseDraggingInChildComp() returns false during
+            // updateComponents() → no drag-held ItemComponent survivors →
+            // no ghost row, no click interception on remaining bookmarks.
+            juce::Timer::callAfterDelay(150, [safeThis, name]() {
+                if (safeThis == nullptr) return;
+                juce::String path = name.substring(9);
+                int idx = safeThis->audioProcessor.bookmarkFolders.indexOf(path);
                 
-                bmNode->onRemove = [this, bookmarkIndex]() {
-                    if (bookmarkIndex < audioProcessor.bookmarkFolders.size()) {
-                        audioProcessor.bookmarkFolders.remove(bookmarkIndex);
-                        if (auto* editor = dynamic_cast<EnsoniqSD1AudioProcessorEditor*>(getParentComponent()))
-                            editor->saveGlobalSettings();
-                        
-                        // CRASH FIX
-                        juce::Component::SafePointer<PresetBrowserComponent> safeThis(this);
-                        juce::MessageManager::callAsync([safeThis]() {
-                            if (safeThis != nullptr) {
-                                safeThis->rebuildTree();
-                                // If you were in a deleted folder, return to a safe view
-                                if (safeThis->currentCategory.startsWith("BOOKMARK:")) {
-                                    safeThis->audioProcessor.fileManagerState.category = "Documents/EnsoniqSD1";
-                                    safeThis->restoreStateFromProcessor();
-                                }
-                            }
-                        });
+                if (idx >= 0) {
+                    safeThis->audioProcessor.bookmarkFolders.remove(idx);
+                    
+                    safeThis->audioProcessor.requestGlobalSave.store(true, std::memory_order_release);
+                    
+                    if (safeThis->currentCategory == name) {
+                        safeThis->audioProcessor.fileManagerState.category = "Documents/EnsoniqSD1";
+                        safeThis->restoreStateFromProcessor();
                     }
-                };
-                localNode->addSubItem(bmNode);
-            }
+                }
+                safeThis->rebuildTree();
+            });
+        };
+        localNode->addSubItem(bmNode);
+    }
 
-    // --- Only show the "Add Folder..." button if we haven't reached the 10 bookmark limit ---
-        if (audioProcessor.bookmarkFolders.size() < 10) {
-            auto* addNode = new SourceTreeItem("Add Folder...");
-            addNode->onSelection = onTreeSelect;
-            localNode->addSubItem(addNode);
-        }
+    if (audioProcessor.bookmarkFolders.size() < 10) {
+        auto* addNode = new SourceTreeItem("Add Folder...");
+        addNode->onSelection = onTreeSelect;
+        localNode->addSubItem(addNode);
+    }
+
+    // --- Safe tree swap: direct root replacement + trashBin ---
+    // JUCE 8's isMouseDraggingInChildComp() keeps old ItemComponents alive during
+    // mouse-down, even through setRootItem(nullptr). This means we must NEVER free
+    // old TreeViewItems while an ItemComponent might still reference them.
+    //
+    // Strategy: swap the root directly (no nullptr intermediate). Old items stay
+    // alive in trashBin. They're freed at the START of the NEXT rebuildTree() call,
+    // by which time the mouse is released and setRootItem has cleaned up old
+    // ItemComponents. Destructor also cleans up.
+    auto* oldRoot = rootItem.release();
+    rootItem.reset(new SourceTreeItem("Root", true));
+    rootItem->addSubItem(internalNode);
     rootItem->addSubItem(localNode);
-    sourcesTree.setRootItem(rootItem.get());
+    sourcesTree.setRootItem(rootItem.get());     // direct swap: old ItemComps → old items (alive in trashBin)
+    trashBin.clear();                             // free PREVIOUS rebuild's items (their ItemComps are gone now)
+    if (oldRoot != nullptr)
+        trashBin.add(oldRoot);                    // THIS rebuild's items stay alive
+    sourcesTree.setRootItemVisible(false);        // re-assert invisible root
+    sourcesTree.repaint();                         // force full repaint
 }
 
 // =========================================================================================
@@ -1596,7 +1619,14 @@ void PresetBrowserComponent::restoreStateFromProcessor()
         isRestoringUI = false;
     }
 
-PresetBrowserComponent::~PresetBrowserComponent() { stopTimer(); }
+PresetBrowserComponent::~PresetBrowserComponent()
+{
+    stopTimer();
+    sourcesTree.setVisible(false);        // Prevent paint during teardown
+    sourcesTree.setRootItem(nullptr);
+    rootItem.reset();
+    trashBin.clear();
+}
 
 // HELPER: Reading Actual INT RAM Names
 juce::String PresetBrowserComponent::decodeEnsoniqName(const char* nameBuf) {
@@ -1793,6 +1823,13 @@ void PresetBrowserComponent::showClosingProgress(const juce::String& message, do
 
 void PresetBrowserComponent::timerCallback()
 {
+
+        if (pendingTreeRebuild) {
+            pendingTreeRebuild = false;
+            sourcesTree.clearSelectedItems();
+            rebuildTree();
+            return;
+        }
     
         bool booting = isSystemBooting(audioProcessor);
         
@@ -1806,8 +1843,6 @@ void PresetBrowserComponent::timerCallback()
         } else if (wasBootingOverlay) {
             clickBlocker.reset();
             wasBootingOverlay = false;
-            // MIDI ON FOR PREVIEW
-            //audioProcessor.suppressMidiInput.store(false, std::memory_order_release);
             
             // Sync progress bars if an injection was queued during boot
             if (isSYXProcessing) {
@@ -2023,6 +2058,7 @@ void PresetBrowserComponent::returnToInternalMode(int bank, int program)
 
 void PresetBrowserComponent::updateContentList(const juce::String& categoryName)
 {
+    juce::String previousCategory = currentCategory;
     currentCategory = categoryName;
     currentListItems.clear();
     
@@ -2116,6 +2152,50 @@ void PresetBrowserComponent::updateContentList(const juce::String& categoryName)
             }
         }
     }
+    else if (categoryName == "Browse Computer") {
+        // Re-read settings only when first entering Browse Computer from the tree,
+        // not during directory navigation (which would overwrite the just-set path)
+        if (previousCategory != "Browse Computer")
+            syncSettingsFromDisk();
+        
+        // Resolve path: stored path, or fallback to home
+        juce::File browseDir;
+        if (audioProcessor.myComputerPath.isNotEmpty())
+            browseDir = juce::File(audioProcessor.myComputerPath);
+        
+        // Walk up until we find a valid directory
+        while (browseDir.getFullPathName().isNotEmpty() && (!browseDir.exists() || !browseDir.isDirectory()))
+            browseDir = browseDir.getParentDirectory();
+        
+        // Ultimate fallback: user home
+        if (!browseDir.exists() || !browseDir.isDirectory())
+            browseDir = juce::File::getSpecialLocation(juce::File::userHomeDirectory);
+        
+        audioProcessor.myComputerPath = browseDir.getFullPathName();
+        customBrowseFolder = browseDir;
+        audioProcessor.requestGlobalSave.store(true, std::memory_order_release);
+        
+        // Show current path in the selection label
+        selectionNameLabel.setText(browseDir.getFullPathName(), juce::dontSendNotification);
+        
+        // ".." to go up (unless we're at a filesystem root)
+        if (browseDir.getParentDirectory() != browseDir)
+            currentListItems.add("..");
+        
+        // Subdirectories first (sorted, skip hidden)
+        auto dirs = browseDir.findChildFiles(juce::File::findDirectories, false);
+        dirs.sort();
+        for (const auto& d : dirs)
+            if (!d.getFileName().startsWith("."))
+                currentListItems.add(d.getFileName() + "/");
+        
+        // Then supported files (sorted)
+        auto files = browseDir.findChildFiles(juce::File::findFiles, false,
+            "*.syx;*.img;*.hfe;*.dsk;*.eda;*.eeprom;*.rom;*.cart;*.sc32");
+        files.sort();
+        for (const auto& f : files)
+            currentListItems.add(f.getFileName());
+    }
     else if (categoryName == "Documents/EnsoniqSD1") {
         juce::File docsDir = juce::File::getSpecialLocation(juce::File::userDocumentsDirectory).getChildFile("EnsoniqSD1");
         if (docsDir.exists() && docsDir.isDirectory()) {
@@ -2133,27 +2213,42 @@ void PresetBrowserComponent::updateContentList(const juce::String& categoryName)
         }
     }
     else if (categoryName == "Add Folder...") {
-        sourcesTree.clearSelectedItems();
-        folderChooser = std::make_unique<juce::FileChooser>("Select Folder with SD-1 files",
-                                                            juce::File::getSpecialLocation(juce::File::userHomeDirectory), "");
-        auto flags = juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectDirectories;
-        folderChooser->launchAsync(flags, [this](const juce::FileChooser& fc) {
-            auto folder = fc.getResult();
-            if (folder.exists() && folder.isDirectory()) {
-                juce::String path = folder.getFullPathName();
-                if (!audioProcessor.bookmarkFolders.contains(path)) {
-                    if (audioProcessor.bookmarkFolders.size() >= 10)
-                        audioProcessor.bookmarkFolders.remove(0);
-                    audioProcessor.bookmarkFolders.add(path);
-                    if (auto* editor = dynamic_cast<EnsoniqSD1AudioProcessorEditor*>(getParentComponent()))
-                        editor->saveGlobalSettings();
-                    rebuildTree();
-                }
-                updateContentList("BOOKMARK:" + path);
+            sourcesTree.clearSelectedItems();
+            syncSettingsFromDisk(); 
+            
+            juce::File initialDir;
+            if (audioProcessor.lastBrowsedFolder.isNotEmpty() && juce::File(audioProcessor.lastBrowsedFolder).exists()) {
+                initialDir = juce::File(audioProcessor.lastBrowsedFolder);
+            } else {
+                initialDir = juce::File::getSpecialLocation(juce::File::userHomeDirectory);
             }
-        });
-        return;
-    }
+            
+            folderChooser = std::make_unique<juce::FileChooser>("Select Folder with SD-1 files", initialDir, "");
+            auto flags = juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectDirectories;
+            
+            juce::Component::SafePointer<PresetBrowserComponent> safeThis(this);
+            
+            folderChooser->launchAsync(flags, [safeThis](const juce::FileChooser& fc) {
+                auto folder = fc.getResult();
+                if (folder.exists() && folder.isDirectory() && safeThis != nullptr) {
+                    
+                    juce::String path = folder.getFullPathName();
+                    safeThis->audioProcessor.lastBrowsedFolder = folder.getParentDirectory().getFullPathName();
+
+                    if (!safeThis->audioProcessor.bookmarkFolders.contains(path)) {
+                        if (safeThis->audioProcessor.bookmarkFolders.size() >= 10) {
+                            safeThis->audioProcessor.bookmarkFolders.remove(0);
+                        }
+                        safeThis->audioProcessor.bookmarkFolders.add(path);
+                        
+                        safeThis->audioProcessor.requestGlobalSave.store(true, std::memory_order_release);
+                        safeThis->rebuildTree();
+                    }
+                    safeThis->updateContentList("BOOKMARK:" + path);
+                }
+            });
+            return;
+        }
     else if (categoryName.startsWith("BOOKMARK:")) {
         juce::String folderPath = categoryName.substring(9);
         juce::File folder(folderPath);
@@ -2186,9 +2281,12 @@ void PresetBrowserComponent::paintListBoxItem(int rowNumber, juce::Graphics& g, 
         g.fillAll(juce::Colour(0xff446688)); 
     }
 
-    g.setColour(rowIsSelected ? juce::Colours::white : juce::Colours::lightgrey);
-    g.setFont(juce::FontOptions(18.0f));
-    g.drawText(currentListItems[rowNumber], 10, 0, width - 15, height, juce::Justification::centredLeft, true);
+    juce::String text = currentListItems[rowNumber];
+    bool isDir = (currentCategory == "Browse Computer") && (text == ".." || text.endsWithChar('/'));
+    
+    g.setColour(isDir ? juce::Colours::orange : (rowIsSelected ? juce::Colours::white : juce::Colours::lightgrey));
+    g.setFont(isDir ? juce::Font(juce::FontOptions(18.0f)).boldened() : juce::FontOptions(18.0f));
+    g.drawText(text, 10, 0, width - 15, height, juce::Justification::centredLeft, true);
 }
 
 void PresetBrowserComponent::listBoxItemClicked(int row, const juce::MouseEvent&)
@@ -2196,6 +2294,32 @@ void PresetBrowserComponent::listBoxItemClicked(int row, const juce::MouseEvent&
     if (isSequenceTransferActive) return;
         if (row >= currentListItems.size()) return;
         
+        // --- Browse Computer: directory navigation ---
+        if (currentCategory == "Browse Computer") {
+            juce::String itemText = currentListItems[row];
+            juce::File currentDir(audioProcessor.myComputerPath);
+            
+            if (itemText == "..") {
+                // Navigate up
+                audioProcessor.myComputerPath = currentDir.getParentDirectory().getFullPathName();
+                audioProcessor.requestGlobalSave.store(true, std::memory_order_release);
+                updateContentList("Browse Computer");
+                return;
+            }
+            
+            if (itemText.endsWithChar('/')) {
+                // Navigate into subdirectory (strip trailing "/")
+                juce::String dirName = itemText.dropLastCharacters(1);
+                audioProcessor.myComputerPath = currentDir.getChildFile(dirName).getFullPathName();
+                audioProcessor.requestGlobalSave.store(true, std::memory_order_release);
+                updateContentList("Browse Computer");
+                return;
+            }
+            
+            // It's a file — set customBrowseFolder and fall through to normal file handling
+            customBrowseFolder = currentDir;
+        }
+
         if (contentList.getNumSelectedRows() > 1) {
             bool isInternalBank = (currentCategory == "INT (RAM)" || currentCategory == "CART");
             int numSel = contentList.getNumSelectedRows();
@@ -3087,4 +3211,29 @@ void PresetBrowserComponent::injectAndPreview(double startTimeOffset)
     playHintLabel.setVisible(true);
     isSYXProcessing = true;
     wasSYXPreview = true;
+}
+
+void PresetBrowserComponent::syncSettingsFromDisk()
+{
+    juce::InterProcessLock settingsLock("EnsoniqSD1_Settings_Lock");
+    if (!settingsLock.enter(200)) return;
+
+    juce::File settingsFile = juce::File::getSpecialLocation(juce::File::userDocumentsDirectory).getChildFile("EnsoniqSD1/settings.xml");
+    
+    for (int i = 0; i < 5; ++i) {
+        if (auto xml = juce::XmlDocument::parse(settingsFile)) {
+            audioProcessor.bookmarkFolders.clear();
+            for (int j = 0; j < 10; ++j) {
+                juce::String path = xml->getStringAttribute("bookmark_" + juce::String(j), "");
+                if (path.isNotEmpty()) audioProcessor.bookmarkFolders.add(path);
+            }
+            audioProcessor.lastBrowsedFolder = xml->getStringAttribute("last_browsed_folder", audioProcessor.lastBrowsedFolder);
+            audioProcessor.lastMediaFolder = xml->getStringAttribute("last_media_folder", audioProcessor.lastMediaFolder);
+            audioProcessor.lastRomFolder = xml->getStringAttribute("last_rom_folder", audioProcessor.lastRomFolder);
+            audioProcessor.myComputerPath = xml->getStringAttribute("my_computer_path", audioProcessor.myComputerPath);
+            break;
+        }
+        juce::Thread::sleep(10);
+    }
+    settingsLock.exit();
 }

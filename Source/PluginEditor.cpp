@@ -214,18 +214,37 @@ EnsoniqSD1AudioProcessorEditor::EnsoniqSD1AudioProcessorEditor (EnsoniqSD1AudioP
     saveBadge.setMouseClickGrabsKeyboardFocus(false);
 
     saveBadge.onClick = [this]() {
-        // 1. Electronically hold down the PRESETS button via APVTS
-        if (auto* p = audioProcessor.apvts.getParameter("btn_presets")) {
-            p->setValueNotifyingHost(1.0f);
+        if (audioProcessor.mameMachine == nullptr) return;
+        
+        // If already active, cancel
+        if (audioProcessor.isSaveMacroActive.load(std::memory_order_acquire)) {
+            audioProcessor.macroBankToHold.store(-1, std::memory_order_release);  // release hold (audio thread)
+            audioProcessor.saveMacroHeldBank = -1;
+            audioProcessor.isSaveMacroActive.store(false, std::memory_order_release);
+            savePromptLabel.setVisible(false);
+            return;
         }
         
-        // 2. Arm the macro in the processor
+        // Check if VFD already shows WRITE EDIT (user pressed WRITE manually)
+        juce::String vfd = audioProcessor.getHardwareVfdText();
+        if (!vfd.containsIgnoreCase("WRITE EDIT")) {
+            // Press WRITE button momentarily (150ms)
+            if (auto* p = audioProcessor.apvts.getParameter("btn_write")) {
+                p->setValueNotifyingHost(1.0f);
+                juce::Timer::callAfterDelay(150, [this]() {
+                    if (auto* p2 = audioProcessor.apvts.getParameter("btn_write"))
+                        p2->setValueNotifyingHost(0.0f);
+                });
+            }
+        }
+        
+        // Phase 1: waiting for bank button click on the MAME panel
+        audioProcessor.saveMacroHeldBank = -1;
+        audioProcessor.macroBankToHold.store(-1, std::memory_order_release);
+        audioProcessor.detectedBankMask.store(0, std::memory_order_release);
         audioProcessor.isSaveMacroActive.store(true, std::memory_order_release);
-        
-        // 3. Show the instructional text
-        savePromptLabel.setText("Press any BANK button to save...", juce::dontSendNotification);
+        savePromptLabel.setText("Select a BANK button on the panel...", juce::dontSendNotification);
         savePromptLabel.setVisible(true);
-        
     };
     addAndMakeVisible(saveBadge);
 
@@ -315,13 +334,12 @@ EnsoniqSD1AudioProcessorEditor::EnsoniqSD1AudioProcessorEditor (EnsoniqSD1AudioP
 
 EnsoniqSD1AudioProcessorEditor::~EnsoniqSD1AudioProcessorEditor()
 {
-    // Only save session state if a song load didn't just happen
-    // (song load sets fileManagerState from XML — destructor of old editor must not overwrite it)
     if (!audioProcessor.stateJustLoaded.exchange(false, std::memory_order_acq_rel)) {
         presetBrowser.saveStateToProcessor();
         if (auto* choice = dynamic_cast<juce::AudioParameterChoice*>(audioProcessor.apvts.getParameter("layout_view"))) {
             audioProcessor.fileManagerState.viewBeforeBrowser = choice->getIndex();
         }
+        saveGlobalSettings();
     }
     stopTimer();
 }
@@ -359,11 +377,47 @@ void EnsoniqSD1AudioProcessorEditor::timerCallback()
 
     }
     
-    // SAVE MACRO - Flash label
+    // SAVE PROGRAM MACRO — 2-phase via esqpanel detection + set_button hold
     if (audioProcessor.isSaveMacroActive.load(std::memory_order_acquire) && !isSettingsVisible) {
-        // Flash 1 sec on, 1 sec off (1000 ms)
-        bool flashState = (juce::Time::getMillisecondCounter() % 1000) < 500;
-        savePromptLabel.setVisible(flashState);
+        int mask = audioProcessor.detectedBankMask.load(std::memory_order_acquire);
+        
+        if (audioProcessor.saveMacroHeldBank < 0) {
+            // Phase 1: detect first pressed bank → start holding it
+            for (int i = 0; i < 10; ++i) {
+                if (mask & (1 << i)) {
+                    audioProcessor.saveMacroHeldBank = i;
+                    audioProcessor.macroBankToHold.store(i, std::memory_order_release);
+                    savePromptLabel.setText("Bank " + juce::String(i) + " held. Click a SOFT button to save...", juce::dontSendNotification);
+                    break;
+                }
+            }
+        } else {
+            // Phase 2: bank held. Allow switching to a different bank.
+            for (int i = 0; i < 10; ++i) {
+                if (i != audioProcessor.saveMacroHeldBank && (mask & (1 << i))) {
+                    // User clicked a different bank → switch hold
+                    audioProcessor.saveMacroHeldBank = i;
+                    audioProcessor.macroBankToHold.store(i, std::memory_order_release);
+                    savePromptLabel.setText("Bank " + juce::String(i) + " held. Click a SOFT button to save...", juce::dontSendNotification);
+                    break;
+                }
+            }
+            
+            // Check VFD for "WRITING" → auto-complete
+            juce::String vfd = audioProcessor.getHardwareVfdText();
+            if (vfd.containsIgnoreCase("WRITING")) {
+                audioProcessor.macroBankToHold.store(-1, std::memory_order_release);
+                audioProcessor.saveMacroHeldBank = -1;
+                audioProcessor.isSaveMacroActive.store(false, std::memory_order_release);
+                savePromptLabel.setVisible(false);
+            }
+        }
+        
+        // Flash the prompt
+        if (audioProcessor.isSaveMacroActive.load(std::memory_order_acquire)) {
+            bool flashState = (juce::Time::getMillisecondCounter() % 1000) < 500;
+            savePromptLabel.setVisible(flashState);
+        }
     } else {
         savePromptLabel.setVisible(false);
     }
@@ -695,7 +749,7 @@ void EnsoniqSD1AudioProcessorEditor::paint (juce::Graphics& g)
     if (hasCart)   drawBadge(cartX, cartY, badgeW, badgeH, audioProcessor.loadedCartName, cartIcon.get(), juce::Colours::limegreen, 1.0f, true);
     
     float saveAlpha = saveBadge.isEnabled() ? 1.0f : 0.4f;
-    drawBadge(saveX, saveY, saveW, saveH, "Save Preset", floppyIcon.get(), juce::Colours::transparentBlack, saveAlpha, false);
+    drawBadge(saveX, saveY, saveW, saveH, "Save Program", floppyIcon.get(), juce::Colours::transparentBlack, saveAlpha, false);
 
     // ==============================================================================
     // --- 4. SETTINGS OVERLAY (Dimmed background & Settings Panel)
@@ -948,7 +1002,7 @@ void EnsoniqSD1AudioProcessorEditor::paint (juce::Graphics& g)
         if (hasCart)   drawBadge(cartX, cartY, badgeW, badgeH, audioProcessor.loadedCartName, cartIcon.get(), juce::Colours::limegreen, 1.0f, true);
         
         float saveAlpha = saveBadge.isEnabled() ? 1.0f : 0.4f;
-        drawBadge(saveX, saveY, saveW, saveH, "Save Preset", floppyIcon.get(), juce::Colours::transparentBlack, saveAlpha, false);
+        drawBadge(saveX, saveY, saveW, saveH, "Save Program", floppyIcon.get(), juce::Colours::transparentBlack, saveAlpha, false);
     }
 
     // ==============================================================================
@@ -1004,7 +1058,7 @@ void EnsoniqSD1AudioProcessorEditor::resized()
                 audioProcessor.savedWindowWidth = getWidth();
                 audioProcessor.savedWindowHeight = getHeight();
             }
-            audioProcessor.requestGlobalSave.store(true, std::memory_order_release);
+           // audioProcessor.requestGlobalSave.store(true, std::memory_order_release);
         }
 
     float scaleX = getWidth() / (float)baseW;
@@ -1186,13 +1240,9 @@ void EnsoniqSD1AudioProcessorEditor::mouseUp(const juce::MouseEvent& e) {
     if (isSettingsVisible || getWidth() <= 0 || getHeight() <= 0) return;
     audioProcessor.injectMouseUp(e.x, e.y);
     
-    // --- CLEAR SAVE PRESET MACRO ON MOUSE LIFT ---
-    if (audioProcessor.isSaveMacroActive.load(std::memory_order_acquire)) {
-        if (auto* p = audioProcessor.apvts.getParameter("btn_presets")) {
-            p->setValueNotifyingHost(0.0f);
-        }
-        audioProcessor.isSaveMacroActive.store(false, std::memory_order_release);
-    }
+    // NOTE: Save Program macro completion is handled in timerCallback via "WRITING"
+    // VFD detection — NOT on mouseUp, because mouseUp also fires when switching banks,
+    // and releasing the bank mid-write would corrupt the save.
 }
 
 void EnsoniqSD1AudioProcessorEditor::mouseDrag(const juce::MouseEvent& e) {
@@ -1256,18 +1306,41 @@ void EnsoniqSD1AudioProcessorEditor::loadMediaButtonClicked()
                         presetBrowser.restoreStateFromProcessor();
                         repaint();
                     }
-            else if (result == 2 || result == 3) {
-                juce::String filter = (result == 2) ? "*.img;*.hfe;*.dsk;*.eda" : "*.eeprom;*.rom;*.cart;*.sc32";
-                juce::String title = (result == 2) ? "Select Floppy Image" : "Select Cartridge";
-                
-                fileChooser = std::make_unique<juce::FileChooser>(title,
-                    juce::File::getSpecialLocation(juce::File::userHomeDirectory), filter);
+        else if (result == 2 || result == 3) {
+                        juce::String filter = (result == 2) ? "*.img;*.hfe;*.dsk;*.eda" : "*.eeprom;*.rom;*.cart;*.sc32";
+                        juce::String title = (result == 2) ? "Select Floppy Image" : "Select Cartridge";
+                        
+                        juce::File settingsFile = juce::File::getSpecialLocation(juce::File::userDocumentsDirectory).getChildFile("EnsoniqSD1/settings.xml");
+                        {
+                            juce::InterProcessLock settingsLock("EnsoniqSD1_Settings_Lock");
+                            if (settingsLock.enter(200)) {
+                                for (int i = 0; i < 5; ++i) {
+                                    if (auto xml = juce::XmlDocument::parse(settingsFile)) {
+                                        audioProcessor.lastMediaFolder = xml->getStringAttribute("last_media_folder", audioProcessor.lastMediaFolder);
+                                        break;
+                                    }
+                                    juce::Thread::sleep(10);
+                                }
+                                settingsLock.exit();
+                            }
+                        }
 
-                auto folderChooserFlags = juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles;
+                    juce::File initialDir;
+                    if (audioProcessor.lastMediaFolder.isNotEmpty() && juce::File(audioProcessor.lastMediaFolder).exists()) {
+                        initialDir = juce::File(audioProcessor.lastMediaFolder);
+                    } else {
+                        initialDir = juce::File::getSpecialLocation(juce::File::userHomeDirectory);
+                    }
+
+                    fileChooser = std::make_unique<juce::FileChooser>(title, initialDir, filter);
+                    auto folderChooserFlags = juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles;
 
                 fileChooser->launchAsync(folderChooserFlags, [this, result](const juce::FileChooser& fc) {
-                    auto file = fc.getResult();
-                    if (file.existsAsFile()) {
+                        auto file = fc.getResult();
+                        if (file.existsAsFile()) {
+                            audioProcessor.lastMediaFolder = file.getParentDirectory().getFullPathName();
+                            saveGlobalSettings();
+                                        
                         std::lock_guard<std::mutex> lock(audioProcessor.mediaMutex);
                         
                         if (result == 3) {
@@ -1325,6 +1398,7 @@ void EnsoniqSD1AudioProcessorEditor::toggleSettings()
     closeSettingsButton.setVisible(isSettingsVisible);
     loadMediaButton.setEnabled(!isSettingsVisible);
     saveBadge.setEnabled(!isSettingsVisible);
+    if (isSettingsVisible) resized();  // reposition all panel elements for the current window size
     repaint();
 }
 
@@ -1370,9 +1444,11 @@ void EnsoniqSD1AudioProcessorEditor::updateWindowSize()
 
 void EnsoniqSD1AudioProcessorEditor::saveGlobalSettings()
 {
-    // Use an inter-process lock to prevent file corruption when multiple plugin instances save simultaneously
+    // Inter-process lock prevents two plugin instances from doing concurrent
+    // read-modify-write on settings.xml (which can erase attributes when the
+    // parse fails and a fresh empty XmlElement is written instead).
     juce::InterProcessLock settingsLock("EnsoniqSD1_Settings_Lock");
-    if (!settingsLock.enter(2000)) return; // Could not acquire lock, abort saving to prevent corruption
+    if (!settingsLock.enter(200)) return;  // skip this save if another instance is holding the lock
 
     juce::File docsDir = juce::File::getSpecialLocation(juce::File::userDocumentsDirectory);
     juce::File settingsDir = docsDir.getChildFile("EnsoniqSD1");
@@ -1380,14 +1456,25 @@ void EnsoniqSD1AudioProcessorEditor::saveGlobalSettings()
 
     juce::File settingsFile = settingsDir.getChildFile("settings.xml");
     
-    // Read existing file to preserve states saved by other instances just milliseconds ago
     std::unique_ptr<juce::XmlElement> xml;
-    if (settingsFile.existsAsFile()) {
-        xml = juce::XmlDocument::parse(settingsFile);
+    for (int i = 0; i < 5; ++i) {
+        if (settingsFile.existsAsFile()) {
+            xml = juce::XmlDocument::parse(settingsFile);
+            if (xml != nullptr) break;
+        } else {
+            break;
+        }
+        juce::Thread::sleep(10);
     }
+    
     if (xml == nullptr || !xml->hasTagName("EnsoniqSD1Settings")) {
         xml = std::make_unique<juce::XmlElement>("EnsoniqSD1Settings");
     }
+
+    if (audioProcessor.lastBrowsedFolder.isNotEmpty()) xml->setAttribute("last_browsed_folder", audioProcessor.lastBrowsedFolder);
+    if (audioProcessor.lastMediaFolder.isNotEmpty()) xml->setAttribute("last_media_folder", audioProcessor.lastMediaFolder);
+    if (audioProcessor.lastRomFolder.isNotEmpty()) xml->setAttribute("last_rom_folder", audioProcessor.lastRomFolder);
+    if (audioProcessor.myComputerPath.isNotEmpty()) xml->setAttribute("my_computer_path", audioProcessor.myComputerPath);
 
     if (auto* p = dynamic_cast<juce::AudioParameterChoice*>(audioProcessor.apvts.getParameter("buffer_size")))
         xml->setAttribute("buffer_size", p->getIndex());
@@ -1398,23 +1485,20 @@ void EnsoniqSD1AudioProcessorEditor::saveGlobalSettings()
     xml->setAttribute("window_width", audioProcessor.savedWindowWidth);
     xml->setAttribute("window_height", audioProcessor.savedWindowHeight);
     
-    // Save File Manager dedicated dimensions
     xml->setAttribute("fm_window_width", audioProcessor.fileManagerState.fmWindowWidth);
     xml->setAttribute("fm_window_height", audioProcessor.fileManagerState.fmWindowHeight);
-    
-    // Save first-launch UX state so it never shows again
     xml->setAttribute("welcome_shown", !audioProcessor.showWelcomeMessage.load(std::memory_order_acquire));
-
     xml->setAttribute("rom_path", audioProcessor.customRomPath);
     
-    // Clean old bookmarks first to prevent accumulation
     for (int i = 0; i < 10; ++i) xml->removeAttribute("bookmark_" + juce::String(i));
     
-    // Save current folder bookmarks
     for (int i = 0; i < audioProcessor.bookmarkFolders.size() && i < 10; ++i)
         xml->setAttribute("bookmark_" + juce::String(i), audioProcessor.bookmarkFolders[i]);
     
-    xml->writeTo(settingsFile);
+    juce::File tempFile = settingsFile.getSiblingFile("settings.xml.tmp");
+    if (xml->writeTo(tempFile)) {
+        tempFile.moveFileTo(settingsFile); 
+    }
     
     settingsLock.exit();
 }
@@ -1426,9 +1510,14 @@ void EnsoniqSD1AudioProcessorEditor::flushFileManagerState()
 
 void EnsoniqSD1AudioProcessorEditor::locateRomButtonClicked()
 {
+    
+    juce::File initialDir = audioProcessor.lastRomFolder.isNotEmpty()
+            ? juce::File(audioProcessor.lastRomFolder)
+            : juce::File::getSpecialLocation(juce::File::userHomeDirectory);
+    
     romChooser = std::make_unique<juce::FileChooser>("Select ROM .zip files, or the folder containing the .bin files",
-        juce::File::getSpecialLocation(juce::File::userHomeDirectory),
-        ""); // Empty wildcard to allow directories more easily on all OSs
+            initialDir,
+            "");
 
     auto folderChooserFlags = juce::FileBrowserComponent::openMode |
                               juce::FileBrowserComponent::canSelectFiles |
@@ -1440,6 +1529,11 @@ void EnsoniqSD1AudioProcessorEditor::locateRomButtonClicked()
         bool show7zWarning = false;
         
         if (!files.isEmpty()) {
+            
+            // SAVE: Update the ROM folder in the XML
+            audioProcessor.lastRomFolder = files[0].getParentDirectory().getFullPathName();
+            saveGlobalSettings();
+            
             for (const auto& file : files) {
                 if (file.exists()) {
                     if (file.isDirectory()) {
