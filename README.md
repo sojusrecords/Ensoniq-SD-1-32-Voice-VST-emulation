@@ -204,7 +204,7 @@ You can import all Ensoniq file types: 1/6/30/60 program files and banks, 1/10/2
 <details>
   <summary>How can I save my Programs to INT RAM?</summary>
 
-  - We added a macro button ```SAVE PRESET``` so users without a MIDI controller can also save presets.
+  - We added a macro button ```SAVE PROGRAM``` so users without a MIDI controller can also save presets.
 
   - You can also assign the buttons to a physical or virtual MIDI controller. With this workaround you can save the preset as you can hold down any buttons simultaneous.
 
@@ -294,9 +294,13 @@ Because the MAME emulator runs asynchronously on its own background thread, we n
 
 - [SoHu (PRC)](https://www.sohu.com/a/1000002551_455142)
 
+- [s1forum (ROK)](https://s1forum.kr/news/sojus-records%EC%97%90%EC%84%9C-ensoniq-sd-132-%EC%8B%A0%EC%8A%A4-%EC%97%90%EB%AE%AC%EB%A0%88%EC%9D%B4%EC%85%98-%EB%AC%B4%EB%A3%8C-%ED%94%8C%EB%9F%AC%EA%B7%B8%EC%9D%B8/)
+
+- [OneMusic (HU)](https://onemusic.hu/articles/sojus-records-ensoniq-sd-1-emulator-uj-eletre-kel-a-legendas-szintetizator)
+
 - [AudioPluginsForFree](https://www.audiopluginsforfree.com/ensoniq-sd-1-vst/)
 
-- [SoundShock](https://soundshockaudio.com/ensoniq-sd-1-32-vst-emulation/)
+- [ProducerGang](https://producergang.com/sojus-records-releases-a-free-open-source-ensoniq-sd-1-32-vst-emulation/)
 
 # License and credits
 
