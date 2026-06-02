@@ -202,11 +202,7 @@ You can import all Ensoniq file types: 1/6/30/60 program files and banks, 1/10/2
 </details>
 
 <details>
-  <summary>How can I save my Presets (not Programs!) to INT RAM?</summary>
-
-  - A Preset is a combination of three Programs and an effects set-up which can be instantly recalled for use in performance. Presets are handy "performance memories" which allow you to create and save sound combinations, splits, layers, patch select variations, etc.
-
-  - Saving on the real hardware requires holding down ```PRESETS``` button and pressing a ```BANK (0-9)``` button.
+  <summary>How can I save my Programs to INT RAM?</summary>
 
   - We added a macro button ```SAVE PRESET``` so users without a MIDI controller can also save presets.
 
@@ -235,6 +231,8 @@ You can import all Ensoniq file types: 1/6/30/60 program files and banks, 1/10/2
 <details>
   <summary>How do I save my stuff to Floppy Disk Images (.IMG, .HFE, .DSK, .EDA)?</summary>
 
+   - You can export any Ensoniq file from floppy images with the file manager, you don't have to attach it to SD-1. 
+
    - Here you can find an [SD-1 formatted empty hfe disk image (1.44MB).](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/blob/main/SD-1-EMPTY-DISK.hfe)
 
    - Attach the disk image using the ```Preset/File Manager``` button and ```Insert Floppy Image```. Press ```STORAGE```, then select ```DISK```. Press ```SAVE```. The display will show the Disk SAVE page with the ```File Type``` selected. Move the data entry slider or push up/down buttons to select save type. Press ```*YES*```. You can convert SYS-EX data to [disk images with this tool](https://github.com/joemcmahon/sd1diskutil).
@@ -242,7 +240,7 @@ You can import all Ensoniq file types: 1/6/30/60 program files and banks, 1/10/2
 </details>
 
 <details>
-  <summary>How can I load my Cartridges (.EEPROM, .ROM, .CART, .SC32)?</summary>
+  <summary>How can I load/save my Cartridges (.EEPROM, .ROM, .CART, .SC32)?</summary>
 
    - Open ```Preset/File Manager``` and browse your folder. Open the cartridge file and play the programs/presets with MIDI keyboard instantly. You can import all Ensoniq file types: 1/6/30/60 program files and banks, 1/10/20 preset files and banks, 1/30 and 60 sequences. Note for sequences: you must load the sequencer program first, [Read the FAQ for more info!](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation#faq)
 
