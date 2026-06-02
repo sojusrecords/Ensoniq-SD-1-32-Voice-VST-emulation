@@ -59,7 +59,7 @@ Everything. Check the original manual here: [SD-1 Manual at Polynominal](https:/
 
 - **NEW: macOS AU first public build for SELECTED DAWS ONLY!** Please note that the AU plugin is ONLY for Logic, GarageBand, MainStage, Ableton Live, Fender Studio Pro (Studio One) and Reaper. Any other DAW must use the VST3 version! Tested on Logic 11, Fender Studio Pro 8, Reaper 7, Ableton Live 12.
 
-- **NEW: Preset saving macro button for users without MIDI controllers** [Read the FAQ for more info!](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation#faq)
+- **NEW: Program saving macro button for users without MIDI controllers** [Read the FAQ for more info!](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation#faq)
 
 - Windows 10+ 64 bit VST3 AVX1/AVX2, Mac Intel+ARM Universal Binary VST3 and AU, Linux VST3 Generic/AVX2
 
