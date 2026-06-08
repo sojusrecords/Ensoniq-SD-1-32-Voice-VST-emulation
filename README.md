@@ -22,17 +22,17 @@ We are Sojus Records, one of the longest-running netlabels still active. We are 
 
 **IMPORTANT - ROM Files Required!** [Read this section for more info!](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation#rom-installation)
 
-  - [Win x64 VST3 W10+](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v1.0.0/EnsoniqSD1-v.1.0.0-winVST3.7z)
+  - [Win x64 VST3 W10+](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v1.0.1/EnsoniqSD1-v.1.0.1-winVST3.7z)
 
-  - [Win x64 VST3 oldskool AVX1 for pre-Haswell machines](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v1.0.0/EnsoniqSD1-v.1.0.0-winVST3-AVX1.7z)
+  - [Win x64 VST3 oldskool AVX1 for pre-Haswell machines](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v1.0.1/EnsoniqSD1-v.1.0.1-winVST3-AVX1.7z)
 
-  - [macOS Universal Binary VST3 macOS 11 or newer](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v1.0.0/EnsoniqSD1-v.1.0.0-macVST3.7z) [Read this section for more info!](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation#known-limitations)
+  - [macOS Universal Binary VST3 macOS 11 or newer](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v1.0.1/EnsoniqSD1-v.1.0.1-macVST3.7z) [Read this section for more info!](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation#known-limitations)
 
-  - [macOS Universal Binary AU SELECTED DAWS ONLY macOS 11 or newer](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v1.0.0/EnsoniqSD1-v.1.0.0-macAU.7z) [Read this section for more info!](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation#known-limitations)
+  - [macOS Universal Binary AU SELECTED DAWS ONLY macOS 11 or newer](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v1.0.1/EnsoniqSD1-v.1.0.1-macAU.7z) [Read this section for more info!](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation#known-limitations)
 
-  - [Linux VST3 AVX2](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v1.0.0/EnsoniqSD1-v.1.0.0-LINUX-AVX2.7z)
+  - [Linux VST3 AVX2](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v1.0.1/EnsoniqSD1-v.1.0.1-LINUX-AVX2.7z)
 
-  - [Linux VST3 Generic for oldskool CPUs](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v1.0.0/EnsoniqSD1-v.1.0.0-LINUX-Generic.7z)
+  - [Linux VST3 Generic for oldskool CPUs](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v1.0.1/EnsoniqSD1-v.1.0.1-LINUX-Generic.7z)
   
 # What's working?
 Everything. Check the original manual here: [SD-1 Manual at Polynominal](https://www.polynominal.com/ensoniq-sd1/ensoniq-sd1-manual.pdf)
