@@ -260,7 +260,7 @@ You can import all Ensoniq file types: 1/6/30/60 program files and banks, 1/10/2
 <details>
   <summary>Audio Settings: Why can't I set the Buffer to 0?</summary>
 
-This plugin runs a cycle-accurate emulation of the original Motorola 68000 CPU, Ensoniq OTTO (ES-5506) and Ensoniq ESP (ES5510) and other chips. On the real physical SD-1, the time it takes from pressing a key to hearing a sound is approximately 24.4 milliseconds.
+This plugin runs a cycle-accurate emulation of the original Motorola 68000 CPU, Ensoniq OTIS (ES-5505) and Ensoniq ESP (ES5510) and other chips. On the real physical SD-1, the time it takes from pressing a key to hearing a sound is approximately 24.4 milliseconds.
 
 Because the MAME emulator runs asynchronously on its own background thread, we need a tiny "safety pool" (the plugin buffer) to ensure the audio stream never drops out.
 
