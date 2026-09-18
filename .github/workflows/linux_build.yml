@@ -108,13 +108,27 @@ jobs:
              libharfbuzz-dev libpng-dev libjpeg-dev libpulse-dev libsdl2-dev \
              qtbase5-dev qt5-qmake qtbase5-dev-tools zlib1g-dev
 
-    - name: Verify qmake6 (MAME 0.288 requires Qt6, not Qt5)
+    - name: Provide a qmake6 stub (MAME probes Qt headers even with USE_QTDEBUG=0)
       run: |
-        echo "which qmake6: $(which qmake6 || echo 'NOT FOUND')"
-        echo "which qmake : $(which qmake  || echo 'NOT FOUND')"
-        dpkg -l | grep -i "qt6-base-dev-tools" || echo "qt6-base-dev-tools NOT installed"
-        # Not fatal: the build passes USE_QTDEBUG=0, so qmake6 should not be needed
-        # at all once the project files are regenerated without the Qt debugger.
+        # scripts/src/osd/sdl_cfg.lua ALWAYS adds this to every SDL OSD project on
+        # Linux, regardless of USE_QTDEBUG:
+        #     -I$(shell qmake6 -query QT_INSTALL_HEADERS)
+        # It is evaluated at COMPILE time for every object. With qmake6 absent the
+        # shell call returns an EMPTY string, leaving a bare "-I" on the command
+        # line, and a bare -I swallows the NEXT argument, which is -std=c++20.
+        # Losing C++20 is what produced the bogus "char8_t was not declared"
+        # errors in the stock language.h.
+        #
+        # We do not build the Qt debugger, so the probe only has to return a valid
+        # path. A tiny stub pointing at an empty directory is enough, and avoids
+        # depending on any Qt package being installed.
+        sudo mkdir -p /usr/local/share/qmake6-stub/include
+        echo '#!/bin/sh' | sudo tee /usr/local/bin/qmake6 > /dev/null
+        echo 'echo /usr/local/share/qmake6-stub/include' | sudo tee -a /usr/local/bin/qmake6 > /dev/null
+        sudo chmod +x /usr/local/bin/qmake6
+        echo "qmake6 -> $(which qmake6)"
+        echo "QT_INSTALL_HEADERS -> $(qmake6 -query QT_INSTALL_HEADERS)"
+
 
     - name: Restore SDL3 cache
       uses: actions/cache/restore@v4
@@ -164,7 +178,6 @@ jobs:
         copy_if_changed Mame_Patches/esq16_dsk.cpp mame/src/lib/formats/esq16_dsk.cpp
         copy_if_changed Mame_Patches/es5510.cpp mame/src/devices/cpu/es5510/es5510.cpp
         copy_if_changed Mame_Patches/main.h mame/src/emu/main.h
-        copy_if_changed Mame_Patches/render.cpp mame/src/emu/render.cpp
         copy_if_changed Mame_Patches/emufwd.h mame/src/emu/emufwd.h
         copy_if_changed Mame_Patches/machine.h mame/src/emu/machine.h
         copy_if_changed Mame_Patches/video.cpp mame/src/emu/video.cpp
@@ -199,17 +212,18 @@ jobs:
     - name: Compile MAME sd132 (Generic) — incremental, picks up changed files
       run: |
         cd mame
-        # Force a clean project regeneration. A cached mame/ directory can still
-        # contain makefiles generated WITH the Qt debugger enabled (MAME defaults
-        # USE_QTDEBUG=1 on Linux -- see scripts/src/osd/modules.lua). Those
-        # makefiles embed "-I$(shell qmake6 -query QT_INSTALL_HEADERS)", which is
-        # evaluated at COMPILE time for every osd_sdl3 object and breaks the build
-        # when qmake6 is absent. Removing the whole generated-projects tree
-        # guarantees genie regenerates them with USE_QTDEBUG=0.
+        # MAME quirk (scripts/src/osd/sdl_cfg.lua): on Linux it ALWAYS adds
+        #   -I$(shell qmake6 -query QT_INSTALL_HEADERS)
+        # to every SDL OSD project, regardless of USE_QTDEBUG. That $(shell ...)
+        # runs at COMPILE time for every object, so a missing qmake6 floods the
+        # log with "qmake6: No such file or directory" and leaves osd_sdl3 without
+        # its proper flags (hence the bogus char8_t/C++20 errors in language.h).
+        # A qmake6 stub is installed in an earlier step so this probe returns a
+        # valid path instead of an empty one (see that step for the reason).
         rm -rf build/projects
         make SUBTARGET=sd132 SOURCES=src/mame/ensoniq/esq5505.cpp \
-             OSD=sdl3 USE_QTDEBUG=0 REGENIE=1 NO_USE_BGFX=1 ARCHOPTS=-fPIC \
-             -j$(nproc)
+             OSD=sdl3 USE_QTDEBUG=0 REGENIE=1 NO_USE_BGFX=1 \
+             ARCHOPTS=-fPIC -j$(nproc)
 
     - name: Save MAME cache
       if: steps.cache-mame.outputs.cache-hit != 'true'
@@ -287,13 +301,27 @@ jobs:
              libharfbuzz-dev libpng-dev libjpeg-dev libpulse-dev libsdl2-dev \
              qtbase5-dev qt5-qmake qtbase5-dev-tools zlib1g-dev
 
-    - name: Verify qmake6 (MAME 0.288 requires Qt6, not Qt5)
+    - name: Provide a qmake6 stub (MAME probes Qt headers even with USE_QTDEBUG=0)
       run: |
-        echo "which qmake6: $(which qmake6 || echo 'NOT FOUND')"
-        echo "which qmake : $(which qmake  || echo 'NOT FOUND')"
-        dpkg -l | grep -i "qt6-base-dev-tools" || echo "qt6-base-dev-tools NOT installed"
-        # Not fatal: the build passes USE_QTDEBUG=0, so qmake6 should not be needed
-        # at all once the project files are regenerated without the Qt debugger.
+        # scripts/src/osd/sdl_cfg.lua ALWAYS adds this to every SDL OSD project on
+        # Linux, regardless of USE_QTDEBUG:
+        #     -I$(shell qmake6 -query QT_INSTALL_HEADERS)
+        # It is evaluated at COMPILE time for every object. With qmake6 absent the
+        # shell call returns an EMPTY string, leaving a bare "-I" on the command
+        # line, and a bare -I swallows the NEXT argument, which is -std=c++20.
+        # Losing C++20 is what produced the bogus "char8_t was not declared"
+        # errors in the stock language.h.
+        #
+        # We do not build the Qt debugger, so the probe only has to return a valid
+        # path. A tiny stub pointing at an empty directory is enough, and avoids
+        # depending on any Qt package being installed.
+        sudo mkdir -p /usr/local/share/qmake6-stub/include
+        echo '#!/bin/sh' | sudo tee /usr/local/bin/qmake6 > /dev/null
+        echo 'echo /usr/local/share/qmake6-stub/include' | sudo tee -a /usr/local/bin/qmake6 > /dev/null
+        sudo chmod +x /usr/local/bin/qmake6
+        echo "qmake6 -> $(which qmake6)"
+        echo "QT_INSTALL_HEADERS -> $(qmake6 -query QT_INSTALL_HEADERS)"
+
 
     - name: Restore SDL3 cache
       uses: actions/cache/restore@v4
@@ -343,7 +371,6 @@ jobs:
         copy_if_changed Mame_Patches/esq16_dsk.cpp mame/src/lib/formats/esq16_dsk.cpp
         copy_if_changed Mame_Patches/es5510.cpp mame/src/devices/cpu/es5510/es5510.cpp
         copy_if_changed Mame_Patches/main.h mame/src/emu/main.h
-        copy_if_changed Mame_Patches/render.cpp mame/src/emu/render.cpp
         copy_if_changed Mame_Patches/emufwd.h mame/src/emu/emufwd.h
         copy_if_changed Mame_Patches/machine.h mame/src/emu/machine.h
         copy_if_changed Mame_Patches/video.cpp mame/src/emu/video.cpp
@@ -378,17 +405,18 @@ jobs:
     - name: Compile MAME sd132 (AVX2) — incremental, picks up changed files
       run: |
         cd mame
-        # Force a clean project regeneration. A cached mame/ directory can still
-        # contain makefiles generated WITH the Qt debugger enabled (MAME defaults
-        # USE_QTDEBUG=1 on Linux -- see scripts/src/osd/modules.lua). Those
-        # makefiles embed "-I$(shell qmake6 -query QT_INSTALL_HEADERS)", which is
-        # evaluated at COMPILE time for every osd_sdl3 object and breaks the build
-        # when qmake6 is absent. Removing the whole generated-projects tree
-        # guarantees genie regenerates them with USE_QTDEBUG=0.
+        # MAME quirk (scripts/src/osd/sdl_cfg.lua): on Linux it ALWAYS adds
+        #   -I$(shell qmake6 -query QT_INSTALL_HEADERS)
+        # to every SDL OSD project, regardless of USE_QTDEBUG. That $(shell ...)
+        # runs at COMPILE time for every object, so a missing qmake6 floods the
+        # log with "qmake6: No such file or directory" and leaves osd_sdl3 without
+        # its proper flags (hence the bogus char8_t/C++20 errors in language.h).
+        # A qmake6 stub is installed in an earlier step so this probe returns a
+        # valid path instead of an empty one (see that step for the reason).
         rm -rf build/projects
         make SUBTARGET=sd132 SOURCES=src/mame/ensoniq/esq5505.cpp \
-             OSD=sdl3 USE_QTDEBUG=0 REGENIE=1 NO_USE_BGFX=1 ARCHOPTS=-fPIC \
-             OPT_FLAGS="-mavx2" -j$(nproc)
+             OSD=sdl3 USE_QTDEBUG=0 REGENIE=1 NO_USE_BGFX=1 \
+             ARCHOPTS=-fPIC OPT_FLAGS="-mavx2" -j$(nproc)
 
     - name: Save MAME cache (AVX2)
       if: steps.cache-mame.outputs.cache-hit != 'true'

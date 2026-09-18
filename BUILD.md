@@ -34,8 +34,6 @@ We had to make specific modifications to the MAME core to expose certain interna
 
    - main.h -> Overwrite in /src/emu/main.h
 
-   - render.cpp -> Overwrite in /src/emu/render.cpp
-
    - emufwd.h -> Overwrite in /src/emu/emufwd.h
 
    - machine.h -> Overwrite in /src/emu/machine.h
