@@ -125,59 +125,67 @@ jobs:
       uses: actions/cache/restore@v4
       with:
         path: mame
-        key: mame-0287-pic-Generic-${{ hashFiles('Mame_Patches/**') }}
+        key: mame-0288-pic-Generic-${{ hashFiles('Mame_Patches/**') }}
 
-    - name: Clone MAME v0.287 (only if not cached)
+    - name: Clone MAME v0.288 (only if not cached)
       if: steps.cache-mame.outputs.cache-hit != 'true'
       run: |
-        git clone --depth 1 --branch mame0287 \
+        git clone --depth 1 --branch mame0288 \
           https://github.com/mamedev/mame.git mame
 
-    - name: Clone JUCE 8.0.13
+    - name: Clone JUCE 8.0.15
       run: |
-        git clone --depth 1 --branch 8.0.13 \
+        git clone --depth 1 --branch 8.0.15 \
           https://github.com/juce-framework/JUCE.git juce
 
     - name: Apply MAME patches (always — make detects changed files via timestamp)
       run: |
-        cp Mame_Patches/esqpanel.h mame/src/mame/ensoniq/esqpanel.h
-        cp Mame_Patches/esq5505.cpp mame/src/mame/ensoniq/esq5505.cpp
-        cp Mame_Patches/sd132.lay mame/src/mame/layout/sd132.lay
-        cp Mame_Patches/esq16_dsk.cpp mame/src/lib/formats/esq16_dsk.cpp
-        cp Mame_Patches/main.h mame/src/emu/main.h
-        cp Mame_Patches/render.cpp mame/src/emu/render.cpp
-        cp Mame_Patches/emufwd.h mame/src/emu/emufwd.h
-        cp Mame_Patches/machine.h mame/src/emu/machine.h
-        cp Mame_Patches/video.cpp mame/src/emu/video.cpp
-        cp Mame_Patches/emu.h mame/src/emu/emu.h
-        cp Mame_Patches/sound.cpp mame/src/emu/sound.cpp
-        cp Mame_Patches/machine.cpp mame/src/emu/machine.cpp
-        cp Mame_Patches/rendlay.cpp mame/src/emu/rendlay.cpp
-        cp Mame_Patches/debugcpu.cpp mame/src/emu/debug/debugcpu.cpp
-        cp Mame_Patches/cheat.cpp mame/src/frontend/mame/cheat.cpp
-        cp Mame_Patches/clifront.cpp mame/src/frontend/mame/clifront.cpp
-        cp Mame_Patches/luaengine.cpp mame/src/frontend/mame/luaengine.cpp
-        cp Mame_Patches/luaengine.h mame/src/frontend/mame/luaengine.h
-        cp Mame_Patches/luaengine_render.cpp mame/src/frontend/mame/luaengine_render.cpp
-        cp Mame_Patches/mame.cpp mame/src/frontend/mame/mame.cpp
-        cp Mame_Patches/mame.h mame/src/frontend/mame/mame.h
-        cp Mame_Patches/ui.cpp mame/src/frontend/mame/ui/ui.cpp
-        cp Mame_Patches/pluginopt.cpp mame/src/frontend/mame/ui/pluginopt.cpp
-        cp Mame_Patches/selgame.cpp mame/src/frontend/mame/ui/selgame.cpp
-        cp Mame_Patches/mainmenu.cpp mame/src/frontend/mame/ui/mainmenu.cpp
-        cp Mame_Patches/utils.cpp mame/src/frontend/mame/ui/utils.cpp
-        cp Mame_Patches/datmenu.cpp mame/src/frontend/mame/ui/datmenu.cpp
-        cp Mame_Patches/devopt.cpp mame/src/frontend/mame/ui/devopt.cpp
-        cp Mame_Patches/viewgfx.cpp mame/src/frontend/mame/ui/viewgfx.cpp
-        cp Mame_Patches/cheatopt.cpp mame/src/frontend/mame/ui/cheatopt.cpp
-        cp Mame_Patches/selmenu.cpp mame/src/frontend/mame/ui/selmenu.cpp
-        cp Mame_Patches/selsoft.cpp mame/src/frontend/mame/ui/selsoft.cpp
-        cp Mame_Patches/miscmenu.cpp mame/src/frontend/mame/ui/miscmenu.cpp
-        cp Mame_Patches/info.cpp mame/src/frontend/mame/ui/info.cpp
-        cp Mame_Patches/simpleselgame.cpp mame/src/frontend/mame/ui/simpleselgame.cpp
-        cp Mame_Patches/main.cpp mame/src/zexall/main.cpp
-        cp Mame_Patches/ioport.h mame/src/emu/ioport.h
-        cp Mame_Patches/language.h mame/src/lib/util/language.h
+        # Only overwrite when the content actually differs, so that on a cache
+        # hit make has nothing to rebuild.
+        copy_if_changed() {
+          if [ ! -f "$2" ] || ! cmp -s "$1" "$2"; then
+            cp "$1" "$2"
+            echo "  updated: $2"
+          fi
+        }
+        copy_if_changed Mame_Patches/esqpanel.h mame/src/mame/ensoniq/esqpanel.h
+        copy_if_changed Mame_Patches/esqpanel.cpp mame/src/mame/ensoniq/esqpanel.cpp
+        copy_if_changed Mame_Patches/esq5505.cpp mame/src/mame/ensoniq/esq5505.cpp
+        copy_if_changed Mame_Patches/sd132.lay mame/src/mame/layout/sd132.lay
+        copy_if_changed Mame_Patches/esq16_dsk.cpp mame/src/lib/formats/esq16_dsk.cpp
+        copy_if_changed Mame_Patches/es5510.cpp mame/src/devices/cpu/es5510/es5510.cpp
+        copy_if_changed Mame_Patches/main.h mame/src/emu/main.h
+        copy_if_changed Mame_Patches/render.cpp mame/src/emu/render.cpp
+        copy_if_changed Mame_Patches/emufwd.h mame/src/emu/emufwd.h
+        copy_if_changed Mame_Patches/machine.h mame/src/emu/machine.h
+        copy_if_changed Mame_Patches/video.cpp mame/src/emu/video.cpp
+        copy_if_changed Mame_Patches/emu.h mame/src/emu/emu.h
+        copy_if_changed Mame_Patches/sound.cpp mame/src/emu/sound.cpp
+        copy_if_changed Mame_Patches/machine.cpp mame/src/emu/machine.cpp
+        copy_if_changed Mame_Patches/rendlay.cpp mame/src/emu/rendlay.cpp
+        copy_if_changed Mame_Patches/debugcpu.cpp mame/src/emu/debug/debugcpu.cpp
+        copy_if_changed Mame_Patches/cheat.cpp mame/src/frontend/mame/cheat.cpp
+        copy_if_changed Mame_Patches/clifront.cpp mame/src/frontend/mame/clifront.cpp
+        copy_if_changed Mame_Patches/luaengine.cpp mame/src/frontend/mame/luaengine.cpp
+        copy_if_changed Mame_Patches/luaengine.h mame/src/frontend/mame/luaengine.h
+        copy_if_changed Mame_Patches/luaengine_render.cpp mame/src/frontend/mame/luaengine_render.cpp
+        copy_if_changed Mame_Patches/mame.cpp mame/src/frontend/mame/mame.cpp
+        copy_if_changed Mame_Patches/mame.h mame/src/frontend/mame/mame.h
+        copy_if_changed Mame_Patches/ui.cpp mame/src/frontend/mame/ui/ui.cpp
+        copy_if_changed Mame_Patches/pluginopt.cpp mame/src/frontend/mame/ui/pluginopt.cpp
+        copy_if_changed Mame_Patches/selgame.cpp mame/src/frontend/mame/ui/selgame.cpp
+        copy_if_changed Mame_Patches/mainmenu.cpp mame/src/frontend/mame/ui/mainmenu.cpp
+        copy_if_changed Mame_Patches/utils.cpp mame/src/frontend/mame/ui/utils.cpp
+        copy_if_changed Mame_Patches/datmenu.cpp mame/src/frontend/mame/ui/datmenu.cpp
+        copy_if_changed Mame_Patches/devopt.cpp mame/src/frontend/mame/ui/devopt.cpp
+        copy_if_changed Mame_Patches/viewgfx.cpp mame/src/frontend/mame/ui/viewgfx.cpp
+        copy_if_changed Mame_Patches/cheatopt.cpp mame/src/frontend/mame/ui/cheatopt.cpp
+        copy_if_changed Mame_Patches/selmenu.cpp mame/src/frontend/mame/ui/selmenu.cpp
+        copy_if_changed Mame_Patches/selsoft.cpp mame/src/frontend/mame/ui/selsoft.cpp
+        copy_if_changed Mame_Patches/miscmenu.cpp mame/src/frontend/mame/ui/miscmenu.cpp
+        copy_if_changed Mame_Patches/info.cpp mame/src/frontend/mame/ui/info.cpp
+        copy_if_changed Mame_Patches/simpleselgame.cpp mame/src/frontend/mame/ui/simpleselgame.cpp
+        copy_if_changed Mame_Patches/main.cpp mame/src/zexall/main.cpp
 
     - name: Compile MAME sd132 (Generic) — incremental, picks up changed files
       run: |
@@ -191,7 +199,7 @@ jobs:
       uses: actions/cache/save@v4
       with:
         path: mame
-        key: mame-0287-pic-Generic-${{ hashFiles('Mame_Patches/**') }}
+        key: mame-0288-pic-Generic-${{ hashFiles('Mame_Patches/**') }}
 
     - name: Build Projucer
       run: |
@@ -279,59 +287,67 @@ jobs:
       uses: actions/cache/restore@v4
       with:
         path: mame
-        key: mame-0287-pic-AVX2-${{ hashFiles('Mame_Patches/**') }}
+        key: mame-0288-pic-AVX2-${{ hashFiles('Mame_Patches/**') }}
 
-    - name: Clone MAME v0.287 (only if not cached)
+    - name: Clone MAME v0.288 (only if not cached)
       if: steps.cache-mame.outputs.cache-hit != 'true'
       run: |
-        git clone --depth 1 --branch mame0287 \
+        git clone --depth 1 --branch mame0288 \
           https://github.com/mamedev/mame.git mame
 
-    - name: Clone JUCE 8.0.13
+    - name: Clone JUCE 8.0.15
       run: |
-        git clone --depth 1 --branch 8.0.13 \
+        git clone --depth 1 --branch 8.0.15 \
           https://github.com/juce-framework/JUCE.git juce
 
     - name: Apply MAME patches (always — make detects changed files via timestamp)
       run: |
-        cp Mame_Patches/esqpanel.h mame/src/mame/ensoniq/esqpanel.h
-        cp Mame_Patches/esq5505.cpp mame/src/mame/ensoniq/esq5505.cpp
-        cp Mame_Patches/sd132.lay mame/src/mame/layout/sd132.lay
-        cp Mame_Patches/esq16_dsk.cpp mame/src/lib/formats/esq16_dsk.cpp
-        cp Mame_Patches/main.h mame/src/emu/main.h
-        cp Mame_Patches/render.cpp mame/src/emu/render.cpp
-        cp Mame_Patches/emufwd.h mame/src/emu/emufwd.h
-        cp Mame_Patches/machine.h mame/src/emu/machine.h
-        cp Mame_Patches/video.cpp mame/src/emu/video.cpp
-        cp Mame_Patches/emu.h mame/src/emu/emu.h
-        cp Mame_Patches/sound.cpp mame/src/emu/sound.cpp
-        cp Mame_Patches/machine.cpp mame/src/emu/machine.cpp
-        cp Mame_Patches/rendlay.cpp mame/src/emu/rendlay.cpp
-        cp Mame_Patches/debugcpu.cpp mame/src/emu/debug/debugcpu.cpp
-        cp Mame_Patches/cheat.cpp mame/src/frontend/mame/cheat.cpp
-        cp Mame_Patches/clifront.cpp mame/src/frontend/mame/clifront.cpp
-        cp Mame_Patches/luaengine.cpp mame/src/frontend/mame/luaengine.cpp
-        cp Mame_Patches/luaengine.h mame/src/frontend/mame/luaengine.h
-        cp Mame_Patches/luaengine_render.cpp mame/src/frontend/mame/luaengine_render.cpp
-        cp Mame_Patches/mame.cpp mame/src/frontend/mame/mame.cpp
-        cp Mame_Patches/mame.h mame/src/frontend/mame/mame.h
-        cp Mame_Patches/ui.cpp mame/src/frontend/mame/ui/ui.cpp
-        cp Mame_Patches/pluginopt.cpp mame/src/frontend/mame/ui/pluginopt.cpp
-        cp Mame_Patches/selgame.cpp mame/src/frontend/mame/ui/selgame.cpp
-        cp Mame_Patches/mainmenu.cpp mame/src/frontend/mame/ui/mainmenu.cpp
-        cp Mame_Patches/utils.cpp mame/src/frontend/mame/ui/utils.cpp
-        cp Mame_Patches/datmenu.cpp mame/src/frontend/mame/ui/datmenu.cpp
-        cp Mame_Patches/devopt.cpp mame/src/frontend/mame/ui/devopt.cpp
-        cp Mame_Patches/viewgfx.cpp mame/src/frontend/mame/ui/viewgfx.cpp
-        cp Mame_Patches/cheatopt.cpp mame/src/frontend/mame/ui/cheatopt.cpp
-        cp Mame_Patches/selmenu.cpp mame/src/frontend/mame/ui/selmenu.cpp
-        cp Mame_Patches/selsoft.cpp mame/src/frontend/mame/ui/selsoft.cpp
-        cp Mame_Patches/miscmenu.cpp mame/src/frontend/mame/ui/miscmenu.cpp
-        cp Mame_Patches/info.cpp mame/src/frontend/mame/ui/info.cpp
-        cp Mame_Patches/simpleselgame.cpp mame/src/frontend/mame/ui/simpleselgame.cpp
-        cp Mame_Patches/main.cpp mame/src/zexall/main.cpp
-        cp Mame_Patches/ioport.h mame/src/emu/ioport.h
-        cp Mame_Patches/language.h mame/src/lib/util/language.h
+        # Only overwrite when the content actually differs, so that on a cache
+        # hit make has nothing to rebuild.
+        copy_if_changed() {
+          if [ ! -f "$2" ] || ! cmp -s "$1" "$2"; then
+            cp "$1" "$2"
+            echo "  updated: $2"
+          fi
+        }
+        copy_if_changed Mame_Patches/esqpanel.h mame/src/mame/ensoniq/esqpanel.h
+        copy_if_changed Mame_Patches/esqpanel.cpp mame/src/mame/ensoniq/esqpanel.cpp
+        copy_if_changed Mame_Patches/esq5505.cpp mame/src/mame/ensoniq/esq5505.cpp
+        copy_if_changed Mame_Patches/sd132.lay mame/src/mame/layout/sd132.lay
+        copy_if_changed Mame_Patches/esq16_dsk.cpp mame/src/lib/formats/esq16_dsk.cpp
+        copy_if_changed Mame_Patches/es5510.cpp mame/src/devices/cpu/es5510/es5510.cpp
+        copy_if_changed Mame_Patches/main.h mame/src/emu/main.h
+        copy_if_changed Mame_Patches/render.cpp mame/src/emu/render.cpp
+        copy_if_changed Mame_Patches/emufwd.h mame/src/emu/emufwd.h
+        copy_if_changed Mame_Patches/machine.h mame/src/emu/machine.h
+        copy_if_changed Mame_Patches/video.cpp mame/src/emu/video.cpp
+        copy_if_changed Mame_Patches/emu.h mame/src/emu/emu.h
+        copy_if_changed Mame_Patches/sound.cpp mame/src/emu/sound.cpp
+        copy_if_changed Mame_Patches/machine.cpp mame/src/emu/machine.cpp
+        copy_if_changed Mame_Patches/rendlay.cpp mame/src/emu/rendlay.cpp
+        copy_if_changed Mame_Patches/debugcpu.cpp mame/src/emu/debug/debugcpu.cpp
+        copy_if_changed Mame_Patches/cheat.cpp mame/src/frontend/mame/cheat.cpp
+        copy_if_changed Mame_Patches/clifront.cpp mame/src/frontend/mame/clifront.cpp
+        copy_if_changed Mame_Patches/luaengine.cpp mame/src/frontend/mame/luaengine.cpp
+        copy_if_changed Mame_Patches/luaengine.h mame/src/frontend/mame/luaengine.h
+        copy_if_changed Mame_Patches/luaengine_render.cpp mame/src/frontend/mame/luaengine_render.cpp
+        copy_if_changed Mame_Patches/mame.cpp mame/src/frontend/mame/mame.cpp
+        copy_if_changed Mame_Patches/mame.h mame/src/frontend/mame/mame.h
+        copy_if_changed Mame_Patches/ui.cpp mame/src/frontend/mame/ui/ui.cpp
+        copy_if_changed Mame_Patches/pluginopt.cpp mame/src/frontend/mame/ui/pluginopt.cpp
+        copy_if_changed Mame_Patches/selgame.cpp mame/src/frontend/mame/ui/selgame.cpp
+        copy_if_changed Mame_Patches/mainmenu.cpp mame/src/frontend/mame/ui/mainmenu.cpp
+        copy_if_changed Mame_Patches/utils.cpp mame/src/frontend/mame/ui/utils.cpp
+        copy_if_changed Mame_Patches/datmenu.cpp mame/src/frontend/mame/ui/datmenu.cpp
+        copy_if_changed Mame_Patches/devopt.cpp mame/src/frontend/mame/ui/devopt.cpp
+        copy_if_changed Mame_Patches/viewgfx.cpp mame/src/frontend/mame/ui/viewgfx.cpp
+        copy_if_changed Mame_Patches/cheatopt.cpp mame/src/frontend/mame/ui/cheatopt.cpp
+        copy_if_changed Mame_Patches/selmenu.cpp mame/src/frontend/mame/ui/selmenu.cpp
+        copy_if_changed Mame_Patches/selsoft.cpp mame/src/frontend/mame/ui/selsoft.cpp
+        copy_if_changed Mame_Patches/miscmenu.cpp mame/src/frontend/mame/ui/miscmenu.cpp
+        copy_if_changed Mame_Patches/info.cpp mame/src/frontend/mame/ui/info.cpp
+        copy_if_changed Mame_Patches/simpleselgame.cpp mame/src/frontend/mame/ui/simpleselgame.cpp
+        copy_if_changed Mame_Patches/main.cpp mame/src/zexall/main.cpp
 
     - name: Compile MAME sd132 (AVX2) — incremental, picks up changed files
       run: |
@@ -345,7 +361,7 @@ jobs:
       uses: actions/cache/save@v4
       with:
         path: mame
-        key: mame-0287-pic-AVX2-${{ hashFiles('Mame_Patches/**') }}
+        key: mame-0288-pic-AVX2-${{ hashFiles('Mame_Patches/**') }}
 
     - name: Build Projucer
       run: |
