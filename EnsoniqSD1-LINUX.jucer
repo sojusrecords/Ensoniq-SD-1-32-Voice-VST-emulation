@@ -58,7 +58,7 @@
   <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_VST3_CAN_REPLACE_VST2="0"
                JUCE_USE_FLAC="0" JUCE_WEB_BROWSER="0"/>
   <EXPORTFORMATS>
-    <LINUX_MAKE targetFolder="Builds/LinuxMakefile" externalLibraries="frontend&#10;emu&#10;mame_sd132&#10;optional&#10;formats&#10;dasm&#10;emu&#10;mame_sd132&#10;optional&#10;formats&#10;dasm&#10;osd_sdl3&#10;qtdbg_sdl3&#10;ocore_sdl3&#10;utils&#10;lua&#10;lualibs&#10;expat&#10;zlib&#10;flac&#10;portaudio&#10;portmidi&#10;jpeg&#10;7z&#10;zstd&#10;utf8proc&#10;sqlite3&#10;asmjit&#10;bgfx&#10;bimg&#10;bx&#10;softfloat&#10;softfloat3&#10;ymfm&#10;wdlfft&#10;linenoise&#10;SDL3&#10;SDL2&#10;sd1disk"
+    <LINUX_MAKE targetFolder="Builds/LinuxMakefile" externalLibraries="frontend&#10;emu&#10;mame_sd132&#10;optional&#10;formats&#10;dasm&#10;emu&#10;mame_sd132&#10;optional&#10;formats&#10;dasm&#10;osd_sdl3&#10;qtdbg_sdl3&#10;ocore_sdl3&#10;utils&#10;lua&#10;lualibs&#10;expat&#10;zlib&#10;flac&#10;portaudio&#10;portmidi&#10;jpeg&#10;7z&#10;zstd&#10;utf8proc&#10;sqlite3&#10;asmjit&#10;bgfx&#10;bimg&#10;bx&#10;softfloat3&#10;ymfm&#10;wdlfft&#10;linenoise&#10;SDL3&#10;SDL2&#10;sd1disk"
                 extraLinkerFlags="-Wl,--allow-multiple-definition" smallIcon="fhfkAt"
                 bigIcon="fhfkAt">
       <CONFIGURATIONS>
