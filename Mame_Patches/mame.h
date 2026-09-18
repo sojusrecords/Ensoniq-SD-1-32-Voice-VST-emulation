@@ -40,8 +40,11 @@ class mame_machine_manager : public machine_manager
 public:
 	// Make constructor public to allow multiple embedded instances for VST3 plugin wrapper
     mame_machine_manager(emu_options &options, osd_interface &osd);
-	//static mame_machine_manager *instance();
+	// Destructor declared here, defined out-of-line in mame.cpp (where cheat/inifile/favorite
+	// are complete). This stops sol2's usertype registration in luaengine.cpp from generating
+	// the destructor inline against forward-declared manager types.
 	~mame_machine_manager();
+	//static mame_machine_manager *instance();
 
 	plugin_options &plugins() const { return *m_plugins; }
 	lua_engine *lua() { return m_lua.get(); }
@@ -93,8 +96,6 @@ private:
 	std::unique_ptr<cheat_manager>     m_cheat;             // internal data from cheat.cpp
 	std::unique_ptr<inifile_manager>   m_inifile;           // internal data from inifile.c for INIs
 	std::unique_ptr<favorite_manager>  m_favorite;          // internal data from inifile.c for favorites
-
-	static mame_machine_manager *s_manager;
 };
 
 //**************************************************************************

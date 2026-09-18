@@ -213,6 +213,7 @@ private:
     // These avoid fragile string-parsing of the display string to recover names/types.
     juce::StringArray bankRawNames;
     std::vector<uint8_t> bankEntryTypes;
+    std::vector<uint8_t> bankEntryInfos;   // directory type_info byte (bit 0x20 = embedded programs)
     
     // 11 byte Ensoniq filename
     std::vector<std::array<char, 11>> bankExactNames;

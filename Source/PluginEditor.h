@@ -66,7 +66,7 @@ private:
 
     // --- SETTINGS PANEL GUI COMPONENTS ---
     juce::TextButton settingsButton { "Settings / About" };
-    juce::GroupComponent settingsGroup { "settings_group", "Ensoniq(R) SD-1/32 Settings v1.0.1 3397" };
+    juce::GroupComponent settingsGroup { "settings_group", "Ensoniq(R) SD-1/32 Settings v1.0.2 3514" };
     
     juce::Label bufferLabel { "buffer_label", "MAME(R) Engine buffer:" };
     juce::ComboBox bufferCombo;

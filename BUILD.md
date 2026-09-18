@@ -8,7 +8,7 @@ Because MAME is not natively designed to be run as a shared library inside a DAW
 
 **JUCE Framework** (v7 or v8, built on V8)
 
-**MAME Source Code** (Built on version 0.287) ```git clone --depth 1 https://github.com/mamedev/mame.git```
+**MAME Source Code** (Built on version 0.288) ```git clone --depth 1 https://github.com/mamedev/mame.git```
 
 **macOS Build:** Xcode, SDL2 & SDL3 Frameworks (Installed in /Library/Frameworks) ```xcode-select --install``` then ```brew install pcre2 qt asio sqlite utf8proc flac pugixml portmidi portaudio pkg-config```
 
@@ -95,10 +95,6 @@ We had to make specific modifications to the MAME core to expose certain interna
    - simpleselgame.cpp -> Overwrite in /src/frontend/mame/ui/simpleselgame.cpp
 
    - main.cpp -> Overwrite in /src/zexall/main.cpp
-
-   - required for macOS C++17 only: ioport.h -> Overwrite in /src/emu/ioport.h 
-
-   - required for macOS C++17 only: language.h -> Overwrite in /src/lib/util/language.h
 
    - Note: there are some modified MAME files: sd132.lay and rendlay.cpp be sure to copy the new files.
 

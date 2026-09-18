@@ -511,6 +511,50 @@ void EnsoniqSD1AudioProcessorEditor::timerCallback()
                 saveGlobalSettings(); // Persist the flag immediately after clicking OK
             });
         }
+
+    // --- CONFIGURE MIRROR: fire a host parameter gesture for the clicked panel button ---
+    // The MAME thread hit-tests which button was pressed and bumps mirrorEventSeq. We fire a
+    // momentary begin/1/0/end pulse so hosts that require "Configure" (Ableton) learn the
+    // parameter, and the click is recorded as automation. MAME's own mouse press still drives
+    // the button visually; the brief param pulse writes the same ioport value (harmless).
+    {
+        uint32_t mseq = audioProcessor.mirrorEventSeq.load(std::memory_order_acquire);
+        if (mseq != audioProcessor.lastMirrorSeqSeen) {
+            audioProcessor.lastMirrorSeqSeen = mseq;
+            int idx = audioProcessor.mirrorButtonIndex.load(std::memory_order_relaxed);
+            if (idx >= 0 && idx < static_cast<int>(audioProcessor.sd1Buttons.size())) {
+                if (auto* p = audioProcessor.apvts.getParameter(audioProcessor.sd1Buttons[idx].paramID)) {
+                    p->beginChangeGesture();
+                    p->setValueNotifyingHost(1.0f);
+                    p->setValueNotifyingHost(0.0f);
+                    p->endChangeGesture();
+                }
+            }
+        }
+    }
+
+    // --- CONFIGURE MIRROR: fire a host parameter gesture for the dragged analog control ---
+    // The MAME thread polls the panel's analog drag value and bumps mirrorFloatSeq. We fire a
+    // begin/setValue/end gesture on the matching float param so the host learns it and records the
+    // move. Before pushing it we stamp mirrorFiredUntil[idx] so the resulting parameterChanged knows
+    // this came from a drag (and must NOT write the field back over the live drag).
+    {
+        static const char* floatParamIDs[4] = { "volume", "data_entry", "pitch_bend", "mod_wheel" };
+        uint32_t fseq = audioProcessor.mirrorFloatSeq.load(std::memory_order_acquire);
+        if (fseq != audioProcessor.lastMirrorFloatSeqSeen) {
+            audioProcessor.lastMirrorFloatSeqSeen = fseq;
+            int idx = audioProcessor.mirrorFloatIndex.load(std::memory_order_relaxed);
+            float val = audioProcessor.mirrorFloatValue.load(std::memory_order_relaxed);
+            if (idx >= 0 && idx < 4) {
+                if (auto* p = audioProcessor.apvts.getParameter(floatParamIDs[idx])) {
+                    audioProcessor.mirrorFiredUntil[idx].store(juce::Time::getMillisecondCounter() + 150, std::memory_order_relaxed);
+                    p->beginChangeGesture();
+                    p->setValueNotifyingHost(juce::jlimit(0.0f, 1.0f, val));
+                    p->endChangeGesture();
+                }
+            }
+        }
+    }
     
 }
 // debug rack: original paint() preserved below for non-debug builds

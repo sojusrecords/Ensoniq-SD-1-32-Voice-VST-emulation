@@ -520,7 +520,7 @@ bool sound_stream::try_solving_frequency()
 				freq = r.m_source->sample_rate();
 		}
 		m_sample_rate = freq;
-		return true;
+		return freq != 0;
 
 	} else if(output_adaptive() && !input_adaptive()) {
 		u32 freq = 0;
@@ -531,7 +531,7 @@ bool sound_stream::try_solving_frequency()
 				freq = r.m_target->sample_rate();
 		}
 		m_sample_rate = freq;
-		return true;
+		return freq != 0;
 
 	} else {
 		u32 freqbw = 0;
@@ -2722,6 +2722,7 @@ void sound_manager::streams_update()
 				}
 				sound_data.emplace(sound.device().tag(), std::move(buffers));
 			}
+
 		// Call sound_hook with the machine() reference as the first argument,
 		// adhering to the updated emulator_info signature for multi-instance support.
 		emulator_info::sound_hook(machine(), sound_data);

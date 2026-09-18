@@ -28,6 +28,8 @@
 #include "osdepend.h"
 #include "xmlfile.h"
 
+#include <cstdio>
+
 
 const size_t debugger_cpu::NUM_TEMP_VARIABLES = 10;
 
@@ -443,9 +445,7 @@ void debugger_cpu::wait_for_debugger(device_t &device)
 		// flush any pending updates before waiting again
 		m_machine.debug_view().flush_osd_updates();
 
-// Pass the m_machine reference to adhere to the updated periodic_check signature 
-// for multi-instance VST3 support.
-emulator_info::periodic_check(m_machine);
+		emulator_info::periodic_check(m_machine);
 
 		// clear the memory modified flag and wait
 		set_memory_modified(false);

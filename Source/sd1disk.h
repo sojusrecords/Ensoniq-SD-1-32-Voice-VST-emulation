@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
+
 /* Opaque handles — never dereference these directly in C/C++ code. */
 typedef struct DiskImage    DiskImage;
 typedef struct DiskImage    Sd1DiskImage;

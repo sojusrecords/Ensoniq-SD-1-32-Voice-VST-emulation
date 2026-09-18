@@ -119,6 +119,12 @@ public:
 	DECLARE_INPUT_CHANGED_MEMBER(key_change);
 	void set_floppy_active(bool floppy_active) override;
 
+	// Latest analog value (0..1023) written by a physical panel drag, indexed by analog channel
+	// (0=pitch 2=mod 3=data 5=volume). Used by the host plugin to mirror panel slider/wheel
+	// movement to its automation parameters. Only analog_value_change writes this (the user-drag
+	// path) — set_analog_value (DAW/plugin writes) does NOT, so there is no feedback loop.
+	uint16_t get_panel_analog_input(int channel) const { return (channel >= 0 && channel < 8) ? m_panel_analog_input[channel] : 0; }
+
 	void set_family_member(int family_member);
 
 	enum panel_types : int {
@@ -146,6 +152,10 @@ protected:
 
 private:
 	int m_panel_type;
+
+	// Initialized to the ioport field defaults so the value reflects the rest position before any
+	// drag: [0]=pitch 512(center) [2]=mod 1023(no mod) [3]=data 512 [5]=volume 1023(full).
+	uint16_t m_panel_analog_input[8] = { 512, 0, 1023, 512, 0, 1023, 0, 0 };  // latest panel-drag analog values
 
 	emu_timer *m_blink_timer = nullptr;
 	uint8_t m_blink_phase;

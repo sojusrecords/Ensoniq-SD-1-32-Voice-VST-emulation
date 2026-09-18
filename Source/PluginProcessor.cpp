@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <zlib.h> // MAME uses standard zlib
 #include <new>
+#include <cmath>
 #ifdef _WIN32
 #define NOMINMAX
 #include <windows.h>
@@ -47,6 +48,7 @@
 #include "inputdev.h"
 #include "emuopts.h"
 #include "render.h"
+#include "rendlay.h"   // layout_view / layout_view_item (current_view hit-testing)
 #include "osdepend.h"
 #include "frontend/mame/mame.h"
 #include "frontend/mame/clifront.h"
@@ -56,11 +58,32 @@
 
 #include <iomanip>
 #include <fstream>
+#include <cstring>   // strcmp (Configure mirror tag matching)
+
+// ==============================================================================
+// FL Studio is written in Delphi and runs its threads with floating-point
+// exceptions UNMASKED. Any divide-by-zero or invalid FP operation inside MAME's
+// DSP (or our timing math) then raises a hardware trap that FL reports as
+// "EDivByZero" and crashes — e.g. when an automated analog parameter sweeps a
+// synth value to a divisor of zero. Every other DAW masks these exceptions, so
+// the same op silently yields inf/nan. We mask them on every thread that runs
+// FP-heavy code so MAME/our math behaves like it does everywhere else.
+#if defined(__x86_64__) || defined(_M_X64) || defined(__i386__) || defined(_M_IX86)
+ #include <pmmintrin.h>
+ static inline void sd1_mask_fp_exceptions()
+ {
+     // Mask all 6 SSE FP exceptions (bits 7-12 = 0x1F80) + flush-to-zero (0x8000)
+     // + denormals-are-zero (0x0040).
+     _mm_setcsr(_mm_getcsr() | 0x1F80u | 0x8000u | 0x0040u);
+ }
+#else
+ static inline void sd1_mask_fp_exceptions() {}
+#endif
 
 // MAME Versioning stubs required by the linker
-extern const char bare_build_version[] = "0.287";
+extern const char bare_build_version[] = "0.288";
 extern const char bare_vcs_revision[] = "";
-extern const char build_version[] = "0.287";
+extern const char build_version[] = "0.288";
 
 const char * emulator_info::get_appname() { return "mame"; }
 const char * emulator_info::get_appname_lower() { return "mame"; }
@@ -428,11 +451,8 @@ public:
                     if (osram_share != nullptr && osram_share->bytes() >= 0xCE0C) {
                         uint8_t* osram = static_cast<uint8_t*>(osram_share->ptr());
                         
-                        // The CPU writes to 0xFFCE0B. In the Little-Endian array, this is 0xCE0A or 0xCE0B.
-                        // To be safe and prevent freezes, we keep both locked at 0x01!
-                        // No thread collision, no CPU calls, just raw byte overwriting.
+                        // SYS-EX Flag memory inject
                         if (osram[0xCE0A] != 0x01) osram[0xCE0A] = 0x01;
-                        if (osram[0xCE0B] != 0x01) osram[0xCE0B] = 0x01;
                     }
                 }
         
@@ -818,6 +838,53 @@ public:
                 );
                 
                 lastMouseButtons = currentBtns;
+
+                // ==============================================================================
+                // --- CONFIGURE MIRROR: detect which panel button was clicked ---
+                // ==============================================================================
+                // On a fresh left-button press, hit-test the pointer against the active view's
+                // interactive items, match the hit item's input port+mask to our sd1Buttons, and
+                // publish the index so the editor can fire a host parameter gesture. This lets
+                // hosts that require "Configure" (Ableton) learn the parameter. We use the SAME
+                // x/y MAME uses, mapped through current_view().bounds() (the window keeps a fixed
+                // aspect ratio, so the view fills the target with no letterboxing → linear map).
+                // Gated on RUNNING so the layout/devices are fully resolved.
+                if (pressed && mame_machine->phase() == machine_phase::RUNNING) {
+                    layout_view& view = target->current_view();
+                    uint32_t tw = target->width();
+                    uint32_t th = target->height();
+                    // layout_view_item::bounds() are NORMALIZED [0..1] relative to the view, and
+                    // the view fills the target (fixed aspect, no letterbox), so the mouse pixel
+                    // maps to view-normalized space simply as x/tw, y/th. (view.bounds() itself is
+                    // in the layout's native units, which do NOT match item bounds — don't use it.)
+                    float vx = (tw > 0) ? static_cast<float>(x) / static_cast<float>(tw) : -999.0f;
+                    float vy = (th > 0) ? static_cast<float>(y) / static_cast<float>(th) : -999.0f;
+
+                    if (tw > 0 && th > 0) {
+                        for (auto& ref : view.interactive_items()) {
+                            layout_view_item& item = ref.get();
+                            render_bounds ib = item.bounds();
+                            if (vx >= ib.x0 && vx <= ib.x1 && vy >= ib.y0 && vy <= ib.y1) {
+                                auto tagmask = item.input_tag_and_mask();
+                                ioport_port* iport = tagmask.first;
+                                ioport_value imask = tagmask.second;
+                                if (iport != nullptr) {
+                                    const char* itag = iport->tag();
+                                    for (size_t bi = 0; bi < processor->sd1Buttons.size(); ++bi) {
+                                        if (processor->sd1Buttons[bi].ioportMask == imask
+                                            && itag != nullptr
+                                            && strcmp(itag, processor->sd1Buttons[bi].ioportTag) == 0) {
+                                            processor->mirrorButtonIndex.store(static_cast<int>(bi), std::memory_order_relaxed);
+                                            processor->mirrorEventSeq.fetch_add(1, std::memory_order_release);
+                                            break;
+                                        }
+                                    }
+                                }
+                                break; // first matching interactive item wins
+                            }
+                        }
+                    }
+                }
             }
 
                     // ==============================================================================
@@ -877,6 +944,88 @@ public:
                             if (field != nullptr) {
                                 // Electronically press or release the button!
                                 field->set_value(isPressed ? 1 : 0);
+                            }
+                        }
+                    }
+
+                    // ==============================================================================
+                    // --- 3. ANALOG FLOAT AUTOMATION → IOPORT FIELD (sound + moves the panel control) ---
+                    // ==============================================================================
+                    // Write each changed float param into its analog ioport field (the same field the
+                    // Lua SliderHandler writes on a drag). This makes the panel slider/wheel follow host
+                    // automation visually (the layout <animate> reads the field). volume(ch5)/data(ch3)
+                    // also sound here via analog_value_change -> set_analog_value; pitch(ch0)/mod(ch2)
+                    // are sounded by MIDI (parameterChanged) and analog_value_change forces their analog
+                    // path to neutral, so the wheel moves visually without doubling the MIDI bend/mod.
+                    //
+                    // Gate on machine_phase::RUNNING: field writes fire analog_value_change which invokes
+                    // the m_write_analog devcb, only valid after start() completes (else null deref).
+                    if (mame_machine->phase() == machine_phase::RUNNING) {
+                        // ioport tags + field mask for the 4 analog controls (index 0=vol 1=data 2=pitch 3=mod)
+                        static const char* kAnalogTags[4] = {
+                            ":panel:analog_volume", ":panel:analog_data_entry",
+                            ":panel:analog_pitch_bend", ":panel:analog_mod_wheel"
+                        };
+                        for (int i = 0; i < 4; ++i) {
+                            if (!processor->floatDirty[i].exchange(false, std::memory_order_acq_rel))
+                                continue;
+                            float t = juce::jlimit(0.0f, 1.0f, processor->floatTarget[i].load(std::memory_order_relaxed));
+                            // field value 0..1023; mod is inverted (param 1.0 = full mod = ioport 0)
+                            int V = (i == 3) ? static_cast<int>((1.0f - t) * 1023.0f + 0.5f)
+                                             : static_cast<int>(t * 1023.0f + 0.5f);
+                            V = juce::jlimit(0, 1023, V);
+                            ioport_port* port = mame_machine->root_device().ioport(kAnalogTags[i]);
+                            if (port != nullptr) {
+                                ioport_field* field = port->field(0x3ff);
+                                if (field != nullptr) {
+                                    if (field->is_analog()) {
+                                        // PADDLE (pitch_bend): a real analog field — set the analog value.
+                                        field->set_value((ioport_value)V);
+                                    } else {
+                                        // ADJUSTER (volume/data_entry/mod_wheel) is NOT an analog field, so
+                                        // set_value() would store a digital 0/1. The adjuster value lives in
+                                        // user_settings.value (this is what the Lua SliderHandler writes).
+                                        ioport_field::user_settings us;
+                                        field->get_user_settings(us);
+                                        us.value = (ioport_value)V;
+                                        field->set_user_settings(us);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // ==============================================================================
+                    // --- 4. PANEL ANALOG MIRROR (host automation learn: Configure / Last Tweaked) ---
+                    // ==============================================================================
+                    // The 4 analog controls are driven by a Lua SliderHandler, NOT clickable
+                    // interactive_items, so the button hit-test cannot see them. The panel captures the
+                    // user's drag value in analog_value_change (get_panel_analog_input). We poll it here
+                    // and, on a genuine drag, fire the matching float param's gesture so the host learns
+                    // it. Host automation also moves the field (block 3 above); to avoid mirroring that
+                    // back (echo), we skip when the read value equals what our own param would have written.
+                    if (mame_machine->phase() == machine_phase::RUNNING) {
+                        auto* panel = mame_machine->root_device().subdevice<esqpanel2x40_vfx_device>("panel");
+                        if (panel != nullptr) {
+                            // index -> analog channel: 0=volume(5) 1=data_entry(3) 2=pitch_bend(0) 3=mod_wheel(2)
+                            static const int chans[4] = { 5, 3, 0, 2 };
+                            for (int i = 0; i < 4; ++i) {
+                                int v = static_cast<int>(panel->get_panel_analog_input(chans[i]));
+                                if (v != processor->lastPanelAnalog[i]) {
+                                    bool firstSync = (processor->lastPanelAnalog[i] < 0);
+                                    processor->lastPanelAnalog[i] = v;
+                                    if (firstSync) continue;   // establish baseline, don't fire a startup gesture
+                                    // If host automation is currently driving this control (block 3 wrote the
+                                    // field), this change is our own write echoing back, not a user drag — skip.
+                                    if (juce::Time::getMillisecondCounter() < processor->automationSuppressUntil[i].load(std::memory_order_relaxed))
+                                        continue;
+                                    float p = static_cast<float>(v) / 1023.0f;
+                                    if (i == 3) p = 1.0f - p;   // mod wheel ioport is inverted (1023 = no mod)
+                                    p = juce::jlimit(0.0f, 1.0f, p);
+                                    processor->mirrorFloatIndex.store(i, std::memory_order_relaxed);
+                                    processor->mirrorFloatValue.store(p, std::memory_order_relaxed);
+                                    processor->mirrorFloatSeq.fetch_add(1, std::memory_order_release);
+                                }
                             }
                         }
                     }
@@ -999,6 +1148,9 @@ juce::AudioProcessorValueTreeState::ParameterLayout EnsoniqSD1AudioProcessor::cr
 
 void EnsoniqSD1AudioProcessor::parameterChanged(const juce::String& parameterID, float newValue)
 {
+    // FL runs automation on a side thread with FP exceptions unmasked; the /sr math below
+    // would trap on EDivByZero. Mask exceptions here too.
+    sd1_mask_fp_exceptions();
         
     // --- 1. SETUP ---
     if (parameterID == "buffer_size") {
@@ -1034,17 +1186,52 @@ void EnsoniqSD1AudioProcessor::parameterChanged(const juce::String& parameterID,
         else {
             uint64_t targetSample = totalRead.load(std::memory_order_acquire) + mameBufferThreshold.load(std::memory_order_relaxed);
             double sr = hostSampleRate.load(std::memory_order_relaxed);
+            if (sr <= 0.0) sr = 44100.0;  // safety: never divide by zero
             double t_anchor = anchorMameTime.load(std::memory_order_relaxed);
             uint64_t s_anchor = anchorDawSample.load(std::memory_order_relaxed);
                         
             // Same clean math as in processBlock
             double targetMameTime = t_anchor + static_cast<double>(targetSample - s_anchor) / sr;
 
+            // Is this change our own drag-mirror echoing back (editor just pushed it), rather than
+            // host automation? If so, the user already moved the panel control and sounded it — we must
+            // NOT write the field back (that fights the live drag). Time-based + async-safe.
+            auto fromDragMirror = [this](int idx) -> bool {
+                return juce::Time::getMillisecondCounter() < mirrorFiredUntil[idx].load(std::memory_order_relaxed);
+            };
+            // Host automation moved this control: write its field (block 3) and mute the mirror briefly
+            // so block 3's own field write is not read back as a drag.
+            auto markHostAutomation = [this](int idx, float value) {
+                floatTarget[idx].store(value, std::memory_order_relaxed);
+                floatDirty[idx].store(true, std::memory_order_release);
+                automationSuppressUntil[idx].store(juce::Time::getMillisecondCounter() + 250, std::memory_order_relaxed);
+            };
+
             if (parameterID == "volume") {
+                // Sound + slider move both happen via the field write in input_update (block 3), which
+                // routes through analog_value_change -> set_analog_value. On a drag the panel already did
+                // that, so only write the field when the change is host automation.
+                if (!fromDragMirror(0)) markHostAutomation(0, newValue);
+            }
+            else if (parameterID == "data_entry") {
+                if (!fromDragMirror(1)) markHostAutomation(1, newValue);
+            }
+            else if (parameterID == "pitch_bend") {
+                // Sound is always MIDI (both drag and automation): classic Pitch Bend (0xE0), 0.5=center.
+                int bend = juce::jlimit(0, 16383, static_cast<int>(newValue * 16383.0f));
+                pushMidiByte(0xE0, targetMameTime);
+                pushMidiByte(static_cast<uint8_t>(bend & 0x7F), targetMameTime);
+                pushMidiByte(static_cast<uint8_t>((bend >> 7) & 0x7F), targetMameTime);
+                // Only host automation should move the wheel visually (a drag is already at the wheel).
+                if (!fromDragMirror(2)) markHostAutomation(2, newValue);
+            }
+            else if (parameterID == "mod_wheel") {
+                // Sound is always MIDI (CC1).
                 uint8_t val = static_cast<uint8_t>(newValue * 127.0f);
                 pushMidiByte(0xB0, targetMameTime);
-                pushMidiByte(0x07, targetMameTime);
+                pushMidiByte(0x01, targetMameTime);
                 pushMidiByte(val, targetMameTime);
+                if (!fromDragMirror(3)) markHostAutomation(3, newValue);
             }
         }
 }
@@ -1404,6 +1591,7 @@ bool EnsoniqSD1AudioProcessor::isBusesLayoutSupported (const BusesLayout& layout
 void EnsoniqSD1AudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ScopedNoDenormals noDenormals;
+    sd1_mask_fp_exceptions();  // FL leaves FP exceptions unmasked on the audio thread
     
       int numSamples = buffer.getNumSamples();
       if (numSamples <= 0) return; // Safety check
@@ -1472,6 +1660,7 @@ void EnsoniqSD1AudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
     uint64_t currentReadPos = totalRead.load(std::memory_order_acquire);
     int threshold = mameBufferThreshold.load(std::memory_order_relaxed);
     double sr = hostSampleRate.load(std::memory_order_relaxed);
+    if (sr <= 0.0) sr = 44100.0;  // safety: never divide by a zero sample rate (matches the automation path)
     
     // Security boot check
     if (mameMachine == nullptr) {
@@ -1514,9 +1703,13 @@ void EnsoniqSD1AudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
     // =====================================================================
     
     bool isPlaying = false;
+    double hostBpm = 120.0, hostPpq = 0.0;
+    bool hostPpqValid = false;
     if (auto* ph = getPlayHead()) {
         if (auto pos = ph->getPosition()) {
             isPlaying = pos->getIsPlaying();
+            if (auto bpmOpt = pos->getBpm())          hostBpm = juce::jlimit(1.0, 1000.0, *bpmOpt);
+            if (auto ppqOpt = pos->getPpqPosition()) { hostPpq = *ppqOpt; hostPpqValid = true; }
         }
     }
     
@@ -1778,6 +1971,144 @@ void EnsoniqSD1AudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
                 for (int i = 0; i < msg.getRawDataSize(); ++i)
                     pushMidiByte(rawData[i], targetMameTime);
             }
+        }
+
+        // ========================================================
+        // EXTERNAL MIDI SYNC OUT (DAW transport -> SD-1)
+        // ========================================================
+        // Feed the SD-1 the host transport as ordinary MIDI: 0xF8 clock @ 24 PPQN,
+        // 0xFA/0xFB/0xFC start/continue/stop, 0xF2 song-position. MAME needs nothing
+        // extra — these ride the same MIDI-in the notes use; the SD-1 firmware acts on
+        // them only when its menu has CLOCK=MIDI (so this is inert otherwise).
+        //
+        // Safety: pushed AFTER the note dispatch, so notes always win the strict-FIFO
+        // ring — a sync byte can never delay or drop a note (at worst a single clock
+        // drops itself, which the SD-1 clock PLL averages out). Skipped on chase /
+        // anchor / play-start blocks (isLogicChaseDump) so it never interferes with the
+        // silent-first-note or anchor-sync handling; sync just begins one block later,
+        // which is inaudible for clock locking. syncWasPlaying is our own edge tracker
+        // (independent of lastIsPlaying) so the start edge survives the skipped block.
+
+        if (sendMidiClock && hostPpqValid && !isLogicChaseDump && sr > 0.0 && mameMachine != nullptr)
+        {
+            double nowMame = mameMachine->time().as_double();
+
+            // anchored DAW-sample -> MAME-time: identical math to the note path above
+            auto sampleToMame = [&](double sampleOffset) -> double {
+                double off = (sampleOffset < 0.0) ? 0.0 : sampleOffset;
+                uint64_t targetSample = currentReadPos + static_cast<uint64_t>(off) + static_cast<uint64_t>(threshold);
+                return t_anchor + static_cast<double>(
+                    static_cast<int64_t>(targetSample) - static_cast<int64_t>(s_anchor)) / sr;
+            };
+            // push one sync byte, kept in order and >= 0.35ms from the previous sync byte (UART rate)
+            auto emit = [&](uint8_t b, double tIdeal) {
+                double t = tIdeal;
+                if (t < nowMame) t = nowMame;
+                if (t < lastSyncByteTime + 0.00035) t = lastSyncByteTime + 0.00035;
+                pushMidiByte(b, t);
+                lastSyncByteTime = t;
+            };
+            auto emitSPP = [&](double tIdeal) {
+                int spp = static_cast<int>(std::floor(hostPpq * 4.0)); // SPP counts 16th notes; ppq counts quarters
+                if (spp < 0) spp = 0;
+                spp &= 0x3FFF;
+                emit(0xF2, tIdeal);
+                emit(static_cast<uint8_t>(spp & 0x7F), tIdeal);
+                emit(static_cast<uint8_t>((spp >> 7) & 0x7F), tIdeal);
+            };
+
+            double ppqPerSample = (hostBpm / 60.0) / sr;
+            double ppqStart = hostPpq;
+            double ppqEnd   = hostPpq + static_cast<double>(numSamples) * ppqPerSample;
+            double blockStart = sampleToMame(0.0);
+
+            bool startEdge = ( isPlaying && !syncWasPlaying);
+            bool stopEdge  = (!isPlaying &&  syncWasPlaying);
+
+            // Pre-roll handling. If the host starts playback inside a count-in (ppq < 0),
+            // the SD-1 must not Start until the song origin (ppq == 0) arrives, otherwise
+            // it begins early and the first bars are out of time. We defer the Start until
+            // ppq crosses 0. The defer is self-disabling: if the host transport reports a
+            // non-monotonic / jittery ppq during the count-in (Logic/AU does this), we
+            // abandon the defer and fall back to the proven immediate-Start + SPP-relocate
+            // path, so the defer can never make sync worse than the pre-fix behaviour.
+            bool inPreRoll     = (ppqEnd <= 0.0);
+            bool crossesOrigin = (ppqStart < 0.0 && ppqEnd > 0.0);
+
+            if (startEdge && inPreRoll) {
+                // Genuine pre-roll start: hold Start until the origin arrives.
+                syncStartPending = true;
+                syncPrerollPpq   = ppqStart;
+            }
+            else if (syncStartPending && isPlaying) {
+                bool advancing = (ppqStart >= syncPrerollPpq - 1.0e-6);
+                if (crossesOrigin && advancing) {
+                    // Clean crossing: fire the held Start timed to the ppq==0 sample.
+                    syncStartPending = false;
+                    double startOff = (0.0 - ppqStart) / ppqPerSample;
+                    double startT   = sampleToMame(startOff);
+                    emitSPP(startT);
+                    emit(0xFA, startT);                       // Start from 0
+                }
+                else if (ppqStart >= 0.0) {
+                    // Origin already passed without a clean crossing block: Start now + locate.
+                    syncStartPending = false;
+                    emitSPP(blockStart);
+                    emit((std::floor(ppqStart * 4.0) <= 0.0) ? 0xFA : 0xFB, blockStart);
+                }
+                else if (!advancing) {
+                    // Host transport went non-monotonic during pre-roll (AU jitter):
+                    // abandon the defer, Start now, let SPP relocates keep alignment.
+                    syncStartPending = false;
+                    emitSPP(blockStart);
+                    emit(0xFA, blockStart);
+                }
+                else {
+                    syncPrerollPpq = ppqStart;   // still cleanly pre-rolling; keep waiting
+                }
+            }
+            else if (startEdge) {
+                // Normal start at/after the origin (no pre-roll): the original path.
+                emitSPP(blockStart);
+                emit((std::floor(hostPpq * 4.0) <= 0.0) ? 0xFA : 0xFB, blockStart); // Start from 0, else Continue
+            }
+            else if (stopEdge) {
+                syncStartPending = false;
+                emit(0xFC, blockStart);
+            }
+            else if (isPlaying) {
+                // loop / relocate while playing: ppq jumped off the expected continuation point.
+                // The SD-1 (like most sequencers) only honours a Song Position Pointer while it is
+                // STOPPED, so to reposition a *running* sequence we Stop, locate, then Continue --
+                // exactly the message order a hardware master emits on a loop or jump.
+                if (std::fabs(ppqStart - syncLastPpq) > 0.05) {
+                    emit(0xFC, blockStart);     // stop so the SD-1 will accept the locate
+                    emitSPP(blockStart);        // locate to the new song position
+                    emit(0xFB, blockStart);     // continue from there
+                }
+            }
+            else {
+                // relocate while stopped (user moved the playhead): keep the SD-1's SPP in step
+                if (std::fabs(ppqStart - syncLastPpq) > 0.05)
+                    emitSPP(blockStart);
+            }
+
+            // 24-PPQN MIDI clock for the beats falling inside this block (only while
+            // playing and only from the song origin onward -- never during pre-roll).
+            if (isPlaying && ppqPerSample > 0.0 && ppqEnd > 0.0) {
+                double clockFrom = std::max(ppqStart, 0.0);
+                long k = static_cast<long>(std::ceil(clockFrom * 24.0));
+                for (; (static_cast<double>(k) / 24.0) < ppqEnd; ++k) {
+                    double clockPpq = static_cast<double>(k) / 24.0;
+                    double off = (clockPpq - ppqStart) / ppqPerSample; // sample offset within this block
+                    emit(0xF8, sampleToMame(off));
+                }
+            }
+
+            syncWasPlaying = isPlaying;
+            // continuation point: while playing the next block starts at ppqEnd; while stopped ppq
+            // does not advance, so anchor to ppqStart (avoids a false relocate every idle block).
+            syncLastPpq = isPlaying ? ppqEnd : ppqStart;
         }
     
         // ========================================================
@@ -2412,14 +2743,23 @@ bool EnsoniqSD1AudioProcessor::runSelfCheck()
         if (wrapperType == juce::AudioProcessor::wrapperType_AudioUnit) {
             juce::PluginHostType host;
             juce::String hostPath = host.getHostPath().toLowerCase();
-            if (!host.isLogic() &&
-                !host.isGarageBand() &&
-                !host.isAbletonLive() &&
-                !host.isReaper() &&
-                !host.isStudioOne() &&
-                !hostPath.contains("fender") &&
-                !hostPath.contains("studio pro")) {
-                
+            // Whitelist the Apple AU hosts (Logic, MainStage, GarageBand) and the
+            // other DAWs that support the AU sync path. We check BOTH the JUCE
+            // host booleans AND the host executable path, because the JUCE
+            // detection can miss depending on JUCE version / host bundle (notably
+            // MainStage was being misclassified as unsupported, and GarageBand
+            // detection can vary). The path checks are version-independent.
+            bool supported =
+                host.isLogic()       || hostPath.contains("logic")     ||
+                host.isGarageBand()  || hostPath.contains("garageband")||
+                                        hostPath.contains("mainstage") ||
+                host.isAbletonLive() || hostPath.contains("live")      ||
+                host.isReaper()      || hostPath.contains("reaper")    ||
+                host.isStudioOne()   || hostPath.contains("studio one")||
+                hostPath.contains("fender") ||
+                hostPath.contains("studio pro");
+
+            if (!supported) {
                 isUnsupportedAUHost.store(true, std::memory_order_release);
             }
         }
@@ -2761,6 +3101,10 @@ void EnsoniqSD1AudioProcessor::mameOutputNotifier(const char *outname, s32 value
 
 void EnsoniqSD1AudioProcessor::runMameEngine()
 {
+    // FL Studio leaves FP exceptions unmasked; mask them for this thread's entire
+    // lifetime so MAME's DSP divide-by-zero yields inf/nan instead of an EDivByZero trap.
+    sd1_mask_fp_exceptions();
+
 #ifdef _WIN32
     DWORD taskIndex = 0;
     HANDLE hTask = AvSetMmThreadCharacteristicsA("Pro Audio", &taskIndex);
@@ -2865,6 +3209,13 @@ void EnsoniqSD1AudioProcessor::runMameEngine()
     args.push_back("-sound");
     args.push_back("osd");
     args.push_back("-midiin");
+    args.push_back("VST MIDI");
+    // Enable the MIDI OUTPUT slot too. Without -midiout, MAME never instantiates
+    // the mdout port, our OSD create_midi_output() is never called, and the SD-1's
+    // DUART transmit (sequencer + keyboard echo) goes to a disconnected port — so
+    // no MIDI ever leaves the plug-in. The OSD advertises one port named
+    // "VST MIDI" with output=true; use it for both directions.
+    args.push_back("-midiout");
     args.push_back("VST MIDI");
     
     // Disable MAME's internal pacing (we control this strictly via audio throttle)

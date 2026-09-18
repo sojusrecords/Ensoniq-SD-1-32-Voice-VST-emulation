@@ -22,23 +22,28 @@ We are Sojus Records, one of the longest-running netlabels still active. We are 
 
 **IMPORTANT - ROM Files Required!** [Read this section for more info!](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation#rom-installation)
 
-  - [Win x64 VST3 W10+](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v1.0.1/EnsoniqSD1-v.1.0.1-winVST3.7z)
+  - [Win x64 VST3 W10+](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v1.0.2/EnsoniqSD1-v.1.0.2-winVST3.7z)
 
-  - [Win x64 VST3 oldskool AVX1 for pre-Haswell machines](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v1.0.1/EnsoniqSD1-v.1.0.1-winVST3-AVX1.7z)
+  - [Win x64 VST3 oldskool AVX1 for pre-Haswell machines](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v1.0.2/EnsoniqSD1-v.1.0.2-winVST3-AVX1.7z)
 
-  - [macOS Universal Binary VST3 macOS 11 or newer](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v1.0.1/EnsoniqSD1-v.1.0.1-macVST3.7z) [Read this section for more info!](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation#known-limitations)
+  - [macOS Universal Binary VST3 macOS 11 or newer](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v1.0.2/EnsoniqSD1-v.1.0.2-macVST3.7z) [Read this section for more info!](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation#known-limitations)
 
-  - [macOS Universal Binary AU SELECTED DAWS ONLY macOS 11 or newer](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v1.0.1/EnsoniqSD1-v.1.0.1-macAU.7z) [Read this section for more info!](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation#known-limitations)
+  - [macOS Universal Binary AU SELECTED DAWS ONLY macOS 11 or newer](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v1.0.2/EnsoniqSD1-v.1.0.2-macAU.7z) [Read this section for more info!](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation#known-limitations)
 
-  - [Linux VST3 AVX2](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v1.0.1/EnsoniqSD1-v.1.0.1-LINUX-AVX2.7z)
+  - [Linux VST3 AVX2](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v1.0.2/EnsoniqSD1-v.1.0.2-LINUX-AVX2.7z)
 
-  - [Linux VST3 Generic for oldskool CPUs](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v1.0.1/EnsoniqSD1-v.1.0.1-LINUX-Generic.7z)
+  - [Linux VST3 Generic for oldskool CPUs](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation/releases/download/v1.0.2/EnsoniqSD1-v.1.0.2-LINUX-Generic.7z)
   
 # What's working?
 Everything. Check the original manual here: [SD-1 Manual at Polynominal](https://www.polynominal.com/ensoniq-sd1/ensoniq-sd1-manual.pdf)
 
 # Features:
-- **NEW: Full featured preset and disk manager.**
+
+- **NEW: VST automation via panel.** You can automate any slider or button with selecting it from the panel. (Yes, even with Ableton Live.) The automation is also visible on the panel. 
+
+- **NEW: The sequencer can be controlled using DAW transport buttons, responds to song position, and synchronizes the BPM.** Note: You must enable external MIDI control: STOP/CONT -» CLOCK: MIDI. Thanks to Mike Fumbler for testing!
+
+- **Full featured preset and disk manager.**
   - Browse and play any preset with MIDI keyboard from:
     - internal: RAM, ROM 0 and 1, attached cartridge
     - any external folders: supported VFX, VFX-SD, SD1 .SYX files, cartridge files, .HFE/.IMG disk images.
@@ -53,13 +58,13 @@ Everything. Check the original manual here: [SD-1 Manual at Polynominal](https:/
 
 - **Reworked MIDI automation** This time really :) Every panel button can be automated and assign to virtual or physical MIDI controller. [Read the FAQ for more info!](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation#faq)
 
-- **NEW: Full MIDI out**
+- **Full MIDI out**
 
-- **NEW: Removed instance blocking** You can load as many instances of a plugin as you want in your DAW! Thanks to [kbaccki](https://github.com/kbaccki) for investigating the singletons.
+- **Removed instance blocking** You can load as many instances of a plugin as you want in your DAW! Thanks to [kbaccki](https://github.com/kbaccki) for investigating the singletons.
 
-- **NEW: macOS AU first public build for SELECTED DAWS ONLY!** Please note that the AU plugin is ONLY for Logic, GarageBand, MainStage, Ableton Live, Fender Studio Pro (Studio One) and Reaper. Any other DAW must use the VST3 version! Tested on Logic 11, Fender Studio Pro 8, Reaper 7, Ableton Live 12.
+- **macOS AU first public build for SELECTED DAWS ONLY!** Please note that the AU plugin is ONLY for Logic, GarageBand, MainStage, Ableton Live, Fender Studio Pro (Studio One) and Reaper. Any other DAW must use the VST3 version! Tested on Logic 11, Fender Studio Pro 8, Reaper 7, Ableton Live 12.
 
-- **NEW: Program saving macro button for users without MIDI controllers** [Read the FAQ for more info!](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation#faq)
+- **Program saving macro button for users without MIDI controllers** [Read the FAQ for more info!](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation#faq)
 
 - Windows 10+ 64 bit VST3 AVX1/AVX2, Mac Intel+ARM Universal Binary VST3 and AU, Linux VST3 Generic/AVX2
 
@@ -74,7 +79,6 @@ Everything. Check the original manual here: [SD-1 Manual at Polynominal](https:/
 - Can load and save all compatible VFX/VFX-SD/SD1-24/SD1-32 disk images (.img, .hfe, .dsk, .eda) and cartridges (.eeprom, .rom, .cart, .sc32) [Read the FAQ for more info!](https://github.com/sojusrecords/Ensoniq-SD-1-32-Voice-VST-emulation#faq)
 
 # Known limitations
-- DAW automation is not visible on GUI and you can NOT directly select buttons or sliders from the GUI to assign them to a controller (yet)
 
 - No floppy drive sound :D
 
@@ -213,9 +217,7 @@ You can import all Ensoniq file types: 1/6/30/60 program files and banks, 1/10/2
 <details>
   <summary>How can I automate the plugin's buttons and sliders?</summary>
 
-  - You can NOT directly select buttons or sliders from the GUI to assign them to a controller. You should use your DAW's VST automation parameter listing for the plugin and choose from there.
-
-  - Note: DAW automation is not visible on GUI!
+You can automate any slider or button with selecting it from the panel. (Yes, even with Ableton Live.) The automation is also visible on the panel. 
 
 </details>
 
@@ -363,6 +365,8 @@ sd1diskutil<br/>
 Copyright [© Joe McMahon](https://github.com/joemcmahon/sd1diskutil) 
 
 and so many others. Thank you for your work!
+
+Special thanks to Christian Brunschen, Mike Fumbler and Giulio Zausa.
 
 Built with JUCE Framework [© Raw Material Software Limited](https://github.com/juce-framework/JUCE)
 

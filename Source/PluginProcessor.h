@@ -422,7 +422,47 @@ public:
     int saveMacroHeldBank = -1;                 // GUI-side: currently held bank (0-9), -1 = none
     std::atomic<int> macroBankToHold{ -1 };      // GUI → audio: bank to electronically hold via set_button
     std::atomic<int> detectedBankMask{ 0 };       // audio → GUI: bitmask of pressed banks (bit i = bank i)
-    
+
+    // --- ANALOG FLOAT AUTOMATION (message thread → audio thread) ---
+    // volume and data_entry drive the SD-1 analog controls via panel->set_analog_value
+    // (the same path the panel sliders use). parameterChanged sets the target + dirty flag;
+    // input_update applies it on the audio thread. Dirty-on-change so manual panel sliders
+    // are only overridden when automation actually moves the parameter.
+    // --- ANALOG FLOAT → IOPORT FIELD (host automation moves the panel slider/wheel + sound) ---
+    // parameterChanged stores the target + dirty; input_update writes the analog ioport field so the
+    // panel slider/wheel follows automation (the layout <animate> reads the field). volume/data also
+    // sound through analog_value_change->set_analog_value; pitch/mod are sounded by MIDI and their
+    // analog path is forced neutral in analog_value_change. index: 0=volume 1=data 2=pitch 3=mod.
+    std::atomic<float> floatTarget[4] { 1.0f, 0.0f, 0.5f, 0.0f };
+    std::atomic<bool>  floatDirty[4]  { false, false, false, false };
+
+    // --- ABLETON CONFIGURE MIRROR (audio thread → message thread) ---
+    // When the user clicks a panel button, the MAME thread hit-tests which sd1Buttons
+    // entry was hit and publishes its index here; the editor then fires a host parameter
+    // gesture (begin/setValue/end) so hosts that require "Configure" (Ableton) learn the
+    // parameter. MAME's own mouse handling is untouched — this only mirrors the click.
+    std::atomic<int>      mirrorButtonIndex{ -1 };  // sd1Buttons index of the last click
+    std::atomic<uint32_t> mirrorEventSeq{ 0 };       // bumped on each new click event
+    uint32_t              lastMirrorSeqSeen = 0;     // editor/message-thread only: last fired event
+
+    // --- ANALOG (float) MIRROR ---
+    // The 4 analog controls are driven by a Lua SliderHandler, not interactive_items, so we poll
+    // the panel's captured drag value (get_panel_analog_input) and mirror it to the float params.
+    // index: 0=volume 1=data_entry 2=pitch_bend 3=mod_wheel.
+    std::atomic<int>      mirrorFloatIndex{ -1 };    // which float changed
+    std::atomic<float>    mirrorFloatValue{ 0.0f };  // its new 0..1 value
+    std::atomic<uint32_t> mirrorFloatSeq{ 0 };       // bumped on each analog change
+    uint32_t              lastMirrorFloatSeqSeen = 0;// editor/message-thread only
+    int                   lastPanelAnalog[4] = { -1, -1, -1, -1 }; // MAME-thread only: last polled ioport values
+    // Bidirectional sync needs to tell apart "user dragged the panel" from "host automation moved the
+    // param" — both end up changing the same ioport field + param. Two time-based, async-safe gates:
+    //  - mirrorFiredUntil: set by the editor when it fires a drag-mirror gesture; parameterChanged
+    //    treats a change inside this window as drag-originated (so it does NOT write the field back).
+    //  - automationSuppressUntil: set by host-automation parameterChanged; the mirror skips while a
+    //    control is being driven by automation (so its own field write is not mistaken for a drag).
+    std::atomic<uint32_t> mirrorFiredUntil[4]       { 0, 0, 0, 0 };
+    std::atomic<uint32_t> automationSuppressUntil[4] { 0, 0, 0, 0 };
+
     void shutdownMame();
     
 private:
@@ -433,6 +473,17 @@ private:
         bool localLastOffline = false;
         double lastAuMidiTime = 0.0;
         uint64_t captureReadPos = 0;
+
+        // --- EXTERNAL MIDI SYNC OUT (DAW transport/tempo -> SD-1 MIDI clock/SPP/start-stop) ---
+        // Feeds the SD-1 the host transport as ordinary MIDI bytes (0xF8 clock @ 24 PPQN,
+        // 0xFA/0xFB/0xFC start/continue/stop, 0xF2 song-position). The SD-1 only acts on them
+        // when its own menu has CLOCK=MIDI, so leaving this on is harmless otherwise.
+        bool   sendMidiClock   = true;   // master enable for transport sync output
+        bool   syncWasPlaying  = false;  // sync block's own transport-edge tracker (independent of lastIsPlaying)
+        double syncLastPpq     = 0.0;    // last ppq continuation point, for loop/relocate detection
+        bool   syncStartPending = false; // deferred Start held during a pre-roll until ppq crosses 0
+        double syncPrerollPpq   = 0.0;   // tracks ppq during a deferred pre-roll start (monotonic check)
+        double lastSyncByteTime = 0.0;   // MAME-time cursor keeping injected sync bytes UART-spaced
     
     bool extractLegacyMameState(const juce::String& base64State, juce::MemoryBlock& outOsram, juce::MemoryBlock& outSeqram);
     std::thread mameThread;

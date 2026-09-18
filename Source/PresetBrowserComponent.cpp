@@ -178,6 +178,7 @@ PresetBrowserComponent::PresetBrowserComponent(EnsoniqSD1AudioProcessor& p)
                             juce::String fatName(nameBuf);
                             bankRawNames.add(fatName);
                             bankEntryTypes.push_back(entries[i].file_type);
+                            bankEntryInfos.push_back(entries[i].type_info);
                             
                             // Store the exact 11-byte name for the FAT engine
                             std::array<char, 11> exact;
@@ -333,42 +334,44 @@ PresetBrowserComponent::PresetBrowserComponent(EnsoniqSD1AudioProcessor& p)
                                                         uint8_t* seqPayload = nullptr;
                                                         uintptr_t seqLen = 0;
                                                         int32_t convErr = SD1_ERR_INVALID_SYSEX;
-                                                        
-                                                        if (fileType == 0x12) convErr = sd1_disk_to_thirty_sequences(rawData, rawLen, &seqPayload, &seqLen);
-                                                        else if (fileType == 0x13) {
-                                                            convErr = sd1_disk_to_allsequences(rawData, rawLen, true, &seqPayload, &seqLen);
-                                                            if (convErr != SD1_OK) {
-                                                                if (seqPayload) { sd1_bytes_free(seqPayload, seqLen); seqPayload = nullptr; }
-                                                                convErr = sd1_disk_to_allsequences(rawData, rawLen, false, &seqPayload, &seqLen);
-                                                            }
+
+                                                        // Embedded-programs flag from the directory entry's type_info byte (bit 0x20)
+                                                        uint8_t fileInfo = (r < (int)bankEntryInfos.size()) ? bankEntryInfos[r] : 0;
+                                                        bool hasProgs = (fileType == 0x13) && ((fileInfo & 0x20) != 0);
+
+                                                        // Use the hardware-format converters (same as the import path) so the
+                                                        // exported .syx is a genuine SD-1 AllSequences dump that loads on real
+                                                        // hardware too. These return the complete F0..F7 message, nibble-encoded.
+                                                        if (fileType == 0x12 || fileType == 0x11) {
+                                                            convErr = sd1_disk_to_thirty_sequences_hw_sysex(rawData, rawLen, true, &seqPayload, &seqLen);
                                                         } else {
-                                                            convErr = sd1_disk_to_thirty_sequences(rawData, rawLen, &seqPayload, &seqLen);
+                                                            convErr = sd1_disk_to_allsequences_hw_sysex(rawData, rawLen, hasProgs, true, &seqPayload, &seqLen);
                                                             if (convErr != SD1_OK) {
                                                                 if (seqPayload) { sd1_bytes_free(seqPayload, seqLen); seqPayload = nullptr; }
-                                                                convErr = sd1_disk_to_allsequences(rawData, rawLen, false, &seqPayload, &seqLen);
+                                                                hasProgs = !hasProgs;   // safety net if type_info is missing/odd
+                                                                convErr = sd1_disk_to_allsequences_hw_sysex(rawData, rawLen, hasProgs, true, &seqPayload, &seqLen);
                                                             }
                                                         }
-                                                        
+
                                                         if (convErr == SD1_OK && seqPayload != nullptr) {
+                                                            // seqPayload is already a complete hardware SysEx message
+                                                            // (F0 0F 05 00 00 0A <nibbles> F7). Prepend the 0x0C Command
+                                                            // packet: declared = denibblized payload size - 11429
+                                                            // (= the global "declared" field, 252 + sum of seq data sizes;
+                                                            // same formula as startSequenceTransfer's auto-prepend).
                                                             juce::MemoryBlock transferData;
+                                                            uint32_t totalPayload = (seqLen > 7) ? (uint32_t)((seqLen - 7) / 2) : 0;
+                                                            uint32_t declared = (totalPayload > 11429) ? (totalPayload - 11429) : 0;
                                                             uint8_t p1[17];
                                                             p1[0]=0xF0; p1[1]=0x0F; p1[2]=0x05; p1[3]=0x00; p1[4]=0x00; p1[5]=0x00;
                                                             p1[6]=0x00; p1[7]=0x0C;
-                                                            uint32_t sz = static_cast<uint32_t>(seqLen);
-                                                            p1[8]=(sz>>28)&0x0F; p1[9]=(sz>>24)&0x0F;
-                                                            p1[10]=(sz>>20)&0x0F; p1[11]=(sz>>16)&0x0F;
-                                                            p1[12]=(sz>>12)&0x0F; p1[13]=(sz>>8)&0x0F;
-                                                            p1[14]=(sz>>4)&0x0F;  p1[15]=sz&0x0F;
+                                                            p1[8]=(declared>>28)&0x0F; p1[9]=(declared>>24)&0x0F;
+                                                            p1[10]=(declared>>20)&0x0F; p1[11]=(declared>>16)&0x0F;
+                                                            p1[12]=(declared>>12)&0x0F; p1[13]=(declared>>8)&0x0F;
+                                                            p1[14]=(declared>>4)&0x0F;  p1[15]=declared&0x0F;
                                                             p1[16]=0xF7;
                                                             transferData.append(p1, 17);
-                                                            uint8_t p2hdr[6] = { 0xF0, 0x0F, 0x05, 0x00, 0x00, 0x0A };
-                                                            transferData.append(p2hdr, 6);
-                                                            for (uintptr_t i = 0; i < seqLen; ++i) {
-                                                                uint8_t hi = (seqPayload[i] >> 4) & 0x0F;
-                                                                uint8_t lo = seqPayload[i] & 0x0F;
-                                                                transferData.append(&hi, 1); transferData.append(&lo, 1);
-                                                            }
-                                                            uint8_t eox = 0xF7; transferData.append(&eox, 1);
+                                                            transferData.append(seqPayload, seqLen);
                                                             
                                                             juce::String defName = (fileType == 0x11) ? "SD1-SingleSeq.syx" :
                                                                                    (fileType == 0x12) ? "SD1-30Seq.syx" : "SD1-60Seq.syx";
@@ -1089,14 +1092,22 @@ PresetBrowserComponent::PresetBrowserComponent(EnsoniqSD1AudioProcessor& p)
                             uint8_t ft = fileType;
                             juce::String lookupNameCopy = lookupName;
 
-                            juce::Thread::launch([this, rawCopyForConv, ft, lookupNameCopy]() {
+                            // Embedded-programs flag from the directory entry's type_info byte
+                            // (bit 0x20). Factory disks: 0x2f = 60 programs + sequences (seq data
+                            // at 44032), 0x0f = sequences only (seq data at 11776). Guessing from
+                            // the file type alone reads the wrong offset on >44032-byte files.
+                            uint8_t fileInfo = (bankRow >= 0 && bankRow < (int)bankEntryInfos.size())
+                                ? bankEntryInfos[bankRow] : 0;
+                            bool hasProgsHint = (ft == 0x13) && ((fileInfo & 0x20) != 0);
+
+                            juce::Thread::launch([this, rawCopyForConv, ft, lookupNameCopy, hasProgsHint]() {
                                 uint8_t* seqPayload = nullptr;
                                 uintptr_t seqLen = 0;
                                 int32_t convErr = SD1_ERR_INVALID_SYSEX;
                                 const uint8_t* rd = static_cast<const uint8_t*>(rawCopyForConv->getData());
                                 uintptr_t rl = static_cast<uintptr_t>(rawCopyForConv->getSize());
 
-                                bool hasProgs = (ft == 0x13);
+                                bool hasProgs = hasProgsHint;
                                 auto tryHwSeq = [&](bool hp, bool al) -> int32_t {
                                     if (seqPayload) { sd1_bytes_free(seqPayload, seqLen); seqPayload = nullptr; seqLen = 0; }
                                     return (ft == 0x12 || ft == 0x11)
@@ -1106,8 +1117,8 @@ PresetBrowserComponent::PresetBrowserComponent(EnsoniqSD1AudioProcessor& p)
 
                                 convErr = tryHwSeq(hasProgs, false);
                                 if (convErr != SD1_OK && convErr != SD1_ERR_SLOT59_HAS_DATA && ft == 0x13) {
-                                    hasProgs = false;
-                                    convErr = tryHwSeq(false, false);
+                                    hasProgs = !hasProgs;   // safety net if type_info is missing/odd on non-factory disks
+                                    convErr = tryHwSeq(hasProgs, false);
                                 }
 
                                 if (convErr == SD1_ERR_SLOT59_HAS_DATA) {
@@ -2665,6 +2676,7 @@ void PresetBrowserComponent::listBoxItemClicked(int row, const juce::MouseEvent&
                                 juce::String fatName(nameBuf);
                                 bankRawNames.add(fatName);
                                 bankEntryTypes.push_back(entries[i].file_type);
+                                bankEntryInfos.push_back(entries[i].type_info);
                                 
                                 // Store the exact 11-byte name for the FAT engine
                                 std::array<char, 11> exact;
@@ -2787,6 +2799,7 @@ void PresetBrowserComponent::clearBankList()
     bankModel.items.clear();
     bankRawNames.clear();
     bankEntryTypes.clear();
+    bankEntryInfos.clear();
     bankExactNames.clear();
     bankContentList.deselectAllRows();
     bankContentList.updateContent();  // Force JUCE ListBox to see 0 rows — prevents stale selection restore

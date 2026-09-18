@@ -159,7 +159,7 @@ public:
 	virtual char const *display_name() const override { return Base::display_name(Type); }
 	virtual char const *filter_text() const override { return nullptr; }
 
-	virtual void show_ui(mame_ui_manager &mui, render_container &container, std::function<void (Base &)> &&handler) override
+	virtual void show_ui(mame_ui_manager &mui, render_target &target, std::function<void (Base &)> &&handler) override
 	{
 		handler(*this);
 	}
@@ -205,10 +205,10 @@ class choice_filter_impl_base : public simple_filter_impl_base<Base, Type>
 public:
 	virtual char const *filter_text() const override { return selection_valid() ? selection_text().c_str() : nullptr; }
 
-	virtual void show_ui(mame_ui_manager &mui, render_container &container, std::function<void (Base &)> &&handler) override
+	virtual void show_ui(mame_ui_manager &mui, render_target &target, std::function<void (Base &)> &&handler) override
 	{
 		menu::stack_push<menu_selector>(
-				mui, container,
+				mui, target,
 				_("Filter"), // TODO: get localised name of filter in here somehow
 				std::vector<std::string>(m_choices), // ouch, a vector copy!
 				m_selection,
@@ -284,7 +284,7 @@ template <class Impl, class Base, typename Base::type Type>
 class composite_filter_impl_base : public simple_filter_impl_base<Base, Type>
 {
 public:
-	virtual void show_ui(mame_ui_manager &mui, render_container &container, std::function<void (Base &)> &&handler) override;
+	virtual void show_ui(mame_ui_manager &mui, render_target &target, std::function<void (Base &)> &&handler) override;
 
 	virtual bool wants_adjuster() const override { return true; }
 	virtual char const *adjust_text() const override { return _("<set up filters>"); }
@@ -376,10 +376,10 @@ private:
 	public:
 		menu_configure(
 				mame_ui_manager &mui,
-				render_container &container,
+				render_target &target,
 				Impl &parent,
 				std::function<void (Base &filter)> &&handler)
-			: menu(mui, container)
+			: menu(mui, target)
 			, m_parent(parent)
 			, m_handler(std::move(handler))
 			, m_added(false)
@@ -519,10 +519,10 @@ private:
 template <class Impl, class Base, typename Base::type Type>
 void composite_filter_impl_base<Impl, Base, Type>::show_ui(
 		mame_ui_manager &mui,
-		render_container &container,
+		render_target &target,
 		std::function<void (Base &filter)> &&handler)
 {
-	menu::stack_push<menu_configure>(mui, container, static_cast<Impl &>(*this), std::move(handler));
+	menu::stack_push<menu_configure>(mui, target, static_cast<Impl &>(*this), std::move(handler));
 }
 
 
@@ -627,7 +627,7 @@ bool composite_filter_impl_base<Impl, Base, Type>::menu_configure::handle(event 
 			}
 			menu::stack_push<menu_selector>(
 					ui(),
-					container(),
+					target(),
 					std::string(ev->item->text()),
 					std::move(names),
 					sel,
@@ -640,7 +640,7 @@ bool composite_filter_impl_base<Impl, Base, Type>::menu_configure::handle(event 
 		else if ((ADJUST_FIRST <= ref) && (ADJUST_LAST >= ref))
 		{
 			// show selected filter's UI
-			m_parent.m_filters[ref - ADJUST_FIRST]->show_ui(ui(), container(), [this] (Base &filter) { reset(reset_options::REMEMBER_REF); });
+			m_parent.m_filters[ref - ADJUST_FIRST]->show_ui(ui(), target(), [this] (Base &filter) { reset(reset_options::REMEMBER_REF); });
 		}
 		else if (REMOVE_FILTER == ref)
 		{
@@ -864,6 +864,7 @@ using all_machine_filter            = inclusive_machine_filter_impl<machine_filt
 using favorite_machine_filter       = inclusive_machine_filter_impl<machine_filter::FAVORITE>;
 
 
+
 //-------------------------------------------------
 //  category machine filter
 //-------------------------------------------------
@@ -872,7 +873,7 @@ class category_machine_filter : public simple_filter_impl_base<machine_filter, m
 public:
     category_machine_filter(machine_filter_data const &data, char const *value, util::core_file *file, unsigned indent) {}
     virtual char const *filter_text() const override { return nullptr; }
-    virtual void show_ui(mame_ui_manager &mui, render_container &container, std::function<void (machine_filter &)> &&handler) override {}
+    virtual void show_ui(mame_ui_manager &mui, render_target &target, std::function<void (machine_filter &)> &&handler) override {}
     virtual bool wants_adjuster() const override { return false; }
     virtual char const *adjust_text() const override { return ""; }
     virtual void save_ini(util::core_file &file, unsigned indent) const override {}
