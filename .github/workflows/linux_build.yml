@@ -246,9 +246,18 @@ jobs:
 
     - name: Regenerate JuceLibraryCode via Projucer
       run: |
+        # Remove the committed exporter Makefile first: Projucer does not always
+        # rewrite it, and the stale copy still links the MAME 0.287-era
+        # "-lsoftfloat" library, which no longer exists in 0.288 (only softfloat3).
+        rm -f Builds/LinuxMakefile/Makefile
         juce/extras/Projucer/Builds/LinuxMakefile/build/Projucer \
           --resave EnsoniqSD1-LINUX.jucer
         ls -l JuceLibraryCode/
+        # Belt and braces: if anything still emits the obsolete -lsoftfloat, strip
+        # it here. The trailing space keeps -lsoftfloat3 intact.
+        sed -i 's/-lsoftfloat //g' Builds/LinuxMakefile/Makefile
+        echo "--- link libs after fixup ---"
+        grep -o -- "-lsoftfloat[0-9]*" Builds/LinuxMakefile/Makefile | sort -u
 
     - name: Compile JUCE VST3 (Generic)
       run: |
@@ -439,9 +448,18 @@ jobs:
 
     - name: Regenerate JuceLibraryCode via Projucer
       run: |
+        # Remove the committed exporter Makefile first: Projucer does not always
+        # rewrite it, and the stale copy still links the MAME 0.287-era
+        # "-lsoftfloat" library, which no longer exists in 0.288 (only softfloat3).
+        rm -f Builds/LinuxMakefile/Makefile
         juce/extras/Projucer/Builds/LinuxMakefile/build/Projucer \
           --resave EnsoniqSD1-LINUX.jucer
         ls -l JuceLibraryCode/
+        # Belt and braces: if anything still emits the obsolete -lsoftfloat, strip
+        # it here. The trailing space keeps -lsoftfloat3 intact.
+        sed -i 's/-lsoftfloat //g' Builds/LinuxMakefile/Makefile
+        echo "--- link libs after fixup ---"
+        grep -o -- "-lsoftfloat[0-9]*" Builds/LinuxMakefile/Makefile | sort -u
 
     - name: Compile JUCE VST3 (AVX2)
       run: |
