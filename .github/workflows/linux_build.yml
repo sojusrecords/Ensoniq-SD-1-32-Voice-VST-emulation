@@ -100,6 +100,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y build-essential ninja-build cmake patchelf \
+             qt6-base-dev-tools \
              libasound2-dev libx11-dev libxinerama-dev libxext-dev \
              libfreetype6-dev libwebkit2gtk-4.1-dev libglu1-mesa-dev \
              libxrandr-dev libxcursor-dev curl libcurl4-openssl-dev \
@@ -190,6 +191,12 @@ jobs:
     - name: Compile MAME sd132 (Generic) — incremental, picks up changed files
       run: |
         cd mame
+        # Force a clean project regeneration: a cached mame/ directory can still
+        # contain makefiles generated WITH the Qt debugger enabled (MAME defaults
+        # USE_QTDEBUG=1 on Linux). Those makefiles embed
+        # "-I$(shell qmake6 -query QT_INSTALL_HEADERS)" which runs at COMPILE time
+        # and breaks the osd_sdl3 target when qmake6 is missing.
+        rm -rf build/projects/sdl/mame/gmake-linux
         make SUBTARGET=sd132 SOURCES=src/mame/ensoniq/esq5505.cpp \
              OSD=sdl3 USE_QTDEBUG=0 REGENIE=1 NO_USE_BGFX=1 ARCHOPTS=-fPIC \
              -j$(nproc)
@@ -262,6 +269,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y build-essential ninja-build cmake patchelf \
+             qt6-base-dev-tools \
              libasound2-dev libx11-dev libxinerama-dev libxext-dev \
              libfreetype6-dev libwebkit2gtk-4.1-dev libglu1-mesa-dev \
              libxrandr-dev libxcursor-dev curl libcurl4-openssl-dev \
@@ -352,6 +360,12 @@ jobs:
     - name: Compile MAME sd132 (AVX2) — incremental, picks up changed files
       run: |
         cd mame
+        # Force a clean project regeneration: a cached mame/ directory can still
+        # contain makefiles generated WITH the Qt debugger enabled (MAME defaults
+        # USE_QTDEBUG=1 on Linux). Those makefiles embed
+        # "-I$(shell qmake6 -query QT_INSTALL_HEADERS)" which runs at COMPILE time
+        # and breaks the osd_sdl3 target when qmake6 is missing.
+        rm -rf build/projects/sdl/mame/gmake-linux
         make SUBTARGET=sd132 SOURCES=src/mame/ensoniq/esq5505.cpp \
              OSD=sdl3 USE_QTDEBUG=0 REGENIE=1 NO_USE_BGFX=1 ARCHOPTS=-fPIC \
              OPT_FLAGS="-mavx2" -j$(nproc)
