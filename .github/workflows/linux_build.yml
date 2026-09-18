@@ -100,13 +100,21 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y build-essential ninja-build cmake patchelf \
-             qt6-base-dev-tools \
+             qt6-base-dev-tools qt6-base-dev \
              libasound2-dev libx11-dev libxinerama-dev libxext-dev \
              libfreetype6-dev libwebkit2gtk-4.1-dev libglu1-mesa-dev \
              libxrandr-dev libxcursor-dev curl libcurl4-openssl-dev \
              libfontconfig1-dev python3 pkg-config \
              libharfbuzz-dev libpng-dev libjpeg-dev libpulse-dev libsdl2-dev \
              qtbase5-dev qt5-qmake qtbase5-dev-tools zlib1g-dev
+
+    - name: Verify qmake6 (MAME 0.288 requires Qt6, not Qt5)
+      run: |
+        echo "which qmake6: $(which qmake6 || echo 'NOT FOUND')"
+        echo "which qmake : $(which qmake  || echo 'NOT FOUND')"
+        dpkg -l | grep -i "qt6-base-dev-tools" || echo "qt6-base-dev-tools NOT installed"
+        # Not fatal: the build passes USE_QTDEBUG=0, so qmake6 should not be needed
+        # at all once the project files are regenerated without the Qt debugger.
 
     - name: Restore SDL3 cache
       uses: actions/cache/restore@v4
@@ -191,12 +199,14 @@ jobs:
     - name: Compile MAME sd132 (Generic) — incremental, picks up changed files
       run: |
         cd mame
-        # Force a clean project regeneration: a cached mame/ directory can still
+        # Force a clean project regeneration. A cached mame/ directory can still
         # contain makefiles generated WITH the Qt debugger enabled (MAME defaults
-        # USE_QTDEBUG=1 on Linux). Those makefiles embed
-        # "-I$(shell qmake6 -query QT_INSTALL_HEADERS)" which runs at COMPILE time
-        # and breaks the osd_sdl3 target when qmake6 is missing.
-        rm -rf build/projects/sdl/mame/gmake-linux
+        # USE_QTDEBUG=1 on Linux -- see scripts/src/osd/modules.lua). Those
+        # makefiles embed "-I$(shell qmake6 -query QT_INSTALL_HEADERS)", which is
+        # evaluated at COMPILE time for every osd_sdl3 object and breaks the build
+        # when qmake6 is absent. Removing the whole generated-projects tree
+        # guarantees genie regenerates them with USE_QTDEBUG=0.
+        rm -rf build/projects
         make SUBTARGET=sd132 SOURCES=src/mame/ensoniq/esq5505.cpp \
              OSD=sdl3 USE_QTDEBUG=0 REGENIE=1 NO_USE_BGFX=1 ARCHOPTS=-fPIC \
              -j$(nproc)
@@ -269,13 +279,21 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y build-essential ninja-build cmake patchelf \
-             qt6-base-dev-tools \
+             qt6-base-dev-tools qt6-base-dev \
              libasound2-dev libx11-dev libxinerama-dev libxext-dev \
              libfreetype6-dev libwebkit2gtk-4.1-dev libglu1-mesa-dev \
              libxrandr-dev libxcursor-dev curl libcurl4-openssl-dev \
              libfontconfig1-dev python3 pkg-config \
              libharfbuzz-dev libpng-dev libjpeg-dev libpulse-dev libsdl2-dev \
              qtbase5-dev qt5-qmake qtbase5-dev-tools zlib1g-dev
+
+    - name: Verify qmake6 (MAME 0.288 requires Qt6, not Qt5)
+      run: |
+        echo "which qmake6: $(which qmake6 || echo 'NOT FOUND')"
+        echo "which qmake : $(which qmake  || echo 'NOT FOUND')"
+        dpkg -l | grep -i "qt6-base-dev-tools" || echo "qt6-base-dev-tools NOT installed"
+        # Not fatal: the build passes USE_QTDEBUG=0, so qmake6 should not be needed
+        # at all once the project files are regenerated without the Qt debugger.
 
     - name: Restore SDL3 cache
       uses: actions/cache/restore@v4
@@ -360,12 +378,14 @@ jobs:
     - name: Compile MAME sd132 (AVX2) — incremental, picks up changed files
       run: |
         cd mame
-        # Force a clean project regeneration: a cached mame/ directory can still
+        # Force a clean project regeneration. A cached mame/ directory can still
         # contain makefiles generated WITH the Qt debugger enabled (MAME defaults
-        # USE_QTDEBUG=1 on Linux). Those makefiles embed
-        # "-I$(shell qmake6 -query QT_INSTALL_HEADERS)" which runs at COMPILE time
-        # and breaks the osd_sdl3 target when qmake6 is missing.
-        rm -rf build/projects/sdl/mame/gmake-linux
+        # USE_QTDEBUG=1 on Linux -- see scripts/src/osd/modules.lua). Those
+        # makefiles embed "-I$(shell qmake6 -query QT_INSTALL_HEADERS)", which is
+        # evaluated at COMPILE time for every osd_sdl3 object and breaks the build
+        # when qmake6 is absent. Removing the whole generated-projects tree
+        # guarantees genie regenerates them with USE_QTDEBUG=0.
+        rm -rf build/projects
         make SUBTARGET=sd132 SOURCES=src/mame/ensoniq/esq5505.cpp \
              OSD=sdl3 USE_QTDEBUG=0 REGENIE=1 NO_USE_BGFX=1 ARCHOPTS=-fPIC \
              OPT_FLAGS="-mavx2" -j$(nproc)
