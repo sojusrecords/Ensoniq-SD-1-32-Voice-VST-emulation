@@ -300,9 +300,13 @@ Because the MAME emulator runs asynchronously on its own background thread, we n
 
 - [OneMusic (HU)](https://onemusic.hu/articles/sojus-records-ensoniq-sd-1-emulator-uj-eletre-kel-a-legendas-szintetizator)
 
+- [Ménemszól (HU)](https://www.menemszol.hu/topic/11072-ensoniq-sd1-vst3-plugin/)
+
 - [AudioPluginsForFree](https://www.audiopluginsforfree.com/ensoniq-sd-1-vst/)
 
 - [ProducerGang](https://producergang.com/sojus-records-releases-a-free-open-source-ensoniq-sd-1-32-vst-emulation/)
+
+- [Audiartist](https://www.audiartist.com/ensoniq-sd-1-free-vst/)
 
 # License and credits
 
@@ -366,7 +370,7 @@ Copyright [© Joe McMahon](https://github.com/joemcmahon/sd1diskutil)
 
 and so many others. Thank you for your work!
 
-Special thanks to Christian Brunschen, Mike Fumbler and Giulio Zausa.
+Special thanks to Christian Brunschen, Joe McMahon, Mike Fumbler and Giulio Zausa.
 
 Built with JUCE Framework [© Raw Material Software Limited](https://github.com/juce-framework/JUCE)
 
